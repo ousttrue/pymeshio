@@ -52,58 +52,31 @@ try:
     print('use meshio C module')
 except ImportError:
     # full python
-    from pymeshio import mqo
+    from .pymeshio import mqo
 
-def isBlender24():
-    return sys.version_info[0]<3
+# for 2.5
+import bpy
 
-if isBlender24():
-    # for 2.4
-    import Blender
-    from Blender import Mathutils
-    import bpy
+# wrapper
+from . import bl25 as bl
 
-    # wrapper
-    import bl24 as bl
-
-    def createMqoMaterial(m):
-        material = Blender.Material.New(
-                m.getName().encode(bl.INTERNAL_ENCODING))
-        #material.mode |= Blender.Material.Modes.SHADELESS
-        # diffuse
-        material.rgbCol = [m.color.r, m.color.g, m.color.b]
-        material.alpha = m.color.a
-        # other
-        material.amb=m.ambient
-        material.spec=m.specular
-        material.hard=int(255 * m.power)
-        material.emit=m.emit
-        return material
-
-else:
-    # for 2.5
-    import bpy
-
-    # wrapper
-    import bl25 as bl
-
-    def createMqoMaterial(m):
-        material = bpy.data.materials.new(m.getName())
-        # shader
-        if m.shader==1:
-            material.diffuse_shader='FRESNEL'
-        else:
-            material.diffuse_shader='LAMBERT'
-        # diffuse
-        material.diffuse_color=[m.color.r, m.color.g, m.color.b]
-        material.diffuse_intensity=m.diffuse
-        material.alpha=m.color.a
-        # other
-        material.ambient = m.ambient
-        #material.specular = m.specular
-        material.emit=m.emit
-        material.use_shadeless=True
-        return material
+def createMqoMaterial(m):
+    material = bpy.data.materials.new(m.getName())
+    # shader
+    if m.shader==1:
+        material.diffuse_shader='FRESNEL'
+    else:
+        material.diffuse_shader='LAMBERT'
+    # diffuse
+    material.diffuse_color=[m.color.r, m.color.g, m.color.b]
+    material.diffuse_intensity=m.diffuse
+    material.alpha=m.color.a
+    # other
+    material.ambient = m.ambient
+    #material.specular = m.specular
+    material.emit=m.emit
+    material.use_shadeless=True
+    return material
 
 
 def has_mikoto(mqo):
@@ -621,20 +594,20 @@ def create_bone_weight(scene, mqo, armature_object, objects):
         mesh.update()
 
 
-def _execute(filename, scene, scale=0.1):
+def _execute(filepath='', scale=0.1):
     # parse file
     io=mqo.IO()
-    if not io.read(filename):
-        bl.message("fail to load %s" % filename)
+    if not io.read(filepath):
+        bl.message("fail to load %s" % filepath)
         return
 
     # create materials
-    materials, imageMap=__createMaterials(io, os.path.dirname(filename))
+    materials, imageMap=__createMaterials(io, os.path.dirname(filepath))
     if len(materials)==0:
         materials.append(bl.material.create('default'))
 
     # create objects
-    root=bl.object.createEmpty(os.path.basename(filename))
+    root=bl.object.createEmpty(os.path.basename(filepath))
     objects=__createObjects(io, root, materials, imageMap, scale)
 
     if has_mikoto(io):

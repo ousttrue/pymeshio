@@ -102,7 +102,7 @@ class ImportMQO(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         from . import import_mqo
-        bl.initialize('mqo_import', scene)
+        bl.initialize('mqo_import', context.scene)
         import_mqo._execute(**self.as_keywords(
             ignore=("filter_glob",)))
         bl.finalize()
