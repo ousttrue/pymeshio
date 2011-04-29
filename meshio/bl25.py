@@ -113,6 +113,10 @@ def progress_set(message, progress):
 
 class scene:
     @staticmethod
+    def get():
+        global SCENE
+        return SCENE
+
     def update(scene):
         scene.update()
 

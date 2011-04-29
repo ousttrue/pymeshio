@@ -142,7 +142,7 @@ class ExportMQO(bpy.types.Operator, ExportHelper):
 
     def execute(self, context):
         from . import export_mqo
-        export_pmd._execute(**self.as_keywords(
+        export_mqo._execute(**self.as_keywords(
             ignore=("check_existing", "filter_glob", "use_selection")))
         return {'FINISHED'}
 

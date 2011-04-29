@@ -45,10 +45,6 @@ bl_addon_info = {
 import os
 import sys
 
-def isBlender24():
-    return sys.version_info[0]<3
-
-
 class MQOMaterial(object):
     __slots__=[
             'name', 'shader', 'r', 'g', 'b', 'a',
@@ -72,39 +68,21 @@ class MQOMaterial(object):
                 )
 
 
-if isBlender24():
-    # for 2.4
-    import Blender
-    from Blender import Mathutils
-    import bpy
+# for 2.5
+import bpy
 
-    # wrapper
-    import bl24 as bl
+# wrapper
+from . import bl25 as bl
 
-    def materialToMqo(m):
-        material=MQOMaterial(m.name, 3)
-        material.r=m.rgbCol[0]
-        material.g=m.rgbCol[1]
-        material.b=m.rgbCol[2]
-        material.a=m.alpha
-        return material
-
-else:
-    # for 2.5
-    import bpy
-
-    # wrapper
-    import bl25 as bl
-
-    def materialToMqo(m):
-        material=MQOMaterial(m.name, 3)
-        material.r=m.diffuse_color[0]
-        material.g=m.diffuse_color[1]
-        material.b=m.diffuse_color[2]
-        material.a=m.alpha
-        material.amb=m.ambient
-        material.emi=m.emit
-        return material
+def materialToMqo(m):
+    material=MQOMaterial(m.name, 3)
+    material.r=m.diffuse_color[0]
+    material.g=m.diffuse_color[1]
+    material.b=m.diffuse_color[2]
+    material.a=m.alpha
+    material.amb=m.ambient
+    material.emi=m.emit
+    return material
 
 def apply_transform(vec, matrix):
     x, y, z = vec
@@ -278,8 +256,8 @@ class MqoExporter(object):
 
     def __write_mesh(self, io, mesh, material_map):
         # vertices
-        io.write("\tvertex %d {\r\n" % len(mesh.verts))
-        for vert in mesh.verts:
+        io.write("\tvertex %d {\r\n" % len(mesh.vertices))
+        for vert in mesh.vertices:
             x, y, z = convert_to_mqo(vert.co)
             io.write("\t\t%f %f %f\r\n" % 
                     (x*self.scale, y*self.scale, z*self.scale)) # rotate to y-up
@@ -309,12 +287,11 @@ class MqoExporter(object):
         io.write("\t}\r\n") # end of faces
 
 
-def __execute(filename, scene, scale=10, apply_modifier=False):
-    if scene.objects.active:
+def _execute(filepath='', scale=10, apply_modifier=False):
+    if bl.object.getActive():
         exporter=MqoExporter(scale, apply_modifier)
-        exporter.setup(scene)
-        exporter.write(filename)
+        exporter.setup(bl.scene.get())
+        exporter.write(filepath)
     else:
         bl.message('no active object !')
-
 
