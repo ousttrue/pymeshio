@@ -621,7 +621,7 @@ def create_bone_weight(scene, mqo, armature_object, objects):
         mesh.update()
 
 
-def __execute(filename, scene, scale=0.1):
+def _execute(filename, scene, scale=0.1):
     # parse file
     io=mqo.IO()
     if not io.read(filename):

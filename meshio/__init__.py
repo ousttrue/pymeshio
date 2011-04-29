@@ -68,8 +68,10 @@ class ExportPMD(bpy.types.Operator, ExportHelper):
 
     def execute(self, context):
         from . import export_pmd
+        bl.initialize('pmd_export', context.scene)
         export_pmd._execute(**self.as_keywords(
-            ignore=("check_existing", "filter_glob")))
+            ignore=("check_existing", "filter_glob", "use_selection")))
+        bl.finalize()
         return {'FINISHED'}
 
 def menu_pmd_export(self, context):
@@ -141,7 +143,7 @@ class ExportMQO(bpy.types.Operator, ExportHelper):
     def execute(self, context):
         from . import export_mqo
         export_pmd._execute(**self.as_keywords(
-            ignore=("check_existing", "filter_glob")))
+            ignore=("check_existing", "filter_glob", "use_selection")))
         return {'FINISHED'}
 
 def menu_mqo_export(self, context):

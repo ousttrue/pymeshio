@@ -85,76 +85,41 @@ try:
     print('use meshio C module')
 except ImportError:
     # full python
-    from pymeshio import englishmap
-    from pymeshio import mmd as pmd
+    from .pymeshio import englishmap
+    from .pymeshio import mmd as pmd
     pmd.IO=pmd.PMDLoader
 
-def isBlender24():
-    return sys.version_info[0]<3
+# for 2.5
+import bpy
+import mathutils
 
-if isBlender24():
-    # for 2.4
-    import Blender
-    from Blender import Mathutils
-    import bpy
+# wrapper
+from . import bl25 as bl
 
-    # wrapper
-    import bl24 as bl
+xrange=range
 
-    def setMaterialParams(material, m):
-        # diffuse
-        material.diffuse.r=m.R
-        material.diffuse.g=m.G
-        material.diffuse.b=m.B
-        material.diffuse.a=m.alpha
-        # specular
-        material.shinness=0 if m.spec<1e-5 else m.spec*10
-        material.specular.r=m.specR
-        material.specular.g=m.specG
-        material.specular.b=m.specB
-        # ambient
-        material.ambient.r=m.mirR
-        material.ambient.g=m.mirG
-        material.ambient.b=m.mirB
-        # flag
-        material.flag=1 if m.enableSSS else 0
+def setMaterialParams(material, m):
+    # diffuse
+    material.diffuse.r=m.diffuse_color[0]
+    material.diffuse.g=m.diffuse_color[1]
+    material.diffuse.b=m.diffuse_color[2]
+    material.diffuse.a=m.alpha
+    # specular
+    material.shinness=0 if m.specular_toon_size<1e-5 else m.specular_hardness*10
+    material.specular.r=m.specular_color[0]
+    material.specular.g=m.specular_color[1]
+    material.specular.b=m.specular_color[2]
+    # ambient
+    material.ambient.r=m.mirror_color[0]
+    material.ambient.g=m.mirror_color[1]
+    material.ambient.b=m.mirror_color[2]
+    # flag
+    material.flag=1 if m.subsurface_scattering.use else 0
+    # toon
+    material.toon_index=7
 
-    def toCP932(s):
-        return s
-
-
-else:
-    # for 2.5
-    import bpy
-    import mathutils
-
-    # wrapper
-    import bl25 as bl
-
-    xrange=range
-
-    def setMaterialParams(material, m):
-        # diffuse
-        material.diffuse.r=m.diffuse_color[0]
-        material.diffuse.g=m.diffuse_color[1]
-        material.diffuse.b=m.diffuse_color[2]
-        material.diffuse.a=m.alpha
-        # specular
-        material.shinness=0 if m.specular_toon_size<1e-5 else m.specular_hardness*10
-        material.specular.r=m.specular_color[0]
-        material.specular.g=m.specular_color[1]
-        material.specular.b=m.specular_color[2]
-        # ambient
-        material.ambient.r=m.mirror_color[0]
-        material.ambient.g=m.mirror_color[1]
-        material.ambient.b=m.mirror_color[2]
-        # flag
-        material.flag=1 if m.subsurface_scattering.enabled else 0
-        # toon
-        material.toon_index=7
-
-    def toCP932(s):
-        return s.encode('cp932')
+def toCP932(s):
+    return s.encode('cp932')
 
 
 class Node(object):
@@ -189,7 +154,7 @@ class VertexAttribute(object):
                 self.nx, self.ny, self.nz, self.u, self.v)
 
     def __hash__(self):
-        return self.nx + self.ny + self.nz + self.u + self.v
+        return int(100*(self.nx + self.ny + self.nz + self.u + self.v))
 
     def __eq__(self, rhs):
         return self.nx==rhs.nx and self.ny==rhs.ny and self.nz==rhs.nz and self.u==rhs.u and self.v==rhs.v
@@ -323,10 +288,7 @@ class Morph(object):
         self.offsets.append((index, offset))
 
     def sort(self):
-        if isBlender24():
-            self.offsets.sort(lambda l, r: l[0]-r[0])
-        else:
-            self.offsets.sort(key=lambda e: e[0])
+        self.offsets.sort(key=lambda e: e[0])
 
     def __str__(self):
         return "<Morph %s>" % self.name
@@ -390,20 +352,15 @@ class OneSkinMesh(object):
                     weightMap[i]=(name, w)
 
         # ToDo bone weightと関係ないvertex groupを除外する
-        if isBlender24():
-            for name in bl.object.getVertexGroupNames(obj):
-                for i, w in mesh.getVertsFromGroup(name, 1):
-                    setWeight(i, name, w)
-        else:
-            for i, v in enumerate(mesh.verts):
-                if len(v.groups)>0:
-                    for g in v.groups:
-                        setWeight(i, obj.vertex_groups[g.group].name, g.weight)
-                else:
-                    setWeight(i, obj.vertex_groups[0].name, 1)
+        for i, v in enumerate(mesh.vertices):
+            if len(v.groups)>0:
+                for g in v.groups:
+                    setWeight(i, obj.vertex_groups[g.group].name, g.weight)
+            else:
+                setWeight(i, obj.vertex_groups[0].name, 1)
 
         # 合計値が1になるようにする
-        for i in xrange(len(mesh.verts)):
+        for i in xrange(len(mesh.vertices)):
             if i in secondWeightMap:
                 secondWeightMap[i]=(secondWeightMap[i][0], 1.0-weightMap[i][1])
             elif i in weightMap:
@@ -421,7 +378,7 @@ class OneSkinMesh(object):
         for i, face in enumerate(mesh.faces):
             faceVertexCount=bl.face.getVertexCount(face)
             material=mesh.materials[bl.face.getMaterialIndex(face)]
-            v=[mesh.verts[index] for index in bl.face.getVertices(face)]
+            v=[mesh.vertices[index] for index in bl.face.getVertices(face)]
             uv=bl.mesh.getFaceUV(
                     mesh, i, face, bl.face.getVertexCount(face))
             # flip triangle
@@ -503,13 +460,10 @@ class OneSkinMesh(object):
                         )
 
     def __mesh(self, obj):
-        if isBlender24():
-            pass
-        else:
-            if RIGID_SHAPE_TYPE in obj:
-                return
-            if CONSTRAINT_A in obj:
-                return
+        if RIGID_SHAPE_TYPE in obj:
+            return
+        if CONSTRAINT_A in obj:
+            return
 
         #if not bl.modifier.hasType(obj, 'ARMATURE'):
         #    return
@@ -518,7 +472,7 @@ class OneSkinMesh(object):
 
         # メッシュのコピーを生成してオブジェクトの行列を適用する
         copyMesh, copyObj=bl.object.duplicate(obj)
-        if len(copyMesh.verts)>0:
+        if len(copyMesh.vertices)>0:
             # apply transform
             copyObj.scale=obj.scale
             bpy.ops.object.scale_apply()
@@ -593,7 +547,7 @@ class OneSkinMesh(object):
             morph=self.__getOrCreateMorph(b.name, 4)
             used=set()
             for index, src, dst in zip(
-                    xrange(len(blenderMesh.verts)),
+                    xrange(len(blenderMesh.vertices)),
                     bl.shapekey.get(basis),
                     bl.shapekey.get(b)):
                 offset=[dst[0]-src[0], dst[1]-src[1], dst[2]-src[2]]
@@ -616,21 +570,14 @@ class OneSkinMesh(object):
                     return i
             print(morph)
             return len(englishmap.skinMap)
-        if isBlender24():
-            self.morphList.sort(lambda l, r: getIndex(l)-getIndex(r))
-        else:
-            self.morphList.sort(key=getIndex)
+        self.morphList.sort(key=getIndex)
 
     def __rigidbody(self, obj):
-        if isBlender24():
-            return
         if not RIGID_SHAPE_TYPE in obj:
             return
         self.rigidbodies.append(obj)
 
     def __constraint(self, obj):
-        if isBlender24():
-            return
         if not CONSTRAINT_A in obj:
             return
         self.constraints.append(obj)
@@ -763,10 +710,7 @@ class BoneBuilder(object):
                 if v[0]==ik.target.name:
                     return i
             return len(englishmap.boneMap)
-        if isBlender24():
-            self.ik_list.sort(lambda l, r: getIndex(l)-getIndex(r))
-        else:
-            self.ik_list.sort(key=getIndex)
+        self.ik_list.sort(key=getIndex)
 
     def __assignBoneGroup(self, poseBone, boneGroup):
         if boneGroup:
@@ -795,10 +739,7 @@ class BoneBuilder(object):
             print(bone)
             return len(boneMap)
 
-        if isBlender24():
-            self.bones.sort(lambda l, r: getIndex(l)-getIndex(r))
-        else:
-            self.bones.sort(key=getIndex)
+        self.bones.sort(key=getIndex)
 
         sortMap={}
         for i, b in enumerate(self.bones):
@@ -1197,8 +1138,7 @@ class PmdExporter(object):
         return io.write(path)
 
 
-def _execute(filename):
-    bl.initialize('pmd_export', scene)
+def _execute(filepath=''):
     active=bl.object.getActive()
     if not active:
         print("abort. no active object.")
@@ -1206,8 +1146,7 @@ def _execute(filename):
     exporter=PmdExporter()
     exporter.setup()
     print(exporter)
-    exporter.write(filename)
+    exporter.write(filepath)
     bl.object.activate(active)
-    bl.finalize()
 
 

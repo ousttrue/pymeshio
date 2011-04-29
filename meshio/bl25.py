@@ -191,7 +191,7 @@ class object:
 
     @staticmethod
     def getShapeKeys(o):
-        return o.data.shape_keys.keys
+        return o.data.shape_keys.key_blocks
 
     @staticmethod
     def addShapeKey(o, name):
@@ -423,7 +423,7 @@ class mesh:
 
     @staticmethod
     def hasUV(mesh):
-        return mesh.active_uv_texture
+        return len(mesh.uv_textures)>0
 
     @staticmethod
     def useVertexUV(mesh):
@@ -435,12 +435,22 @@ class mesh:
 
     @staticmethod
     def hasFaceUV(mesh, i, face):
-        return mesh.active_uv_texture and mesh.active_uv_texture.data[i]
+        active_uv_texture=None
+        for t in mesh.uv_textures:
+            if t.active:
+                active_uv_texture=t
+                break
+        return active_uv_texture and active_uv_texture.data[i]
 
     @staticmethod
     def getFaceUV(mesh, i, faces, count=3):
-        if mesh.active_uv_texture and mesh.active_uv_texture.data[i]:
-            uvFace=mesh.active_uv_texture.data[i]
+        active_uv_texture=None
+        for t in mesh.uv_textures:
+            if t.active:
+                active_uv_texture=t
+                break
+        if active_uv_texture and active_uv_texture.data[i]:
+            uvFace=active_uv_texture.data[i]
             if count==3:
                 return (uvFace.uv1, uvFace.uv2, uvFace.uv3)
             elif count==4:
@@ -605,8 +615,8 @@ class bone:
         bone.use_connect=True
 
     @staticmethod
-    def isConnected(b):
-        return b.connected
+    def isConnected(bone):
+        return bone.use_connect
 
     @staticmethod
     def setLayerMask(bone, layers):
@@ -630,7 +640,7 @@ class bone:
 class constraint:
     @staticmethod
     def ikChainLen(c):
-        return c.chain_length
+        return c.chain_count
 
     @staticmethod
     def ikTarget(c):
