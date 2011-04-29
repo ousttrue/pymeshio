@@ -236,8 +236,7 @@ class object:
 
     @staticmethod
     def assignVertexGroup(o, name, index, weight):
-        g=o.vertex_groups[name]
-        o.vertex_groups.assign([index], g, weight, 'ADD')
+        o.vertex_groups[name].add([index], weight, 'ADD')
 
     @staticmethod
     def createBoneGroup(o, name, color_set='DEFAULT'):
@@ -306,8 +305,8 @@ class texture:
         texture.use_alpha=True
         try:
             image=bpy.data.images.load(path)
-        except SystemError:
-            image=bpy.data.images.new('Image')
+        except RuntimeError:
+            image=bpy.data.images.new('Image', width=16, height=16)
         texture.image=image
         return texture, image
 

@@ -92,111 +92,59 @@ try:
     print('use meshio C module')
 except ImportError:
     # full python
-    from pymeshio import englishmap
-    from pymeshio import mmd as pmd
+    from .pymeshio import englishmap
+    from .pymeshio import mmd as pmd
     pmd.IO=pmd.PMDLoader
 
-def isBlender24():
-    return sys.version_info[0]<3
+# for 2.5
+import bpy
+import mathutils
 
-if isBlender24():
-    # for 2.4
-    import Blender
-    from Blender import Mathutils
-    import bpy
+# wrapper
+from . import bl25 as bl
 
-    # wrapper
-    import bl24 as bl
+xrange=range
 
-    def createPmdMaterial(m, index):
-        material=Blender.Material.New()
-        # fresnelが無いw
-        material.setDiffuseShader(Blender.Material.Shaders.DIFFUSE_TOON)
-        material.setRGBCol([m.diffuse.r, m.diffuse.g, m.diffuse.b])
-        material.setAlpha(m.diffuse.a)
-        # specular
-        material.setSpecShader(Blender.Material.Shaders.SPEC_TOON)
-        material.setSpec(m.shinness*0.1)
-        material.setSpecCol([m.specular.r, m.specular.g, m.specular.b])
-        # ambient
-        material.setMirCol([m.ambient.r, m.ambient.g, m.ambient.b])
-        # flag
-        material.enableSSS=True if m.flag==1 else False
-        # name
-        material.name="m_%02d" % index
-        return material
+def createPmdMaterial(m, index):
+    material = bpy.data.materials.new("Material")
+    # diffuse
+    material.diffuse_shader='FRESNEL'
+    material.diffuse_color=([m.diffuse.r, m.diffuse.g, m.diffuse.b])
+    material.alpha=m.diffuse.a
+    # specular
+    material.specular_shader='TOON'
+    material.specular_color=([m.specular.r, m.specular.g, m.specular.b])
+    material.specular_toon_size=int(m.shinness)
+    # ambient
+    material.mirror_color=([m.ambient.r, m.ambient.g, m.ambient.b])
+    # flag
+    material.subsurface_scattering.use=True if m.flag==1 else False
+    # other
+    material.name="m_%02d" % index
+    material.preview_render_type='FLAT'
+    material.use_transparency=True
+    return material
 
-    def poseBoneLimit(n, b):
-        if n.endswith("_t"):
-            return
-        if n.startswith("knee_"):
-            b.lockYRot=True
-            b.lockZRot=True
-            b.limitX=True
-            b.limitMin=[0, 0, 0]
-            b.limitMax=[180, 0, 0]
-        elif n.startswith("ankle_"):
-            b.lockYRot=True
+def poseBoneLimit(n, b):
+    if n.endswith("_t"):
+        return
+    if n.startswith("knee_"):
+        b.lock_ik_y=True
+        b.lock_ik_z=True
+        b.lock_ik_x=False
+        # IK limit
+        b.use_ik_limit_x=True
+        b.ik_min_x=0
+        b.ik_max_x=180
+    elif n.startswith("ankle_"):
+        #b.ik_dof_y=False
+        pass
 
-    def setSphereMap(material, index, blend_type='MULTIPLY'):
-        slot=material.textures[index]
-        slot.mapto=Blender.Texture.MapTo.NOR
-        slot.mapping=Blender.Texture.Mappings.SPHERE
-        if blend_type=='MULTIPLY':
-            slot.blendmode=Blender.Texture.BlendModes.MULTIPLY
-        elif blend_type=='ADD':
-            slot.blendmode=Blender.Texture.BlendModes.ADD
-
-else:
-    # for 2.5
-    import bpy
-    import mathutils
-
-    # wrapper
-    import bl25 as bl
-
-    xrange=range
-
-    def createPmdMaterial(m, index):
-        material = bpy.data.materials.new("Material")
-        # diffuse
-        material.diffuse_shader='FRESNEL'
-        material.diffuse_color=([m.diffuse.r, m.diffuse.g, m.diffuse.b])
-        material.alpha=m.diffuse.a
-        # specular
-        material.specular_shader='TOON'
-        material.specular_color=([m.specular.r, m.specular.g, m.specular.b])
-        material.specular_toon_size=int(m.shinness)
-        # ambient
-        material.mirror_color=([m.ambient.r, m.ambient.g, m.ambient.b])
-        # flag
-        material.subsurface_scattering.use=True if m.flag==1 else False
-        # other
-        material.name="m_%02d" % index
-        material.preview_render_type='FLAT'
-        material.use_transparency=True
-        return material
-
-    def poseBoneLimit(n, b):
-        if n.endswith("_t"):
-            return
-        if n.startswith("knee_"):
-            b.lock_ik_y=True
-            b.lock_ik_z=True
-            b.lock_ik_x=False
-            # IK limit
-            b.use_ik_limit_x=True
-            b.ik_min_x=0
-            b.ik_max_x=180
-        elif n.startswith("ankle_"):
-            #b.ik_dof_y=False
-            pass
-
-    def setSphereMap(material, index, blend_type='MULTIPLY'):
-        slot=material.texture_slots[index]
-        slot.texture_coords='NORMAL'
-        slot.mapping='SPHERE'
-        slot.blend_type=blend_type
+def setSphereMap(material, index, blend_type='MULTIPLY'):
+    slot=material.texture_slots[index]
+    slot.texture_coords='NORMAL'
+    slot.mapping='SPHERE'
+    slot.blend_type=blend_type
 
 
 ###############################################################################
@@ -254,7 +202,7 @@ def __importShape(obj, l, vertex_map):
     # set shape_key pin
     bl.object.pinShape(obj, True)
 
-    # find base 
+    # find base
     base=None
     for s in l.morph_list:
         if s.type==0:
@@ -288,60 +236,25 @@ def __importShape(obj, l, vertex_map):
         if not name:
             name=s.getName()
 
-        if isBlender24():
-            # 24
-            for index, offset in zip(s.indices, s.pos_list):
-                try:
-                    vertex_index=vertex_map[base.indices[index]]
-                    v=mesh.vertices[vertex_index].co
-                    offset=convert_coord(offset)
-                    v[0]+=offset[0]
-                    v[1]+=offset[1]
-                    v[2]+=offset[2]
-                except IndexError as msg:
-                    print(msg)
-                    print(index, len(base.indices), len(vertex_map))
-                    print(len(mesh.vertices))
-                    print(base.indices[index])
-                    print(vertex_index)
-                    break
-                except KeyError:
-                    #print 'this mesh not has shape vertices'
-                    break
+        # 25
+        new_shape_key=bl.object.addShapeKey(obj, name)
 
-            # create shapekey block
-            new_shape_key=bl.object.addShapeKey(obj, name)
-
-            # copy vertex to shape key
-            mesh.update()
-            
-            # restore
-            for mv, v in zip(mesh.vertices, baseShapeBlock.getData()):
-                mv.co[0] = v[0]
-                mv.co[1] = v[1]
-                mv.co[2] = v[2]
-            mesh.update()
-
-        else:
-            # 25
-            new_shape_key=bl.object.addShapeKey(obj, name)
-
-            for index, offset in zip(s.indices, s.pos_list):
-                try:
-                    vertex_index=vertex_map[base.indices[index]]
-                    bl.shapekey.assign(new_shape_key, vertex_index,
-                            mesh.vertices[vertex_index].co+
-                            bl.createVector(*convert_coord(offset)))
-                except IndexError as msg:
-                    print(msg)
-                    print(index, len(base.indices), len(vertex_map))
-                    print(len(mesh.vertices))
-                    print(base.indices[index])
-                    print(vertex_index)
-                    break
-                except KeyError:
-                    #print 'this mesh not has shape vertices'
-                    break
+        for index, offset in zip(s.indices, s.pos_list):
+            try:
+                vertex_index=vertex_map[base.indices[index]]
+                bl.shapekey.assign(new_shape_key, vertex_index,
+                        mesh.vertices[vertex_index].co+
+                        bl.createVector(*convert_coord(offset)))
+            except IndexError as msg:
+                print(msg)
+                print(index, len(base.indices), len(vertex_map))
+                print(len(mesh.vertices))
+                print(base.indices[index])
+                print(vertex_index)
+                break
+            except KeyError:
+                #print 'this mesh not has shape vertices'
+                break
 
     # select base shape
     bl.object.setActivateShapeKey(obj, 0)
@@ -420,41 +333,38 @@ def __importArmature(l):
         if not effector_name:
             effector_name=l.bones[ik.index].getName()
 
-        constraint=bl.armature.createIkConstraint(armature_object, 
+        constraint=bl.armature.createIkConstraint(armature_object,
                 p_bone, effector_name, ik)
 
     bl.armature.makeEditable(armature_object)
     bl.armature.update(armature)
     bl.enterObjectMode()
 
-    if isBlender24():
-        pass
-    else:
-        # create bone group
-        for i, g in enumerate(l.bone_group_list):
-            name=get_group_name(g)
-            bl.object.createBoneGroup(armature_object, name, "THEME%02d" % (i+1))
+    # create bone group
+    for i, g in enumerate(l.bone_group_list):
+        name=get_group_name(g)
+        bl.object.createBoneGroup(armature_object, name, "THEME%02d" % (i+1))
 
-        # assign bone to group
-        for b_index, g_index in l.bone_display_list:
-            # bone
-            b=l.bones[b_index]
-            bone_name=englishmap.getEnglishBoneName(b.getName())
-            if not bone_name:
-                bone_name=b.getName()
-            # group
-            g=l.bone_group_list[g_index-1]
-            group_name=get_group_name(g)
+    # assign bone to group
+    for b_index, g_index in l.bone_display_list:
+        # bone
+        b=l.bones[b_index]
+        bone_name=englishmap.getEnglishBoneName(b.getName())
+        if not bone_name:
+            bone_name=b.getName()
+        # group
+        g=l.bone_group_list[g_index-1]
+        group_name=get_group_name(g)
 
-            # assign
-            pose.bones[bone_name].bone_group=pose.bone_groups[group_name]
+        # assign
+        pose.bones[bone_name].bone_group=pose.bone_groups[group_name]
 
-        bl.enterObjectMode()
+    bl.enterObjectMode()
 
     return armature_object
-        
 
-def __import16MaerialAndMesh(meshObject, l, 
+
+def __import16MaerialAndMesh(meshObject, l,
         material_order, face_map, tex_dir, toon_material):
 
     mesh=bl.object.getData(meshObject)
@@ -497,9 +407,9 @@ def __import16MaerialAndMesh(meshObject, l,
 
         # toon texture
         toon_index=bl.material.addTexture(
-                material, 
+                material,
                 bl.material.getTexture(
-                    toon_material, 
+                    toon_material,
                     0 if m.toon_index==0xFF else m.toon_index
                     ),
                 False)
@@ -569,7 +479,7 @@ def __import16MaerialAndMesh(meshObject, l,
 
     # vertex params
     bl.mesh.useVertexUV(mesh)
-    for i, v, mvert in zip(xrange(len(l.vertices)), 
+    for i, v, mvert in zip(xrange(len(l.vertices)),
         l.each_vertex(), mesh.vertices):
         # normal, uv
         bl.vertex.setNormal(mvert, convert_coord(v.normal))
@@ -598,9 +508,9 @@ def __import16MaerialAndMesh(meshObject, l,
         used_map[index]=True
         if bl.material.hasTexture(material):
             uv_array=[l.getUV(i) for i in bl.face.getIndices(face)]
-            bl.mesh.setFaceUV(mesh, i, face, 
+            bl.mesh.setFaceUV(mesh, i, face,
                     # fix uv
-                    [(uv.x, 1.0-uv.y) for uv in uv_array], 
+                    [(uv.x, 1.0-uv.y) for uv in uv_array],
                     imageMap.get(index, None))
 
         # set smooth
@@ -637,7 +547,7 @@ def __importMaterialAndMesh(io, tex_dir, toon_material):
     # shapeキーで使われる頂点インデックスを集める
     shape_key_used_vertices=set()
     if len(io.morph_list)>0:
-        # base 
+        # base
         base=None
         for s in io.morph_list:
             if s.type!=0:
@@ -651,7 +561,7 @@ def __importMaterialAndMesh(io, tex_dir, toon_material):
 
     # マテリアルに含まれる頂点がshape_keyに含まれるか否か？
     def isMaterialUsedInShape(offset, m):
-        for i in xrange(offset, offset+m.vertex_count): 
+        for i in xrange(offset, offset+m.vertex_count):
             if io.indices[i] in shape_key_used_vertices:
                 return True
 
@@ -701,16 +611,14 @@ def __importMaterialAndMesh(io, tex_dir, toon_material):
 
     mesh_objects=[__importMeshAndShape(material16, 'with_shape')
         for material16 in __splitList(material_with_shape, 16)]
-    
+
     mesh_objects+=[__importMeshAndShape(material16, 'mesh')
         for material16 in __splitList(material_without_shape, 16)]
- 
+
     return mesh_objects
 
 
 def __importConstraints(io):
-    if isBlender24():
-        return
     print("create constraint")
     container=bl.object.createEmpty('Constraints')
     layer=[
@@ -756,8 +664,6 @@ def __importConstraints(io):
 
 
 def __importRigidBodies(io):
-    if isBlender24():
-        return
     print("create rigid bodies")
 
     container=bl.object.createEmpty('RigidBodies')
@@ -834,17 +740,17 @@ def __importRigidBodies(io):
     return container
 
 
-def _execute(filename):
+def _execute(filepath=""):
     """
     load pmd file to context.
     """
-           
+
     # load pmd
-    bl.progress_set('load %s' % filename, 0.0)
+    bl.progress_set('load %s' % filepath, 0.0)
 
     io=pmd.IO()
-    if not io.read(filename):
-        bl.message("fail to load %s" % filename)
+    if not io.read(filepath):
+        bl.message("fail to load %s" % filepath)
         return
     bl.progress_set('loaded', 0.1)
 
@@ -858,7 +764,7 @@ def _execute(filename):
     root[MMD_COMMENT]=io.getEnglishComment()
 
     # toon textures
-    tex_dir=os.path.dirname(filename)
+    tex_dir=os.path.dirname(filepath)
     toonTextures, toonMaterial=__importToonTextures(io, tex_dir)
     bl.object.makeParent(root, toonTextures)
 
@@ -871,7 +777,7 @@ def _execute(filename):
     armature_object=__importArmature(io)
     if armature_object:
         bl.object.makeParent(root, armature_object)
-        armature = bl.object.getData(armature_object) 
+        armature = bl.object.getData(armature_object)
 
         # add armature modifier
         for o in mesh_objects:
@@ -892,59 +798,4 @@ def _execute(filename):
         bl.object.makeParent(root, constraints)
 
     bl.object.activate(root)
-
-
-if isBlender24():
-    # for 2.4
-    def execute_24(filename):
-        bl.initialize('pmd_import', bpy.data.scenes.active)
-        _execute(filename.decode(bl.INTERNAL_ENCODING))
-        bl.finalize()
-
-    Blender.Window.FileSelector(
-            execute_24, 
-            'Import PMD file', 
-            Blender.sys.makename(ext='.pmd'))
-
-else:
-    # import operator
-    class IMPORT_OT_pmd(bpy.types.Operator):
-        bl_idname = "import_scene.pmd"
-        bl_label = 'Import PMD'
-
-        # List of operator properties, the attributes will be assigned
-        # to the class instance from the operator settings before calling.
-        filepath = bpy.props.StringProperty()
-        filename = bpy.props.StringProperty()
-        directory = bpy.props.StringProperty()
-
-        def execute(self, context):
-            bl.initialize('pmd_import', context.scene)
-            _execute(self.properties.filepath)
-            bl.finalize()
-            return 'FINISHED'
-
-        def invoke(self, context, event):
-            wm = context.window_manager
-            try:
-                wm.fileselect_add(self)
-            except:
-                wm.add_fileselect(self)
-            return 'RUNNING_MODAL'
-
-    # register menu
-    def menu_func(self, context): 
-        self.layout.operator(IMPORT_OT_pmd.bl_idname, 
-                text="MikuMikuDance model (.pmd)",
-                icon='PLUGIN'
-                )
-
-    def register():
-        bpy.types.INFO_MT_file_import.append(menu_func)
-
-    def unregister():
-        bpy.types.INFO_MT_file_import.remove(menu_func)
-
-    if __name__=="__main__":
-        register()
 

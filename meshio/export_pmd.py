@@ -1196,7 +1196,8 @@ class PmdExporter(object):
         return io.write(path)
 
 
-def __execute(filename):
+def _execute(filename):
+    bl.initialize('pmd_export', scene)
     active=bl.object.getActive()
     if not active:
         print("abort. no active object.")
@@ -1206,69 +1207,6 @@ def __execute(filename):
     print(exporter)
     exporter.write(filename)
     bl.object.activate(active)
+    bl.finalize()
 
-
-if isBlender24():
-    # for 2.4
-    def execute_24(filename):
-        bl.initialize('pmd_export', bpy.data.scenes.active)
-        __execute(filename.decode(bl.INTERNAL_ENCODING))
-        bl.finalize()
-
-    Blender.Window.FileSelector(
-             execute_24,
-             'Export Metasequoia PMD',
-             Blender.sys.makename(ext='.pmd'))
-
-else:
-    # for 2.5
-    def execute_25(filename, scene):
-        bl.initialize('pmd_export', scene)
-        __execute(filename)
-        bl.finalize()
-
-    # operator
-    class EXPORT_OT_pmd(bpy.types.Operator):
-        '''Save a Metasequoia PMD file.'''
-        bl_idname = "export_scene.pmd"
-        bl_label = 'Export PMD'
-
-        # List of operator properties, the attributes will be assigned
-        # to the class instance from the operator settings before calling.
-        filepath = bpy.props.StringProperty()
-        filename = bpy.props.StringProperty()
-        directory = bpy.props.StringProperty()
-
-        def execute(self, context):
-            execute_25(
-                    self.properties.filepath, 
-                    context.scene
-                    )
-            return 'FINISHED'
-
-        def invoke(self, context, event):
-            wm=context.window_manager
-            try:
-                wm.fileselect_add(self)
-            except:
-                wm.add_fileselect(self)
-            return 'RUNNING_MODAL'
-
-    # register menu
-    def menu_func(self, context): 
-        default_path=bpy.data.filepath.replace(".blend", ".pmd")
-        self.layout.operator(
-                EXPORT_OT_pmd.bl_idname, 
-                text="Miku Miku Dance Model(.pmd)",
-                icon='PLUGIN'
-                ).filepath=default_path
-
-    def register():
-        bpy.types.INFO_MT_file_export.append(menu_func)
-
-    def unregister():
-        bpy.types.INFO_MT_file_export.remove(menu_func)
-
-    if __name__ == "__main__":
-        register()
 
