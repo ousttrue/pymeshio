@@ -7,7 +7,7 @@
  Tooltip: 'Import PMD file for MikuMikuDance.'
 """
 __author__= ["ousttrue"]
-__version__= "2.2"
+__version__= "2.4"
 __url__=()
 __bpydoc__="""
 pmd Importer
@@ -36,6 +36,7 @@ This script imports a pmd into Blender for editing.
 2.1 20100731: add full python module.
 2.2 20101005: update for Blender2.54.
 2.3 20101228: update for Blender2.55.
+2.4 20110429: update for Blender2.57b.
 """
 bl_addon_info = {
         'category': 'Import/Export',

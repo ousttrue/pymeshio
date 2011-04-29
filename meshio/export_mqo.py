@@ -9,7 +9,7 @@ Tooltip: 'Save as Metasequoia MQO File'
 """
 __author__= 'ousttrue'
 __url__ = ["http://gunload.web.fc2.com/blender/"]
-__version__= '2.2'
+__version__= '2.4'
 __bpydoc__ = """\
 This script is an exporter to MQO file format.
 
@@ -26,6 +26,7 @@ Run this script from "File->Export" menu.
 2.0 20100724: update for Blender2.53.
 2.1 20101005: update for Blender2.54.
 2.2 20101228: update for Blender2.55.
+2.4 20110429: update for Blender2.57b.
 """
 
 bl_addon_info = {

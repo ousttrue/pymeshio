@@ -1,12 +1,12 @@
 bl_info = {
-    "name": "MMD pmd format (.pmd)/ Metasequioa mqo format (.mqo)",
+    "name": "meshio. (.pmd)(.mqo)",
     "author": "ousttrue",
     "blender": (2, 5, 7),
     "api": 35622,
     "location": "File > Import-Export",
     "description": "Import-Export PMD/MQO meshes",
     "warning": "",
-    "wiki_url": "",
+    "url": "http://meshio.sourceforge.jp/",
     "tracker_url": "",
     "support": 'COMMUNITY',
     "category": "Import-Export"
