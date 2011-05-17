@@ -258,7 +258,11 @@ class Face(object):
 
 def withio(method):
     def new(self, path):
-        self.io=open(path, encoding='cp932')
+        print sys.version_info[0]
+        if sys.version_info[0]<3:
+            self.io=open(path)
+        else:
+            self.io=open(path, encoding='cp932')
         result=method(self)
         self.io=None
         return result
