@@ -31,6 +31,7 @@ class Vertex(object):
         else:
             assert(False)
 
+
 class Material(object):
     __slots__=[
             'diffuse', 'shinness', 'specular',
@@ -57,12 +58,14 @@ class Material(object):
     def getTexture(self): return self.texture.decode('cp932')
     def setTexture(self, u): self.texture=u
 
+
 # @return 各マテリアルについて、そのマテリアルが保持する面の回数だけ
 # マテリアル自身を返す
 def material_per_face(materials):
     for m in materials:
         for x in xrange(int(m.vertex_count/3)):
             yield m
+
 
 class Bone(object):
     # kinds
@@ -251,11 +254,13 @@ class Skin(object):
         return '<Skin name: "%s", type: %d, vertex: %d>' % (
             self.name, self.type, len(self.indices))
 
+
 class ToonTexture(object):
     __slots__=['name']
     def __init__(self, name): self.name=name
     def getName(self): return self.name.decode('cp932')
     def setName(self, u): self.name=u
+
 
 class BoneGroup(object):
     __slots__=['name', 'english_name']
@@ -265,10 +270,25 @@ class BoneGroup(object):
     def getEnglishName(self): return self.english_name.decode('cp932')
     def setEnglishName(self, u): self.english_name=u
 
+
+class RigidBody(object):
+    __slots__=['name', 'boneIndex', 'group', 'target', 'shapeType',
+            'w', 'h', 'd', 'position', 'rotation', 'weight',
+            'linearDamping', 'angularDamping', 'restitution', 'friction', 'processType'
+            ]
+    def __init__(self, name):
+        self.name=name
+
+
+class Constraint(object):
+    def __init__(self):
+        pass
+
+
 class IO(object):
     __slots__=['io', 'end', 'pos',
-            'version', 'model_name', 'comment',
-            'english_model_name', 'english_comment',
+            'version', 'name', 'comment',
+            'english_name', 'english_comment',
             'vertices', 'indices', 'materials', 'bones', 
             'ik_list', 'morph_list',
             'face_list', 'bone_group_list', 'bone_display_list',
@@ -278,9 +298,9 @@ class IO(object):
             ]
     def __init__(self):
         self.version=1.0
-        self.model_name=b"default"
+        self.name=b"default"
         self.comment=b"default"
-        self.english_model_name=b'default'
+        self.english_name=b'default'
         self.english_comment=b'default'
         self.vertices=[]
         self.indices=[]
@@ -306,12 +326,12 @@ class IO(object):
         self.rigidbodies=[]
         self.constraints=[]
 
-    def getName(self): return self.model_name.decode('cp932')
-    def setName(self, u): self.model_name=u
+    def getName(self): return self.name.decode('cp932')
+    def setName(self, u): self.name=u
     def getComment(self): return self.comment.decode('cp932')
     def setComment(self, u): self.comment=u
-    def getEnglishName(self): return self.english_model_name.decode('cp932')
-    def setEnglishName(self, u): self.english_model_name=u
+    def getEnglishName(self): return self.english_name.decode('cp932')
+    def setEnglishName(self, u): self.english_name=u
     def getEnglishComment(self): return self.english_comment.decode('cp932')
     def setEnglishComment(self, u): self.english_comment=u
 
@@ -347,7 +367,7 @@ class IO(object):
 
     def __str__(self):
         return '<PMDLoader version: %g, model: "%s", vertex: %d, face: %d, material: %d, bone: %d ik: %d, skin: %d>' % (
-            self.version, self.model_name, len(self.vertices), len(self.indices),
+            self.version, self.name, len(self.vertices), len(self.indices),
             len(self.materials), len(self.bones), len(self.ik_list), len(self.morph_list))
 
     def _check_position(self):
@@ -443,7 +463,7 @@ class IO(object):
         # Header
         io.write(b"Pmd")        
         io.write(struct.pack("f", self.version))
-        io.write(struct.pack("20s", self.model_name))
+        io.write(struct.pack("20s", self.name))
         io.write(struct.pack("256s", self.comment))
 
         # Vertices
@@ -550,20 +570,20 @@ class IO(object):
         ############################################################
         if self.io.tell()>=self.end:
             return True
-        #if not self.loadPhysics():
-        #    return False
+        if not self.loadPhysics():
+            return False
         self._check_position()
 
         return True
 
     def _loadHeader(self):
         signature=struct.unpack("3s", self.io.read(3))[0]
-        print(signature)
+        #print(signature)
         if signature!=b"Pmd":
             print("invalid signature", signature)
             return False
         self.version=struct.unpack("f", self.io.read(4))[0]
-        self.model_name = truncate_zero(struct.unpack("20s", self.io.read(20))[0])
+        self.name = truncate_zero(struct.unpack("20s", self.io.read(20))[0])
         self.comment = truncate_zero(
                 struct.unpack("256s", self.io.read(256))[0])
         return True
@@ -665,7 +685,7 @@ class IO(object):
 
     def loadEnglishName(self):
         # english name
-        self.english_model_name=truncate_zero(
+        self.english_name=truncate_zero(
                 struct.unpack("20s", self.io.read(20))[0])
         self.english_comment=truncate_zero(
                 struct.unpack("256s", self.io.read(256))[0])
@@ -695,10 +715,16 @@ class IO(object):
         # 剛体リスト
         count = struct.unpack("I", self.io.read(4))[0]
         for i in xrange(count):
-            struct.unpack("83s", self.io.read(83))[0]
+            name=truncate_zero(struct.unpack("20s", self.io.read(20))[0])
+            rigidbody=RigidBody(name)
+            struct.unpack("63s", self.io.read(63))[0]
+            self.rigidbodies.append(rigidbody)
+
         # ジョイントリスト
         count = struct.unpack("I", self.io.read(4))[0]
         for i in xrange(count):
             struct.unpack("124s", self.io.read(124))[0]
+            constraint=Constraint()
+            self.constraints.append(Constraint)
         return True
 
