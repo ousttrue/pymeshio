@@ -23,7 +23,10 @@ if "bpy" in locals():
 
 import bpy
 from bpy.props import StringProperty, FloatProperty, BoolProperty
-from io_utils import ImportHelper, ExportHelper
+try:
+    from io_utils import ImportHelper, ExportHelper
+except:
+    from bpy_extras.io_utils import ImportHelper, ExportHelper
 from . import bl25 as bl
 
 

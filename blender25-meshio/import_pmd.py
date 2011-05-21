@@ -94,8 +94,9 @@ try:
 except ImportError:
     # full python
     from .pymeshio import englishmap
-    from .pymeshio import mmd as pmd
-    pmd.IO=pmd.PMDLoader
+    #from .pymeshio import mmd as pmd
+    #pmd.IO=pmd.PMDLoader
+    from .pymeshio import pmd
 
 # for 2.5
 import bpy

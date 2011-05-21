@@ -19,6 +19,10 @@ Import-Exportの中から"meshio. (.pmd)(.mqo)"を探して右のチェックボ
 更新履歴
 ========
 
+20110521 1.8.1
+--------------
+fix io_utils -> bpy_extras.io_utils
+
 20110521 1.8.0
 --------------
 RigidBodyとConstraintの読み込みを実装。
