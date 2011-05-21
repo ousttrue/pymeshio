@@ -231,6 +231,7 @@ class IK(object):
     def __str__(self):
         return "<IK index: %d, target: %d, iterations: %d, weight: %f, children: %s(%d)>" %(self.index, self.target, self.iterations, self.weight, '-'.join([str(i) for i in self.children]), len(self.children))
 
+
 class Skin(object):
     __slots__=['name', 'type', 'indices', 'pos_list', 'english_name',
             'vertex_count']
@@ -255,13 +256,6 @@ class Skin(object):
             self.name, self.type, len(self.indices))
 
 
-class ToonTexture(object):
-    __slots__=['name']
-    def __init__(self, name): self.name=name
-    def getName(self): return self.name.decode('cp932')
-    def setName(self, u): self.name=u
-
-
 class BoneGroup(object):
     __slots__=['name', 'english_name']
     def __init__(self, name='group'): self.name=name; self.english_name='center'
@@ -278,11 +272,26 @@ class RigidBody(object):
             ]
     def __init__(self, name):
         self.name=name
+        self.position=Vector3()
+        self.rotation=Vector3()
 
 
 class Constraint(object):
-    def __init__(self):
-        pass
+    __slots__=[ 'name', 'rigidA', 'rigidB', 'pos', 'rot',
+            'constraintPosMin', 'constraintPosMax',
+            'constraintRotMin', 'constraintRotMax',
+            'springPos', 'springRot',
+            ]
+    def __init__(self, name):
+        self.name=name
+        self.pos=Vector3()
+        self.rot=Vector3()
+        self.constraintPosMin=Vector3()
+        self.constraintPosMax=Vector3()
+        self.constraintRotMin=Vector3()
+        self.constraintRotMax=Vector3()
+        self.springPos=Vector3()
+        self.springRot=Vector3()
 
 
 class IO(object):
@@ -314,11 +323,11 @@ class IO(object):
         self.bone_display_list=[]
 
         self.toon_textures=[
-                ToonTexture(b'toon'), ToonTexture(b'toon'),
-                ToonTexture(b'toon'), ToonTexture(b'toon'),
-                ToonTexture(b'toon'), ToonTexture(b'toon'),
-                ToonTexture(b'toon'), ToonTexture(b'toon'),
-                ToonTexture(b'toon'), ToonTexture(b'toon'),
+                b'toon01.bmp', b'toon02.bmp',
+                b'toon03.bmp', b'toon04.bmp',
+                b'toon05.bmp', b'toon06.bmp',
+                b'toon07.bmp', b'toon08.bmp',
+                b'toon09.bmp', b'toon10.bmp',
                 ]
 
         self.no_parent_bones=[]
@@ -671,7 +680,9 @@ class IO(object):
     def _loadBoneIndex(self):
         size = struct.unpack("I", self.io.read(4))[0]
         for i in xrange(size):
-            self.bone_display_list.append(struct.unpack("HB", self.io.read(3)))
+            first=struct.unpack("H", self.io.read(2))[0]
+            second=struct.unpack("B", self.io.read(1))[0]
+            self.bone_display_list.append((first, second))
         return True
 
     def loadToonTexture(self):
@@ -679,8 +690,8 @@ class IO(object):
         100bytex10
         """
         for i in xrange(10):
-            self.toon_textures.append(ToonTexture(
-                    truncate_zero(struct.unpack("100s", self.io.read(100))[0])))
+            self.toon_textures.append(
+                    truncate_zero(struct.unpack("100s", self.io.read(100))[0]))
         return True
 
     def loadEnglishName(self):
@@ -689,12 +700,11 @@ class IO(object):
                 struct.unpack("20s", self.io.read(20))[0])
         self.english_comment=truncate_zero(
                 struct.unpack("256s", self.io.read(256))[0])
-        # english bone list
+        # english bone name
         for bone in self.bones:
             english_name=truncate_zero(
                     struct.unpack("20s", self.io.read(20))[0])
-            if english_name!=bone.name:
-                bone.english_name=english_name
+            bone.english_name=english_name
         # english skin list
         #for index in self.face_list:
         for skin in self.morph_list:
@@ -717,14 +727,58 @@ class IO(object):
         for i in xrange(count):
             name=truncate_zero(struct.unpack("20s", self.io.read(20))[0])
             rigidbody=RigidBody(name)
-            struct.unpack("63s", self.io.read(63))[0]
+            rigidbody.boneIndex=struct.unpack("H", self.io.read(2))[0]
+            rigidbody.group=struct.unpack("B", self.io.read(1))[0]
+            rigidbody.target=struct.unpack("H", self.io.read(2))[0]
+            rigidbody.shapeType=struct.unpack("B", self.io.read(1))[0]
+            rigidbody.w=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.h=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.d=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.position.x=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.position.y=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.position.z=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.rotation.x=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.rotation.y=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.rotation.z=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.weight=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.linearDamping=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.angularDamping=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.restitution=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.friction=struct.unpack("f", self.io.read(4))[0]
+            rigidbody.processType=struct.unpack("B", self.io.read(1))[0]
             self.rigidbodies.append(rigidbody)
 
         # ジョイントリスト
         count = struct.unpack("I", self.io.read(4))[0]
         for i in xrange(count):
-            struct.unpack("124s", self.io.read(124))[0]
-            constraint=Constraint()
-            self.constraints.append(Constraint)
+            name=truncate_zero(struct.unpack("20s", self.io.read(20))[0])
+            constraint=Constraint(name)
+            constraint.rigidA=struct.unpack("I", self.io.read(4))[0]
+            constraint.rigidB=struct.unpack("I", self.io.read(4))[0]
+            constraint.pos.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.pos.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.pos.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.rot.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.rot.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.rot.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintPosMin.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintPosMin.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintPosMin.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintPosMax.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintPosMax.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintPosMax.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintRotMin.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintRotMin.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintRotMin.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintRotMax.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintRotMax.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.constraintRotMax.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.springPos.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.springPos.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.springPos.z=struct.unpack("f", self.io.read(4))[0]
+            constraint.springRot.x=struct.unpack("f", self.io.read(4))[0]
+            constraint.springRot.y=struct.unpack("f", self.io.read(4))[0]
+            constraint.springRot.z=struct.unpack("f", self.io.read(4))[0]
+            self.constraints.append(constraint)
         return True
 
