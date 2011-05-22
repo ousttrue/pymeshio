@@ -323,11 +323,11 @@ class IO(object):
         self.bone_display_list=[]
 
         self.toon_textures=[
-                b'toon01.bmp', b'toon02.bmp',
-                b'toon03.bmp', b'toon04.bmp',
-                b'toon05.bmp', b'toon06.bmp',
-                b'toon07.bmp', b'toon08.bmp',
-                b'toon09.bmp', b'toon10.bmp',
+                'toon01.bmp', 'toon02.bmp',
+                'toon03.bmp', 'toon04.bmp',
+                'toon05.bmp', 'toon06.bmp',
+                'toon07.bmp', 'toon08.bmp',
+                'toon09.bmp', 'toon10.bmp',
                 ]
 
         self.no_parent_bones=[]
