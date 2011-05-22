@@ -6,6 +6,16 @@ from .mmd import *
 ###############################################################################
 # PMD
 ###############################################################################
+def encode_string(src):
+    t=type(src)
+    if t==str:
+        return src.encode('cp932')
+    elif t==bytes:
+        return src
+    else:
+        raise "INVALID str: %s" % t
+
+
 class Vertex(object):
     __slots__=['pos', 'normal', 'uv', 'bone0', 'bone1', 'weight0', 'edge_flag']
     def __init__(self, x=0, y=0, z=0, nx=0, ny=0, nz=0, u=0, v=0,
@@ -35,8 +45,11 @@ class Vertex(object):
 class Material(object):
     __slots__=[
             'diffuse', 'shinness', 'specular',
-            'ambient', 'vertex_count', 'texture', 'toon_index', 'flag',
+            'ambient', 'vertex_count', '_texture', 'toon_index', 'flag',
             ]
+    def getTexture(self): return self._texture
+    def setTexture(self, texture): self._texture=encode_string(texture)
+    texture=property(getTexture, setTexture)
 
     def __init__(self, dr=0, dg=0, db=0, alpha=1, 
             specular=0, sr=0, sg=0, sb=0, ar=0, ag=0, ab=0):
@@ -45,7 +58,7 @@ class Material(object):
         self.shinness=specular
         self.ambient=RGBA(ar, ag, ab)
         self.vertex_count=0
-        self.texture=''
+        self._texture=''
         self.toon_index=0
         self.flag=0
 
@@ -55,15 +68,12 @@ class Material(object):
                 self.diffuse[2], self.diffuse[3],
                 )
 
-    def getTexture(self): return self.texture.decode('cp932')
-    def setTexture(self, u): self.texture=u
-
 
 # @return 各マテリアルについて、そのマテリアルが保持する面の回数だけ
 # マテリアル自身を返す
 def material_per_face(materials):
     for m in materials:
-        for x in xrange(int(m.vertex_count/3)):
+        for x in range(int(m.vertex_count/3)):
             yield m
 
 
@@ -79,10 +89,17 @@ class Bone(object):
     # since v4.0
     ROLLING=8 # ?
     TWEAK=9
-    __slots__=['name', 'index', 'type', 'parent', 'ik', 'pos',
-            'children', 'english_name', 'ik_index',
+    __slots__=['_name', 'index', 'type', 'parent', 'ik', 'pos',
+            'children', '_english_name', 'ik_index',
             'parent_index', 'tail_index', 'tail',
             ]
+    def getName(self): return self._name
+    def setName(self, name): self._name=encode_string(name)
+    name=property(getName, setName)
+    def getEnglishName(self): return self._english_name
+    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    english_name=property(getEnglishName, setEnglishName)
+
     def __init__(self, name='bone', type=0):
         self.name=name
         self.index=0
@@ -95,10 +112,6 @@ class Bone(object):
         self.pos=Vector3(0, 0, 0)
         self.children=[]
         self.english_name=''
-
-    def getName(self): return self.name.decode('cp932')
-    def setName(self, u): self.name=u
-    def setEnglishName(self, u): self.english_name=u
 
     def hasParent(self):
         return self.parent_index!=0xFFFF
@@ -121,7 +134,7 @@ class Bone(object):
             print(uni.encode(ENCODING))
 
         child_count=len(self.children)
-        for i in xrange(child_count):
+        for i in range(child_count):
             child=self.children[i]
             if i<child_count-1:
                 child.display(indent+[False])
@@ -233,8 +246,15 @@ class IK(object):
 
 
 class Skin(object):
-    __slots__=['name', 'type', 'indices', 'pos_list', 'english_name',
+    __slots__=['_name', 'type', 'indices', 'pos_list', '_english_name',
             'vertex_count']
+    def getName(self): return self._name
+    def setName(self, name): self._name=encode_string(name)
+    name=property(getName, setName)
+    def getEnglishName(self): return self._english_name
+    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    english_name=property(getEnglishName, setEnglishName)
+
     def __init__(self, name='skin'):
         self.name=name
         self.type=None
@@ -242,10 +262,6 @@ class Skin(object):
         self.pos_list=[]
         self.english_name=''
         self.vertex_count=0
-
-    def getName(self): return self.name.decode('cp932')
-    def setName(self, u): self.name=u
-    def setEnglishName(self, u): self.english_name=u
 
     def append(self, index, x, y, z):
         self.indices.append(index)
@@ -257,19 +273,35 @@ class Skin(object):
 
 
 class BoneGroup(object):
-    __slots__=['name', 'english_name']
-    def __init__(self, name='group'): self.name=name; self.english_name='center'
-    def getName(self): return self.name.decode('cp932')
-    def setName(self, u): self.name=u
-    def getEnglishName(self): return self.english_name.decode('cp932')
-    def setEnglishName(self, u): self.english_name=u
+    __slots__=['_name', '_english_name']
+    def getName(self): return self._name
+    def setName(self, name): self._name=encode_string(name)
+    name=property(getName, setName)
+    def getEnglishName(self): return self._english_name
+    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    english_name=property(getEnglishName, setEnglishName)
+
+    def __init__(self, name='group'): self._name=name; self._english_name='center'
+
+
+SHAPE_SPHERE=0
+SHAPE_BOX=1
+SHAPE_CAPSULE=2
+
+RIGIDBODY_KINEMATICS=0
+RIGIDBODY_PHYSICS=1
+RIGIDBODY_PHYSICS_WITH_BONE=2
 
 
 class RigidBody(object):
-    __slots__=['name', 'boneIndex', 'group', 'target', 'shapeType',
+    __slots__=['_name', 'boneIndex', 'group', 'target', 'shapeType',
             'w', 'h', 'd', 'position', 'rotation', 'weight',
             'linearDamping', 'angularDamping', 'restitution', 'friction', 'processType'
             ]
+    def getName(self): return self._name
+    def setName(self, name): self._name=encode_string(name)
+    name=property(getName, setName)
+
     def __init__(self, name):
         self.name=name
         self.position=Vector3()
@@ -277,11 +309,15 @@ class RigidBody(object):
 
 
 class Constraint(object):
-    __slots__=[ 'name', 'rigidA', 'rigidB', 'pos', 'rot',
+    __slots__=[ '_name', 'rigidA', 'rigidB', 'pos', 'rot',
             'constraintPosMin', 'constraintPosMax',
             'constraintRotMin', 'constraintRotMax',
             'springPos', 'springRot',
             ]
+    def getName(self): return self._name
+    def setName(self, name): self._name=encode_string(name)
+    name=property(getName, setName)
+
     def __init__(self, name):
         self.name=name
         self.pos=Vector3()
@@ -296,8 +332,8 @@ class Constraint(object):
 
 class IO(object):
     __slots__=['io', 'end', 'pos',
-            'version', 'name', 'comment',
-            'english_name', 'english_comment',
+            'version', '_name', '_comment',
+            '_english_name', '_english_comment',
             'vertices', 'indices', 'materials', 'bones', 
             'ik_list', 'morph_list',
             'face_list', 'bone_group_list', 'bone_display_list',
@@ -305,12 +341,25 @@ class IO(object):
             'no_parent_bones',
             'rigidbodies', 'constraints',
             ]
+    def getName(self): return self._name
+    def setName(self, name): self._name=encode_string(name)
+    name=property(getName, setName)
+    def getEnglishName(self): return self._english_name
+    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    english_name=property(getEnglishName, setEnglishName)
+    def getComment(self): return self._comment
+    def setComment(self, comment): self._comment=encode_string(comment)
+    comment=property(getComment, setComment)
+    def getEnglishComment(self): return self._english_comment
+    def setEnglishComment(self, english_comment): self._english_comment=encode_string(english_comment)
+    english_comment=property(getEnglishComment, setEnglishComment)
+
     def __init__(self):
         self.version=1.0
-        self.name=b"default"
-        self.comment=b"default"
-        self.english_name=b'default'
-        self.english_comment=b'default'
+        self.name="default"
+        self.comment="default"
+        self.english_name='default'
+        self.english_comment='default'
         self.vertices=[]
         self.indices=[]
         self.materials=[]
@@ -323,11 +372,11 @@ class IO(object):
         self.bone_display_list=[]
 
         self.toon_textures=[
-                'toon01.bmp', 'toon02.bmp',
-                'toon03.bmp', 'toon04.bmp',
-                'toon05.bmp', 'toon06.bmp',
-                'toon07.bmp', 'toon08.bmp',
-                'toon09.bmp', 'toon10.bmp',
+                b'toon01.bmp', b'toon02.bmp',
+                b'toon03.bmp', b'toon04.bmp',
+                b'toon05.bmp', b'toon06.bmp',
+                b'toon07.bmp', b'toon08.bmp',
+                b'toon09.bmp', b'toon10.bmp',
                 ]
 
         self.no_parent_bones=[]
@@ -335,16 +384,6 @@ class IO(object):
         self.rigidbodies=[]
         self.constraints=[]
 
-    def getName(self): return self.name.decode('cp932')
-    def setName(self, u): self.name=u
-    def getComment(self): return self.comment.decode('cp932')
-    def setComment(self, u): self.comment=u
-    def getEnglishName(self): return self.english_name.decode('cp932')
-    def setEnglishName(self, u): self.english_name=u
-    def getEnglishComment(self): return self.english_comment.decode('cp932')
-    def setEnglishComment(self, u): self.english_comment=u
-
-    def getToonTexture(self, i): return self.toon_textures[i]
     def each_vertex(self): return self.vertices
     def getUV(self, i): return self.vertices[i].uv
     def addVertex(self): 
@@ -528,20 +567,68 @@ class IO(object):
             for i, v in zip(s.indices, s.pos_list):
                 io.write(struct.pack("I3f", i, v[0], v[1], v[2]))
 
-        # skin list
+        # skin disp list
         io.write(struct.pack("B", len(self.face_list)))
         for i in self.face_list:
             io.write(struct.pack("H", i))
 
-        # bone name
+        # bone disp list
         io.write(struct.pack("B", len(self.bone_group_list)))
         for g in self.bone_group_list:
             io.write(struct.pack("50s", g.name))
 
-        # bone list
         io.write(struct.pack("I", len(self.bone_display_list)))
         for l in self.bone_display_list:
             io.write(struct.pack("=HB", *l))
+
+        ############################################################
+        # extend data
+        ############################################################
+        io.write(struct.pack("B", 1))
+        # english name
+        io.write(struct.pack("=20s", self.english_name))
+        io.write(struct.pack("=256s", self.english_comment))
+        # english bone name
+        for bone in self.bones:
+            io.write(struct.pack("=20s", bone.english_name))
+        # english skin list
+        for skin in self.morph_list:
+            print(skin.name)
+            if skin.name==b'base':
+                continue
+            io.write(struct.pack("=20s", skin.english_name))
+        # english bone list
+        for bone_group in self.bone_group_list:
+            io.write(struct.pack("50s", bone_group.english_name))
+        # toon texture
+        for i in range(10):
+            io.write(struct.pack("=100s", self.toon_textures[i]))
+        # rigid
+        io.write(struct.pack("I", len(self.rigidbodies)))
+        for r in self.rigidbodies:
+            io.write(struct.pack("=20sHBHB14fB",
+                r.name, r.boneIndex, r.group, r.target, r.shapeType,
+                r.w, r.h, r.d, 
+                r.position.x, r.position.y, r.position.z, 
+                r.rotation.x, r.rotation.y, r.rotation.z, 
+                r.weight,
+                r.linearDamping, r.angularDamping, r.restitution,
+                r.friction, r.processType))
+
+        # constraint
+        io.write(struct.pack("I", len(self.constraints)))
+        for c in self.constraints:
+            io.write(struct.pack("=20sII24f",
+                c.name, c.rigidA, c.rigidB,
+                c.pos.x, c.pos.y, c.pos.z,
+                c.rot.x, c.rot.y, c.rot.z,
+                c.constraintPosMin.x, c.constraintPosMin.y, c.constraintPosMin.z,
+                c.constraintPosMax.x, c.constraintPosMax.y, c.constraintPosMax.z,
+                c.constraintRotMin.x, c.constraintRotMin.y, c.constraintRotMin.z,
+                c.constraintRotMax.x, c.constraintRotMax.y, c.constraintRotMax.z,
+                c.springPos.x, c.springPos.y, c.springPos.z,
+                c.springRot.x, c.springRot.y, c.springRot.z
+                ))
 
         return True
 
@@ -590,19 +677,19 @@ class IO(object):
 
     def _loadVertex(self):
         count = struct.unpack("I", self.io.read(4))[0]
-        for i in xrange(count):
+        for i in range(count):
             self.vertices.append(Vertex(*struct.unpack("8f2H2B", self.io.read(38))))
         return True
 
     def _loadFace(self):
         count = struct.unpack("I", self.io.read(4))[0]
-        for i in xrange(0, count, 3):
+        for i in range(0, count, 3):
             self.indices+=struct.unpack("HHH", self.io.read(6))
         return True
 
     def _loadMaterial(self):
         count = struct.unpack("I", self.io.read(4))[0]
-        for i in xrange(count):
+        for i in range(count):
             material=Material(*struct.unpack("4ff3f3f", self.io.read(44)))
             material.toon_index=struct.unpack("B", self.io.read(1))[0]
             material.flag=struct.unpack("B", self.io.read(1))[0]
@@ -616,7 +703,7 @@ class IO(object):
 
     def _loadBone(self):
         size = struct.unpack("H", self.io.read(2))[0]
-        for i in xrange(size):
+        for i in range(size):
             name=truncate_zero(struct.unpack("20s", self.io.read(20))[0])
             parent_index, tail_index = struct.unpack("HH", self.io.read(4))
             type = struct.unpack("B", self.io.read(1))[0]
@@ -631,23 +718,23 @@ class IO(object):
 
     def _loadIK(self):
         size = struct.unpack("H", self.io.read(2))[0]
-        for i in xrange(size):
+        for i in range(size):
             ik=IK(*struct.unpack("2H", self.io.read(4)))
             ik.length = struct.unpack("B", self.io.read(1))[0]
             ik.iterations = struct.unpack("H", self.io.read(2))[0]
             ik.weight = struct.unpack("f", self.io.read(4))[0]
-            for j in xrange(ik.length):
+            for j in range(ik.length):
                 ik.children.append(struct.unpack("H", self.io.read(2))[0])
             self.ik_list.append(ik)
         return True
 
     def _loadSkin(self):
         size = struct.unpack("H", self.io.read(2))[0]
-        for i in xrange(size):
+        for i in range(size):
             skin=Skin(truncate_zero(struct.unpack("20s", self.io.read(20))[0]))
             skin_size = struct.unpack("I", self.io.read(4))[0]
             skin.type = struct.unpack("B", self.io.read(1))[0]
-            for j in xrange(skin_size):
+            for j in range(skin_size):
                 skin.indices.append(struct.unpack("I", self.io.read(4))[0])
                 skin.pos_list.append(
                         Vector3(*struct.unpack("3f", self.io.read(12))))
@@ -657,20 +744,20 @@ class IO(object):
 
     def _loadSkinIndex(self):
         size = struct.unpack("B", self.io.read(1))[0]
-        for i in xrange(size):
+        for i in range(size):
             self.face_list.append(struct.unpack("H", self.io.read(2))[0])
         return True
 
     def _loadBoneName(self):
         size = struct.unpack("B", self.io.read(1))[0]
-        for i in xrange(size):
+        for i in range(size):
             self.bone_group_list.append(BoneGroup(
                 truncate_zero(struct.unpack("50s", self.io.read(50))[0])))
         return True
 
     def _loadBoneIndex(self):
         size = struct.unpack("I", self.io.read(4))[0]
-        for i in xrange(size):
+        for i in range(size):
             first=struct.unpack("H", self.io.read(2))[0]
             second=struct.unpack("B", self.io.read(1))[0]
             self.bone_display_list.append((first, second))
@@ -680,7 +767,7 @@ class IO(object):
         """
         100bytex10
         """
-        for i in xrange(10):
+        for i in range(10):
             self.toon_textures.append(
                     truncate_zero(struct.unpack("100s", self.io.read(100))[0]))
         return True
@@ -709,7 +796,7 @@ class IO(object):
                 skin.english_name=english_name
         self._check_position()
         # english bone list
-        for i in xrange(0, len(self.bone_group_list)):
+        for i in range(0, len(self.bone_group_list)):
             self.bone_group_list[i].english_name=truncate_zero(
                     struct.unpack("50s", self.io.read(50))[0])
         self._check_position()
@@ -718,7 +805,7 @@ class IO(object):
     def loadPhysics(self):
         # 剛体リスト
         count = struct.unpack("I", self.io.read(4))[0]
-        for i in xrange(count):
+        for i in range(count):
             name=truncate_zero(struct.unpack("20s", self.io.read(20))[0])
             rigidbody=RigidBody(name)
             rigidbody.boneIndex=struct.unpack("H", self.io.read(2))[0]
@@ -745,7 +832,7 @@ class IO(object):
 
         # ジョイントリスト
         count = struct.unpack("I", self.io.read(4))[0]
-        for i in xrange(count):
+        for i in range(count):
             name=truncate_zero(struct.unpack("20s", self.io.read(20))[0])
             constraint=Constraint(name)
             constraint.rigidA=struct.unpack("I", self.io.read(4))[0]

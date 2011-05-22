@@ -86,8 +86,8 @@ try:
 except ImportError:
     # full python
     from .pymeshio import englishmap
-    from .pymeshio import mmd as pmd
-    pmd.IO=pmd.PMDLoader
+    from .pymeshio import pmd
+
 
 # for 2.5
 import bpy
@@ -475,11 +475,11 @@ class OneSkinMesh(object):
         if len(copyMesh.vertices)>0:
             # apply transform
             copyObj.scale=obj.scale
-            bpy.ops.object.scale_apply()
+            bpy.ops.object.transform_apply(scale=True)
             copyObj.rotation_euler=obj.rotation_euler
-            bpy.ops.object.rotation_apply()
+            bpy.ops.object.transform_apply(rotation=True)
             copyObj.location=obj.location
-            bpy.ops.object.location_apply()
+            bpy.ops.object.transform_apply(location=True)
             # apply modifier
             for m in [m for m in copyObj.modifiers]:
                 if m.type=='SOLIDFY':
@@ -878,8 +878,8 @@ class PmdExporter(object):
 
     def write(self, path):
         io=pmd.IO()
-        io.setName(toCP932(self.name))
-        io.setComment(toCP932(self.comment))
+        io.name=self.name
+        io.comment=self.comment
         io.version=1.0
 
         # 頂点
@@ -913,9 +913,9 @@ class PmdExporter(object):
             textures=[os.path.basename(path) 
                 for path in bl.material.eachEnalbeTexturePath(m)]
             if len(textures)>0:
-                material.setTexture(toCP932('*'.join(textures)))
+                material.texture='*'.join(textures)
             else:
-                material.setTexture(toCP932(""))
+                material.texture=""
             # 面
             for i in indices:
                 assert(i<vertexCount)
@@ -936,14 +936,12 @@ class PmdExporter(object):
             if not v:
                 v=[b.name, b.name]
             assert(v)
-            cp932=v[1].encode('cp932')
-            assert(len(cp932)<20)
-            bone.setName(cp932)
+            bone.name=v[1]
 
             # english name
             bone_english_name=toCP932(b.name)
             assert(len(bone_english_name)<20)
-            bone.setEnglishName(bone_english_name)
+            bone.english_name=bone_english_name
 
             if len(v)>=3:
                 # has type
@@ -984,9 +982,8 @@ class PmdExporter(object):
             if not v:
                 v=[m.name, m.name, 0]
             assert(v)
-            cp932=v[1].encode('cp932')
-            morph.setName(cp932)
-            morph.setEnglishName(m.name.encode('cp932'))
+            morph.name=v[1]
+            morph.english_name=m.name
             m.type=v[2]
             morph.type=v[2]
             for index, offset in m.offsets:
@@ -1016,10 +1013,10 @@ class PmdExporter(object):
             name=englishmap.getUnicodeBoneGroupName(g[0])
             if not name:
                 name=g[0]
-            boneDisplayName.setName(toCP932(name+'\n'))
+            boneDisplayName.name=name+'\n'
             # english
             englishName=g[0]
-            boneDisplayName.setEnglishName(toCP932(englishName+'\n'))
+            boneDisplayName.english_name=englishName+'\n'
 
         # ボーングループメンバー
         for i, b in enumerate(self.skeleton.bones):
@@ -1032,8 +1029,8 @@ class PmdExporter(object):
         #assert(len(io.bones)==len(io.bone_display_list)+1)
 
         # English
-        io.setEnglishName(toCP932(self.englishName))
-        io.setEnglishComment(toCP932(self.englishComment))
+        io.english_name=self.englishName
+        io.english_comment=self.englishComment
 
         # toon
         toonMeshObject=None
@@ -1050,20 +1047,19 @@ class PmdExporter(object):
             for i in range(10):
                 t=bl.material.getTexture(toonMaterial, i)
                 if t:
-                    io.getToonTexture(i).setName(toCP932(t.name))
+                    io.toon_textures[i]=pmd.encode_string(t.name)
                 else:
-                    io.getToonTexture(i).setName(toCP932("toon%02d.bmp\n" % i))
+                    io.toon_textures[i]=pmd.encode_string("toon%02d.bmp\n" % i)
         else:
             for i in range(10):
-                io.getToonTexture(i).setName(toCP932("toon%02d.bmp\n" % i))
+                io.toon_textures[i]=pmd.encode_string("toon%02d.bmp\n" % i)
 
         # rigid body
         rigidNameMap={}
         for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
             name=obj[RIGID_NAME] if RIGID_NAME in obj else obj.name
-            print(name)
-            rigidBody=io.addRigidBody()
-            rigidBody.setName(name.encode('cp932'))
+            #print(name)
+            rigidBody=pmd.RigidBody(name)
             rigidNameMap[name]=i
             boneIndex=boneNameMap[obj[RIGID_BONE_NAME]]
             if boneIndex==0:
@@ -1092,6 +1088,8 @@ class PmdExporter(object):
             if obj[RIGID_SHAPE_TYPE]==0:
                 rigidBody.shapeType=pmd.SHAPE_SPHERE
                 rigidBody.w=obj.scale[0]
+                rigidBody.d=0
+                rigidBody.h=0
             elif obj[RIGID_SHAPE_TYPE]==1:
                 rigidBody.shapeType=pmd.SHAPE_BOX
                 rigidBody.w=obj.scale[0]
@@ -1101,11 +1099,12 @@ class PmdExporter(object):
                 rigidBody.shapeType=pmd.SHAPE_CAPSULE
                 rigidBody.w=obj.scale[0]
                 rigidBody.h=obj.scale[2]
+                rigidBody.d=0
+            io.rigidbodies.append(rigidBody)
 
         # constraint
         for obj in self.oneSkinMesh.constraints:
-            constraint=io.addConstraint()
-            constraint.setName(obj[CONSTRAINT_NAME].encode('cp932'))
+            constraint=pmd.Constraint(obj[CONSTRAINT_NAME])
             constraint.rigidA=rigidNameMap[obj[CONSTRAINT_A]]
             constraint.rigidB=rigidNameMap[obj[CONSTRAINT_B]]
             constraint.pos.x=obj.location[0]
@@ -1132,6 +1131,7 @@ class PmdExporter(object):
             constraint.springRot.x=obj[CONSTRAINT_SPRING_ROT][0]
             constraint.springRot.y=obj[CONSTRAINT_SPRING_ROT][1]
             constraint.springRot.z=obj[CONSTRAINT_SPRING_ROT][2]
+            io.constraints.append(constraint)
 
         # 書き込み
         bl.message('write: %s' % path)

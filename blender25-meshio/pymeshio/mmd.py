@@ -109,6 +109,9 @@ class Vector3(object):
     def to_tuple(self):
         return (self.x, self.y, self.z)
 
+    def __add__(l, r):
+        return Vector3(l.x+r.x, l.y+r.y, l.z+r.z)
+
 
 class Quaternion(object):
     __slots__=['x', 'y', 'z', 'w']

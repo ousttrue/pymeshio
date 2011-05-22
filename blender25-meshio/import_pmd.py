@@ -167,21 +167,21 @@ def to_radian(degree):
 
 def get_bone_name(l, index):
     if index==0xFFFF:
-        return l.bones[0].getName()
+        return l.bones[0].name
 
     if index < len(l.bones):
-        name=englishmap.getEnglishBoneName(l.bones[index].getName())
+        name=englishmap.getEnglishBoneName(l.bones[index].name)
         if name:
             return name
-        return l.bones[index].getName()
+        return l.bones[index].name
     print('invalid bone index', index)
-    return l.bones[0].getName()
+    return l.bones[0].name
 
 
 def get_group_name(g):
-    group_name=englishmap.getEnglishBoneGroupName(g.getName().strip())
+    group_name=englishmap.getEnglishBoneGroupName(g.name.strip())
     if not group_name:
-        group_name=g.getName().strip()
+        group_name=g.name.strip()
     return group_name
 
 
@@ -189,9 +189,8 @@ def __importToonTextures(io, tex_dir):
     mesh, meshObject=bl.mesh.create(TOON_TEXTURE_OBJECT)
     material=bl.material.create(TOON_TEXTURE_OBJECT)
     bl.mesh.addMaterial(mesh, material)
-    for i in range(10):
-        t=io.getToonTexture(i)
-        path=os.path.join(tex_dir, t.getName())
+    for toon in (io.toon_textures[i] for i in range(10)):
+        path=os.path.join(tex_dir, toon)
         texture, image=bl.texture.create(path)
         bl.material.addTexture(material, texture, False)
     return meshObject, material
@@ -234,9 +233,9 @@ def __importShape(obj, l, vertex_map):
             continue
 
         # name
-        name=englishmap.getEnglishSkinName(s.getName())
+        name=englishmap.getEnglishSkinName(s.name)
         if not name:
-            name=s.getName()
+            name=s.name
 
         # 25
         new_shape_key=bl.object.addShapeKey(obj, name)
@@ -263,9 +262,9 @@ def __importShape(obj, l, vertex_map):
 
 
 def __build(armature, b, p, parent):
-    name=englishmap.getEnglishBoneName(b.getName())
+    name=englishmap.getEnglishBoneName(b.name)
     if not name:
-        name=b.getName()
+        name=b.name
 
     bone=bl.armature.createBone(armature, name)
 
@@ -320,9 +319,9 @@ def __importArmature(l):
     pose = bl.object.getPose(armature_object)
     for ik in l.ik_list:
         target=l.bones[ik.target]
-        name = englishmap.getEnglishBoneName(target.getName())
+        name = englishmap.getEnglishBoneName(target.name)
         if not name:
-            name=target.getName()
+            name=target.name
         p_bone = pose.bones[name]
         if not p_bone:
             print('not found', name)
@@ -331,9 +330,9 @@ def __importArmature(l):
             print('over MAX_CHAINLEN', ik, len(ik.children))
             continue
         effector_name=englishmap.getEnglishBoneName(
-                l.bones[ik.index].getName())
+                l.bones[ik.index].name)
         if not effector_name:
-            effector_name=l.bones[ik.index].getName()
+            effector_name=l.bones[ik.index].name
 
         constraint=bl.armature.createIkConstraint(armature_object,
                 p_bone, effector_name, ik)
@@ -351,9 +350,9 @@ def __importArmature(l):
     for b_index, g_index in l.bone_display_list:
         # bone
         b=l.bones[b_index]
-        bone_name=englishmap.getEnglishBoneName(b.getName())
+        bone_name=englishmap.getEnglishBoneName(b.name)
         if not bone_name:
-            bone_name=b.getName()
+            bone_name=b.name
         # group
         g=l.bone_group_list[g_index-1]
         group_name=get_group_name(g)
@@ -389,7 +388,7 @@ def __import16MaerialAndMesh(meshObject, l,
         material=createPmdMaterial(m, material_index)
 
         # main texture
-        texture_name=m.getTexture()
+        texture_name=m.texture
         if texture_name!='':
             for i, t in enumerate(texture_name.split('*')):
                 if t in textureMap:
@@ -623,7 +622,7 @@ def __importMaterialAndMesh(io, tex_dir, toon_material):
 def __importConstraints(io):
     print("create constraint")
     container=bl.object.createEmpty('Constraints')
-    layer=[
+    layers=[
         True, False, False, False, False, False, False, False, False, False,
         False, False, False, False, False, False, False, False, False, False,
             ]
@@ -633,10 +632,10 @@ def __importConstraints(io):
     for i, c in enumerate(io.constraints):
         bpy.ops.mesh.primitive_uv_sphere_add(
                 segments=8,
-                rings=4,
+                ring_count=4,
                 size=0.1,
                 location=(c.pos.x, c.pos.z, c.pos.y),
-                layer=layer
+                layers=layers
                 )
         meshObject=bl.object.getActive()
         constraintMeshes.append(meshObject)
@@ -645,13 +644,13 @@ def __importConstraints(io):
         meshObject.name='c_%d' % i
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
-        meshObject.max_draw_type='SOLID'
+        meshObject.draw_type='SOLID'
         rot=c.rot
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
-        meshObject[CONSTRAINT_NAME]=c.getName()
-        meshObject[CONSTRAINT_A]=io.rigidbodies[c.rigidA].getName()
-        meshObject[CONSTRAINT_B]=io.rigidbodies[c.rigidB].getName()
+        meshObject[CONSTRAINT_NAME]=c.name
+        meshObject[CONSTRAINT_A]=io.rigidbodies[c.rigidA].name
+        meshObject[CONSTRAINT_B]=io.rigidbodies[c.rigidB].name
         meshObject[CONSTRAINT_POS_MIN]=VtoV(c.constraintPosMin)
         meshObject[CONSTRAINT_POS_MAX]=VtoV(c.constraintPosMax)
         meshObject[CONSTRAINT_ROT_MIN]=VtoV(c.constraintRotMin)
@@ -669,7 +668,7 @@ def __importRigidBodies(io):
     print("create rigid bodies")
 
     container=bl.object.createEmpty('RigidBodies')
-    layer=[
+    layers=[
         True, False, False, False, False, False, False, False, False, False,
         False, False, False, False, False, False, False, False, False, False,
             ]
@@ -686,21 +685,21 @@ def __importRigidBodies(io):
         if rigid.shapeType==pmd.SHAPE_SPHERE:
             bpy.ops.mesh.primitive_ico_sphere_add(
                     location=(pos.x, pos.z, pos.y),
-                    layer=layer
+                    layers=layers
                     )
             bpy.ops.transform.resize(
                     value=(rigid.w, rigid.w, rigid.w))
         elif rigid.shapeType==pmd.SHAPE_BOX:
             bpy.ops.mesh.primitive_cube_add(
                     location=(pos.x, pos.z, pos.y),
-                    layer=layer
+                    layers=layers
                     )
             bpy.ops.transform.resize(
                     value=(rigid.w, rigid.d, rigid.h))
         elif rigid.shapeType==pmd.SHAPE_CAPSULE:
-            bpy.ops.mesh.primitive_tube_add(
+            bpy.ops.mesh.primitive_cylinder_add(
                     location=(pos.x, pos.z, pos.y),
-                    layer=layer
+                    layers=layers
                     )
             bpy.ops.transform.resize(
                     value=(rigid.w, rigid.w, rigid.h))
@@ -712,10 +711,10 @@ def __importRigidBodies(io):
         rigidMeshes.append(meshObject)
         bl.mesh.addMaterial(mesh, material)
         meshObject.name='r_%d' % i
-        meshObject[RIGID_NAME]=rigid.getName()
+        meshObject[RIGID_NAME]=rigid.name
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
-        meshObject.max_draw_type='WIRE'
+        meshObject.draw_type='WIRE'
         rot=rigid.rotation
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
@@ -723,9 +722,9 @@ def __importRigidBodies(io):
         meshObject[RIGID_SHAPE_TYPE]=rigid.shapeType
         meshObject[RIGID_PROCESS_TYPE]=rigid.processType
 
-        bone_name = englishmap.getEnglishBoneName(bone.getName())
+        bone_name = englishmap.getEnglishBoneName(bone.name)
         if not bone_name:
-            bone_name=bone.getName()
+            bone_name=bone.name
         meshObject[RIGID_BONE_NAME]=bone_name
 
         meshObject[RIGID_GROUP]=rigid.group
@@ -757,13 +756,13 @@ def _execute(filepath=""):
     bl.progress_set('loaded', 0.1)
 
     # create root object
-    model_name=io.getEnglishName()
+    model_name=io.english_name
     if len(model_name)==0:
-        model_name=io.getName()
+        model_name=io.name
     root=bl.object.createEmpty(model_name)
-    root[MMD_MB_NAME]=io.getName()
-    root[MMD_MB_COMMENT]=io.getComment()
-    root[MMD_COMMENT]=io.getEnglishComment()
+    root[MMD_MB_NAME]=io.name
+    root[MMD_MB_COMMENT]=io.comment
+    root[MMD_COMMENT]=io.english_comment
 
     # toon textures
     tex_dir=os.path.dirname(filepath)
