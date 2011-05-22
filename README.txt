@@ -22,6 +22,7 @@ Import-Exportの中から"meshio. (.pmd)(.mqo)"を探して右のチェックボ
 20110522 1.8.2
 --------------
 python3向けの修正。
+RigidBodyとConstrainの書き出し。
 
 20110521 1.8.1
 --------------
