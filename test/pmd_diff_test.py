@@ -1,5 +1,5 @@
 import pymeshio.pmd
-import meshio
+import meshio.pmd
 import sys
 from nose.tools import *
 

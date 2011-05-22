@@ -1,6 +1,7 @@
-import setuptools
+#from distutils.core import setup
+from setuptools import setup
 
-setuptools.setup(
+setup(
         name='pymeshio',
         version='1.8.1',
         description='pure python 3d model io library',
