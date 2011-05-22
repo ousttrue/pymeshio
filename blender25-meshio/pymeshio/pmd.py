@@ -1,19 +1,32 @@
 # coding: utf-8
 import os
+import sys
 import struct
 from .mmd import *
 
 ###############################################################################
 # PMD
 ###############################################################################
-def encode_string(src):
-    t=type(src)
-    if t==str:
-        return src.encode('cp932')
-    elif t==bytes:
-        return src
-    else:
-        raise "INVALID str: %s" % t
+if sys.version_info[0]<3:
+    def encode_string(src):
+        t=type(src)
+        if t==unicode:
+            return src.encode('cp932')
+        elif t==str:
+            return src
+        else:
+            raise "INVALID str: %s" % t
+
+
+else:
+    def encode_string(src):
+        t=type(src)
+        if t==str:
+            return src.encode('cp932')
+        elif t==bytes:
+            return src
+        else:
+            raise "INVALID str: %s" % t
 
 
 class Vertex(object):
