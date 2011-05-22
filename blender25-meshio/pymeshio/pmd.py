@@ -380,17 +380,12 @@ class IO(object):
             len(self.materials), len(self.bones), len(self.ik_list), len(self.morph_list))
 
     def _check_position(self):
-        """
-        if self.pos:
-            print(self.pos, self.io.tell()-self.pos)
-        """
         self.pos=self.io.tell()
-        pass
 
     def read(self, path):
         size=os.path.getsize(path)
-        f=open(path, "rb")
-        return self.load(path, f, size)
+        with open(path, "rb") as f:
+            return self.load(path, f, size)
 
     def load(self, path, io, end):
         self.io=io
@@ -548,9 +543,6 @@ class IO(object):
         for l in self.bone_display_list:
             io.write(struct.pack("=HB", *l))
 
-        # ToDo
-        # Extend Data
-
         return True
 
 
@@ -587,7 +579,6 @@ class IO(object):
 
     def _loadHeader(self):
         signature=struct.unpack("3s", self.io.read(3))[0]
-        #print(signature)
         if signature!=b"Pmd":
             print("invalid signature", signature)
             return False
@@ -700,13 +691,14 @@ class IO(object):
                 struct.unpack("20s", self.io.read(20))[0])
         self.english_comment=truncate_zero(
                 struct.unpack("256s", self.io.read(256))[0])
+        self._check_position()
         # english bone name
         for bone in self.bones:
             english_name=truncate_zero(
                     struct.unpack("20s", self.io.read(20))[0])
             bone.english_name=english_name
+        self._check_position()
         # english skin list
-        #for index in self.face_list:
         for skin in self.morph_list:
             if skin.name=='base':
                 continue
@@ -715,10 +707,12 @@ class IO(object):
             #skin=self.morph_list[index]
             if english_name!=skin.name:
                 skin.english_name=english_name
+        self._check_position()
         # english bone list
         for i in xrange(0, len(self.bone_group_list)):
             self.bone_group_list[i].english_name=truncate_zero(
                     struct.unpack("50s", self.io.read(50))[0])
+        self._check_position()
         return True
 
     def loadPhysics(self):
@@ -747,6 +741,7 @@ class IO(object):
             rigidbody.friction=struct.unpack("f", self.io.read(4))[0]
             rigidbody.processType=struct.unpack("B", self.io.read(1))[0]
             self.rigidbodies.append(rigidbody)
+        self._check_position()
 
         # ジョイントリスト
         count = struct.unpack("I", self.io.read(4))[0]
@@ -780,5 +775,7 @@ class IO(object):
             constraint.springRot.y=struct.unpack("f", self.io.read(4))[0]
             constraint.springRot.z=struct.unpack("f", self.io.read(4))[0]
             self.constraints.append(constraint)
+        self._check_position()
+
         return True
 

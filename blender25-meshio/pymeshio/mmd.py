@@ -35,16 +35,28 @@ if sys.version_info[0]>=3:
 ###############################################################################
 # utility
 ###############################################################################
-def truncate_zero(src):
-    """
-    0x00以降を捨てる
-    """
-    pos = src.find(b"\x00")
-    assert(type(src)==bytes)
-    if pos >= 0:
-        return src[:pos]
-    else:
-        return src
+if sys.version_info[0]<3:
+    def truncate_zero(src):
+        """
+        0x00以降を捨てる
+        """
+        pos = src.find(b"\x00")
+        assert(type(src)==bytes)
+        if pos >= 0:
+            return src[:pos]
+        else:
+            return src
+else:
+    def truncate_zero(src):
+        """
+        0x00以降を捨てる
+        """
+        pos = src.find(b"\x00")
+        assert(type(src)==bytes)
+        if pos >= 0:
+            return src[:pos].decode('cp932')
+        else:
+            return src.decode('cp932')
 
 def radian_to_degree(x):
     return x/math.pi * 180.0

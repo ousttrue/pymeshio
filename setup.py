@@ -1,4 +1,5 @@
 #from distutils.core import setup
+import sys
 from setuptools import setup
 
 setup(
@@ -14,6 +15,7 @@ setup(
             'pymeshio': 'blender25-meshio/pymeshio'
             },
         packages=['pymeshio'],
-        test_suite='nose.collector'
+        test_suite='nose.collector',
+        zip_safe = (sys.version>="2.5"),   # <2.5 needs unzipped for -m to work
         )
 
