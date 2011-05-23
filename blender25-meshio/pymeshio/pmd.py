@@ -7,27 +7,6 @@ from .mmd import *
 ###############################################################################
 # PMD
 ###############################################################################
-if sys.version_info[0]<3:
-    def encode_string(src):
-        t=type(src)
-        if t==unicode:
-            return src.encode('cp932')
-        elif t==str:
-            return src
-        else:
-            raise "INVALID str: %s" % t
-
-else:
-    def encode_string(src):
-        t=type(src)
-        if t==str:
-            return src
-        elif t==bytes:
-            return src.decode('cp932')
-        else:
-            raise "INVALID str: %s" % t
-
-
 class Vertex(object):
     __slots__=['pos', 'normal', 'uv', 'bone0', 'bone1', 'weight0', 'edge_flag']
     def __init__(self, x=0, y=0, z=0, nx=0, ny=0, nz=0, u=0, v=0,
@@ -60,7 +39,7 @@ class Material(object):
             'ambient', 'vertex_count', '_texture', 'toon_index', 'flag',
             ]
     def getTexture(self): return self._texture
-    def setTexture(self, texture): self._texture=encode_string(texture)
+    def setTexture(self, texture): self._texture=to_str(texture)
     texture=property(getTexture, setTexture)
 
     def __init__(self, dr=0, dg=0, db=0, alpha=1, 
@@ -106,10 +85,10 @@ class Bone(object):
             'parent_index', 'tail_index', 'tail',
             ]
     def getName(self): return self._name
-    def setName(self, name): self._name=encode_string(name)
+    def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
     def getEnglishName(self): return self._english_name
-    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
 
     def __init__(self, name='bone', type=0):
@@ -261,10 +240,10 @@ class Skin(object):
     __slots__=['_name', 'type', 'indices', 'pos_list', '_english_name',
             'vertex_count']
     def getName(self): return self._name
-    def setName(self, name): self._name=encode_string(name)
+    def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
     def getEnglishName(self): return self._english_name
-    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
 
     def __init__(self, name='skin'):
@@ -287,10 +266,10 @@ class Skin(object):
 class BoneGroup(object):
     __slots__=['_name', '_english_name']
     def getName(self): return self._name
-    def setName(self, name): self._name=encode_string(name)
+    def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
     def getEnglishName(self): return self._english_name
-    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
 
     def __init__(self, name='group'): self._name=name; self._english_name='center'
@@ -311,7 +290,7 @@ class RigidBody(object):
             'linearDamping', 'angularDamping', 'restitution', 'friction', 'processType'
             ]
     def getName(self): return self._name
-    def setName(self, name): self._name=encode_string(name)
+    def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
 
     def __init__(self, name):
@@ -327,7 +306,7 @@ class Constraint(object):
             'springPos', 'springRot',
             ]
     def getName(self): return self._name
-    def setName(self, name): self._name=encode_string(name)
+    def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
 
     def __init__(self, name):
@@ -353,7 +332,7 @@ class ToonTextures(object):
         return self._toon_textures[key]
 
     def __setitem__(self, key, value):
-        self._toon_textures[key]=encode_string(value)
+        self._toon_textures[key]=to_str(value)
 
     def __iter__(self):
         self
@@ -375,16 +354,16 @@ class IO(object):
             'rigidbodies', 'constraints',
             ]
     def getName(self): return self._name
-    def setName(self, name): self._name=encode_string(name)
+    def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
     def getEnglishName(self): return self._english_name
-    def setEnglishName(self, english_name): self._english_name=encode_string(english_name)
+    def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
     def getComment(self): return self._comment
-    def setComment(self, comment): self._comment=encode_string(comment)
+    def setComment(self, comment): self._comment=to_str(comment)
     comment=property(getComment, setComment)
     def getEnglishComment(self): return self._english_comment
-    def setEnglishComment(self, english_comment): self._english_comment=encode_string(english_comment)
+    def setEnglishComment(self, english_comment): self._english_comment=to_str(english_comment)
     english_comment=property(getEnglishComment, setEnglishComment)
 
     def __init__(self):

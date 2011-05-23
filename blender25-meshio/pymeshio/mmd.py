@@ -58,6 +58,28 @@ else:
         else:
             return src.decode('cp932')
 
+
+if sys.version_info[0]<3:
+    def to_str(src):
+        t=type(src)
+        if t==unicode:
+            return src.encode('cp932')
+        elif t==str:
+            return src
+        else:
+            raise "INVALID str: %s" % t
+
+else:
+    def to_str(src):
+        t=type(src)
+        if t==str:
+            return src
+        elif t==bytes:
+            return src.decode('cp932')
+        else:
+            raise "INVALID str: %s" % t
+
+
 def radian_to_degree(x):
     return x/math.pi * 180.0
 
