@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
         name='pymeshio',
-        version='1.8.2',
+        version='1.8.3',
         description='pure python 3d model io library',
         keywords=[],
         author='ousttrue',

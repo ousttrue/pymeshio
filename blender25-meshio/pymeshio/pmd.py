@@ -17,14 +17,13 @@ if sys.version_info[0]<3:
         else:
             raise "INVALID str: %s" % t
 
-
 else:
     def encode_string(src):
         t=type(src)
         if t==str:
-            return src.encode('cp932')
-        elif t==bytes:
             return src
+        elif t==bytes:
+            return src.decode('cp932')
         else:
             raise "INVALID str: %s" % t
 
@@ -71,7 +70,7 @@ class Material(object):
         self.shinness=specular
         self.ambient=RGBA(ar, ag, ab)
         self.vertex_count=0
-        self._texture=''
+        self.texture=''
         self.toon_index=0
         self.flag=0
 
@@ -343,6 +342,27 @@ class Constraint(object):
         self.springRot=Vector3()
 
 
+class ToonTextures(object):
+    __slots__=['_toon_textures']
+    def __init__(self):
+        self._toon_textures=[]
+        for i in range(10):
+            self._toon_textures.append('toon%02d.bmp' % (i+1))
+
+    def __getitem__(self, key):
+        return self._toon_textures[key]
+
+    def __setitem__(self, key, value):
+        self._toon_textures[key]=encode_string(value)
+
+    def __iter__(self):
+        self
+
+    def next(self):
+        for toon_texture in self._toon_textures:
+            yield toon_texture
+
+
 class IO(object):
     __slots__=['io', 'end', 'pos',
             'version', '_name', '_comment',
@@ -369,8 +389,8 @@ class IO(object):
 
     def __init__(self):
         self.version=1.0
-        self.name="default"
-        self.comment="default"
+        self.name='default'
+        self.comment='default'
         self.english_name='default'
         self.english_comment='default'
         self.vertices=[]
@@ -379,23 +399,15 @@ class IO(object):
         self.bones=[]
         self.ik_list=[]
         self.morph_list=[]
-
         self.face_list=[]
         self.bone_group_list=[]
         self.bone_display_list=[]
-
-        self.toon_textures=[
-                b'toon01.bmp', b'toon02.bmp',
-                b'toon03.bmp', b'toon04.bmp',
-                b'toon05.bmp', b'toon06.bmp',
-                b'toon07.bmp', b'toon08.bmp',
-                b'toon09.bmp', b'toon10.bmp',
-                ]
-
-        self.no_parent_bones=[]
-
+        # extend
+        self.toon_textures=ToonTextures()
         self.rigidbodies=[]
         self.constraints=[]
+        # innner use
+        self.no_parent_bones=[]
 
     def each_vertex(self): return self.vertices
     def getUV(self, i): return self.vertices[i].uv
@@ -614,8 +626,8 @@ class IO(object):
         for bone_group in self.bone_group_list:
             io.write(struct.pack("50s", bone_group.english_name))
         # toon texture
-        for i in range(10):
-            io.write(struct.pack("=100s", self.toon_textures[i]))
+        for toon_texture in self.toon_textures:
+            io.write(struct.pack("=100s", toon_texture))
         # rigid
         io.write(struct.pack("I", len(self.rigidbodies)))
         for r in self.rigidbodies:
@@ -781,8 +793,7 @@ class IO(object):
         100bytex10
         """
         for i in range(10):
-            self.toon_textures.append(
-                    truncate_zero(struct.unpack("100s", self.io.read(100))[0]))
+            self.toon_textures[i]=truncate_zero(struct.unpack("100s", self.io.read(100))[0])
         return True
 
     def loadEnglishName(self):

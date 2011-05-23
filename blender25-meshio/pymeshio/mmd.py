@@ -40,8 +40,8 @@ if sys.version_info[0]<3:
         """
         0x00以降を捨てる
         """
-        pos = src.find(b"\x00")
         assert(type(src)==bytes)
+        pos = src.find(b"\x00")
         if pos >= 0:
             return src[:pos]
         else:
@@ -51,8 +51,8 @@ else:
         """
         0x00以降を捨てる
         """
-        pos = src.find(b"\x00")
         assert(type(src)==bytes)
+        pos = src.find(b"\x00")
         if pos >= 0:
             return src[:pos].decode('cp932')
         else:
