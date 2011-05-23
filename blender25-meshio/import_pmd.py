@@ -168,21 +168,21 @@ def to_radian(degree):
 
 def get_bone_name(l, index):
     if index==0xFFFF:
-        return l.bones[0].name
+        return l.bones[0]._name
 
     if index < len(l.bones):
-        name=englishmap.getEnglishBoneName(l.bones[index].name)
+        name=englishmap.getEnglishBoneName(l.bones[index]._name)
         if name:
             return name
-        return l.bones[index].name
+        return l.bones[index]._name
     print('invalid bone index', index)
-    return l.bones[0].name
+    return l.bones[0]._name
 
 
 def get_group_name(g):
-    group_name=englishmap.getEnglishBoneGroupName(g.name.strip())
+    group_name=englishmap.getEnglishBoneGroupName(g._name.strip())
     if not group_name:
-        group_name=g.name.strip()
+        group_name=g._name.strip()
     return group_name
 
 
@@ -190,7 +190,7 @@ def __importToonTextures(io, tex_dir):
     mesh, meshObject=bl.mesh.create(TOON_TEXTURE_OBJECT)
     material=bl.material.create(TOON_TEXTURE_OBJECT)
     bl.mesh.addMaterial(mesh, material)
-    for toon in (io.toon_textures[i] for i in range(10)):
+    for toon in (io.toon_textures._toon_textures[i] for i in range(10)):
         path=os.path.join(tex_dir, toon)
         texture, image=bl.texture.create(path)
         bl.material.addTexture(material, texture, False)
@@ -234,9 +234,9 @@ def __importShape(obj, l, vertex_map):
             continue
 
         # name
-        name=englishmap.getEnglishSkinName(s.name)
+        name=englishmap.getEnglishSkinName(s._name)
         if not name:
-            name=s.name
+            name=s._name
 
         # 25
         new_shape_key=bl.object.addShapeKey(obj, name)
@@ -263,9 +263,9 @@ def __importShape(obj, l, vertex_map):
 
 
 def __build(armature, b, p, parent):
-    name=englishmap.getEnglishBoneName(b.name)
+    name=englishmap.getEnglishBoneName(b._name)
     if not name:
-        name=b.name
+        name=b._name
 
     bone=bl.armature.createBone(armature, name)
 
@@ -320,9 +320,9 @@ def __importArmature(l):
     pose = bl.object.getPose(armature_object)
     for ik in l.ik_list:
         target=l.bones[ik.target]
-        name = englishmap.getEnglishBoneName(target.name)
+        name = englishmap.getEnglishBoneName(target._name)
         if not name:
-            name=target.name
+            name=target._name
         p_bone = pose.bones[name]
         if not p_bone:
             print('not found', name)
@@ -331,9 +331,9 @@ def __importArmature(l):
             print('over MAX_CHAINLEN', ik, len(ik.children))
             continue
         effector_name=englishmap.getEnglishBoneName(
-                l.bones[ik.index].name)
+                l.bones[ik.index]._name)
         if not effector_name:
-            effector_name=l.bones[ik.index].name
+            effector_name=l.bones[ik.index]._name
 
         constraint=bl.armature.createIkConstraint(armature_object,
                 p_bone, effector_name, ik)
@@ -351,9 +351,9 @@ def __importArmature(l):
     for b_index, g_index in l.bone_display_list:
         # bone
         b=l.bones[b_index]
-        bone_name=englishmap.getEnglishBoneName(b.name)
+        bone_name=englishmap.getEnglishBoneName(b._name)
         if not bone_name:
-            bone_name=b.name
+            bone_name=b._name
         # group
         g=l.bone_group_list[g_index-1]
         group_name=get_group_name(g)
@@ -389,7 +389,7 @@ def __import16MaerialAndMesh(meshObject, l,
         material=createPmdMaterial(m, material_index)
 
         # main texture
-        texture_name=m.texture
+        texture_name=m._texture
         if texture_name!='':
             for i, t in enumerate(texture_name.split('*')):
                 if t in textureMap:
@@ -649,9 +649,9 @@ def __importConstraints(io):
         rot=c.rot
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
-        meshObject[CONSTRAINT_NAME]=c.name
-        meshObject[CONSTRAINT_A]=io.rigidbodies[c.rigidA].name
-        meshObject[CONSTRAINT_B]=io.rigidbodies[c.rigidB].name
+        meshObject[CONSTRAINT_NAME]=c._name
+        meshObject[CONSTRAINT_A]=io.rigidbodies[c.rigidA]._name
+        meshObject[CONSTRAINT_B]=io.rigidbodies[c.rigidB]._name
         meshObject[CONSTRAINT_POS_MIN]=VtoV(c.constraintPosMin)
         meshObject[CONSTRAINT_POS_MAX]=VtoV(c.constraintPosMax)
         meshObject[CONSTRAINT_ROT_MIN]=VtoV(c.constraintRotMin)
@@ -712,7 +712,7 @@ def __importRigidBodies(io):
         rigidMeshes.append(meshObject)
         bl.mesh.addMaterial(mesh, material)
         meshObject.name='r_%d' % i
-        meshObject[RIGID_NAME]=rigid.name
+        meshObject[RIGID_NAME]=rigid._name
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
         meshObject.draw_type='WIRE'
@@ -723,9 +723,9 @@ def __importRigidBodies(io):
         meshObject[RIGID_SHAPE_TYPE]=rigid.shapeType
         meshObject[RIGID_PROCESS_TYPE]=rigid.processType
 
-        bone_name = englishmap.getEnglishBoneName(bone.name)
+        bone_name = englishmap.getEnglishBoneName(bone._name)
         if not bone_name:
-            bone_name=bone.name
+            bone_name=bone._name
         meshObject[RIGID_BONE_NAME]=bone_name
 
         meshObject[RIGID_GROUP]=rigid.group
@@ -757,13 +757,13 @@ def _execute(filepath=""):
     bl.progress_set('loaded', 0.1)
 
     # create root object
-    model_name=io.english_name
+    model_name=io._english_name
     if len(model_name)==0:
-        model_name=io.name
+        model_name=io._name
     root=bl.object.createEmpty(model_name)
-    root[MMD_MB_NAME]=io.name
-    root[MMD_MB_COMMENT]=io.comment
-    root[MMD_COMMENT]=io.english_comment
+    root[MMD_MB_NAME]=io._name
+    root[MMD_MB_COMMENT]=io._comment
+    root[MMD_COMMENT]=io._english_comment
 
     # toon textures
     tex_dir=os.path.dirname(filepath)

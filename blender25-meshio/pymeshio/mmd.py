@@ -69,6 +69,9 @@ if sys.version_info[0]<3:
         else:
             raise "INVALID str: %s" % t
 
+    def from_str(src):
+        return src
+
 else:
     def to_str(src):
         t=type(src)
@@ -78,6 +81,9 @@ else:
             return src.decode('cp932')
         else:
             raise "INVALID str: %s" % t
+
+    def from_str(src):
+        return src.encode('cp932')
 
 
 def radian_to_degree(x):

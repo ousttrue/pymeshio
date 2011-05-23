@@ -38,7 +38,7 @@ class Material(object):
             'diffuse', 'shinness', 'specular',
             'ambient', 'vertex_count', '_texture', 'toon_index', 'flag',
             ]
-    def getTexture(self): return self._texture
+    def getTexture(self): return from_str(self._texture)
     def setTexture(self, texture): self._texture=to_str(texture)
     texture=property(getTexture, setTexture)
 
@@ -50,7 +50,7 @@ class Material(object):
         self.ambient=RGBA(ar, ag, ab)
         self.vertex_count=0
         self.texture=''
-        self.toon_index=0
+        self.toon_index=1
         self.flag=0
 
     def __str__(self):
@@ -84,10 +84,10 @@ class Bone(object):
             'children', '_english_name', 'ik_index',
             'parent_index', 'tail_index', 'tail',
             ]
-    def getName(self): return self._name
+    def getName(self): return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
-    def getEnglishName(self): return self._english_name
+    def getEnglishName(self): return from_str(self._english_name)
     def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
 
@@ -239,10 +239,10 @@ class IK(object):
 class Skin(object):
     __slots__=['_name', 'type', 'indices', 'pos_list', '_english_name',
             'vertex_count']
-    def getName(self): return self._name
+    def getName(self): return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
-    def getEnglishName(self): return self._english_name
+    def getEnglishName(self): return from_str(self._english_name)
     def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
 
@@ -265,10 +265,10 @@ class Skin(object):
 
 class BoneGroup(object):
     __slots__=['_name', '_english_name']
-    def getName(self): return self._name
+    def getName(self): return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
-    def getEnglishName(self): return self._english_name
+    def getEnglishName(self): return from_str(self._english_name)
     def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
 
@@ -289,7 +289,7 @@ class RigidBody(object):
             'w', 'h', 'd', 'position', 'rotation', 'weight',
             'linearDamping', 'angularDamping', 'restitution', 'friction', 'processType'
             ]
-    def getName(self): return self._name
+    def getName(self): return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
 
@@ -305,7 +305,7 @@ class Constraint(object):
             'constraintRotMin', 'constraintRotMax',
             'springPos', 'springRot',
             ]
-    def getName(self): return self._name
+    def getName(self): return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
 
@@ -329,17 +329,14 @@ class ToonTextures(object):
             self._toon_textures.append('toon%02d.bmp' % (i+1))
 
     def __getitem__(self, key):
-        return self._toon_textures[key]
+        return from_str(self._toon_textures[key])
 
     def __setitem__(self, key, value):
         self._toon_textures[key]=to_str(value)
 
     def __iter__(self):
-        self
-
-    def next(self):
         for toon_texture in self._toon_textures:
-            yield toon_texture
+            yield from_str(toon_texture)
 
 
 class IO(object):
@@ -353,16 +350,16 @@ class IO(object):
             'no_parent_bones',
             'rigidbodies', 'constraints',
             ]
-    def getName(self): return self._name
+    def getName(self): return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
-    def getEnglishName(self): return self._english_name
+    def getEnglishName(self): return from_str(self._english_name)
     def setEnglishName(self, english_name): self._english_name=to_str(english_name)
     english_name=property(getEnglishName, setEnglishName)
-    def getComment(self): return self._comment
+    def getComment(self): return from_str(self._comment)
     def setComment(self, comment): self._comment=to_str(comment)
     comment=property(getComment, setComment)
-    def getEnglishComment(self): return self._english_comment
+    def getEnglishComment(self): return from_str(self._english_comment)
     def setEnglishComment(self, english_comment): self._english_comment=to_str(english_comment)
     english_comment=property(getEnglishComment, setEnglishComment)
 
@@ -508,7 +505,7 @@ class IO(object):
         if not io:
             return False
         # Header
-        io.write(b"Pmd")        
+        io.write(b"Pmd")
         io.write(struct.pack("f", self.version))
         io.write(struct.pack("20s", self.name))
         io.write(struct.pack("256s", self.comment))
@@ -790,7 +787,7 @@ class IO(object):
         self._check_position()
         # english skin list
         for skin in self.morph_list:
-            if skin.name=='base':
+            if skin.name==b'base':
                 continue
             english_name=truncate_zero(
                     struct.unpack("20s", self.io.read(20))[0])
