@@ -50,7 +50,7 @@ class Material(object):
         self.ambient=RGBA(ar, ag, ab)
         self.vertex_count=0
         self.texture=''
-        self.toon_index=1
+        self.toon_index=0
         self.flag=0
 
     def __str__(self):

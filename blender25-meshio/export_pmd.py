@@ -1048,12 +1048,12 @@ class PmdExporter(object):
             for i in range(10):
                 t=bl.material.getTexture(toonMaterial, i)
                 if t:
-                    io.toon_textures[i]=t.name
+                    io.toon_textures[i]="%s" % t.name
                 else:
-                    io.toon_textures[i]="toon%02d.bmp\n" % (i+1)
+                    io.toon_textures[i]="toon%02d.bmp" % (i+1)
         else:
             for i in range(10):
-                io.toon_textures[i]="toon%02d.bmp\n" % (i+1)
+                io.toon_textures[i]="toon%02d.bmp" % (i+1)
 
         # rigid body
         rigidNameMap={}
