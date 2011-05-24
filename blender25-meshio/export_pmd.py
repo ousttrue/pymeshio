@@ -475,12 +475,23 @@ class OneSkinMesh(object):
         copyMesh, copyObj=bl.object.duplicate(obj)
         if len(copyMesh.vertices)>0:
             # apply transform
-            copyObj.scale=obj.scale
-            bpy.ops.object.transform_apply(scale=True)
-            copyObj.rotation_euler=obj.rotation_euler
-            bpy.ops.object.transform_apply(rotation=True)
-            copyObj.location=obj.location
-            bpy.ops.object.transform_apply(location=True)
+            try:
+                # svn 36722
+                copyObj.scale=obj.scale
+                bpy.ops.object.transform_apply(scale=True)
+                copyObj.rotation_euler=obj.rotation_euler
+                bpy.ops.object.transform_apply(rotation=True)
+                copyObj.location=obj.location
+                bpy.ops.object.transform_apply(location=True)
+            except AttributeError as e:
+                # 2.57b
+                copyObj.scale=obj.scale
+                bpy.ops.object.scale_apply()
+                copyObj.rotation_euler=obj.rotation_euler
+                bpy.ops.object.rotation_apply()
+                copyObj.location=obj.location
+                bpy.ops.object.location_apply()
+
             # apply modifier
             for m in [m for m in copyObj.modifiers]:
                 if m.type=='SOLIDFY':
@@ -534,7 +545,7 @@ class OneSkinMesh(object):
 
                 break
         assert(basis)
-        print(basis.name, len(baseMorph.offsets))
+        #print(basis.name, len(baseMorph.offsets))
 
         if len(baseMorph.offsets)==0:
             return
@@ -544,7 +555,7 @@ class OneSkinMesh(object):
             if b.name==BASE_SHAPE_NAME:
                 continue
 
-            print(b.name)
+            #print(b.name)
             morph=self.__getOrCreateMorph(b.name, 4)
             used=set()
             for index, src, dst in zip(

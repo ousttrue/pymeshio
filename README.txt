@@ -5,9 +5,9 @@ http://meshio.sourceforge.jp/
 
 pmdとmqoの読み書きライブラリと、それを使ったblender2.57b向けaddonです。
 
-インストール
-============
-アーカイブを解凍すると中にmeshioというディレクトリができます。
+blender-2.57addonのインストール
+===============================
+アーカイブを解凍すると中にblender25-meshioというディレクトリができます。
 これを、
 {blender2.57bのインストールディレクトリ}/2.57/scripts/addons
 にコピーしください。

@@ -594,7 +594,7 @@ class IO(object):
             io.write(struct.pack("=20s", bone.english_name))
         # english skin list
         for skin in self.morph_list:
-            print(skin.name)
+            #print(skin.name)
             if skin.name==b'base':
                 continue
             io.write(struct.pack("=20s", skin.english_name))
