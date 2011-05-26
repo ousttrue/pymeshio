@@ -7,6 +7,10 @@ from .mmd import *
 ###############################################################################
 # PMD
 ###############################################################################
+def UshortVector():
+    return []
+
+
 class Vertex(object):
     __slots__=['pos', 'normal', 'uv', 'bone0', 'bone1', 'weight0', 'edge_flag']
     def __init__(self, x=0, y=0, z=0, nx=0, ny=0, nz=0, u=0, v=0,
@@ -365,10 +369,10 @@ class IO(object):
 
     def __init__(self):
         self.version=1.0
-        self.name='default'
-        self.comment='default'
-        self.english_name='default'
-        self.english_comment='default'
+        self.name=''
+        self.comment=''
+        self.english_name=''
+        self.english_comment=''
         self.vertices=[]
         self.indices=[]
         self.materials=[]
