@@ -243,20 +243,16 @@ def __importShape(obj, l, vertex_map):
 
         for index, offset in zip(s.indices, s.pos_list):
             try:
-                vertex_index=vertex_map[base.indices[index]]
-                bl.shapekey.assign(new_shape_key, vertex_index,
-                        mesh.vertices[vertex_index].co+
-                        bl.createVector(*convert_coord(offset)))
+                base_index=base.indices[index]
             except IndexError as msg:
+                print(name)
                 print(msg)
-                print(index, len(base.indices), len(vertex_map))
-                print(len(mesh.vertices))
-                print(base.indices[index])
-                print(vertex_index)
-                break
-            except KeyError:
-                #print 'this mesh not has shape vertices'
-                break
+                print("invalid index %d/%d" % (index, len(base.indices)))
+                continue
+            vertex_index=vertex_map[base_index]
+            bl.shapekey.assign(new_shape_key, vertex_index,
+                    mesh.vertices[vertex_index].co+
+                    bl.createVector(*convert_coord(offset)))
 
     # select base shape
     bl.object.setActivateShapeKey(obj, 0)
