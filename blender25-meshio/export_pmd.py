@@ -580,7 +580,7 @@ class OneSkinMesh(object):
             for i, v in enumerate(englishmap.skinMap):
                 if v[0]==morph.name:
                     return i
-            print(morph)
+            #print(morph)
             return len(englishmap.skinMap)
         self.morphList.sort(key=getIndex)
 
@@ -797,7 +797,10 @@ class BoneBuilder(object):
         if name=='':
             return 0
         else:
-            return self.getIndex(self.__boneByName(name))
+            try:
+                return self.getIndex(self.__boneByName(name))
+            except:
+                return 0
 
     def __boneByName(self, name):
         return self.boneMap[name]
