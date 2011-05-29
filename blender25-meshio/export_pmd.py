@@ -466,15 +466,13 @@ class OneSkinMesh(object):
         if CONSTRAINT_A in obj:
             return
 
-        #if not bl.modifier.hasType(obj, 'ARMATURE'):
-        #    return
-
         bl.message("export: %s" % obj.name)
 
         # メッシュのコピーを生成してオブジェクトの行列を適用する
         copyMesh, copyObj=bl.object.duplicate(obj)
         if len(copyMesh.vertices)>0:
             # apply transform
+            """
             try:
                 # svn 36722
                 copyObj.scale=obj.scale
@@ -491,6 +489,8 @@ class OneSkinMesh(object):
                 bpy.ops.object.rotation_apply()
                 copyObj.location=obj.location
                 bpy.ops.object.location_apply()
+            """
+            copyMesh.transform(obj.matrix_world)
 
             # apply modifier
             for m in [m for m in copyObj.modifiers]:
