@@ -925,8 +925,15 @@ class PmdExporter(object):
 
             material.vertex_count=len(indices)
             material.toon_index=0
-            textures=[os.path.basename(path) 
+            def get_texture_name(texture):
+                pos=texture.replace("\\", "/").rfind("/")
+                if pos==-1:
+                    return texture
+                else:
+                    return texture[pos+1:]
+            textures=[get_texture_name(path)
                 for path in bl.material.eachEnalbeTexturePath(m)]
+            print(textures)
             if len(textures)>0:
                 material.texture='*'.join(textures)
             else:
