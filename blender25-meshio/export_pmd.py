@@ -304,6 +304,29 @@ class IKSolver(object):
         self.weight=weight
 
 
+class SSS(object):
+    def __init__(self):
+        self.use=1
+
+
+class DefaultMatrial(object):
+    def __init__(self):
+        self.name='default'
+        # diffuse
+        self.diffuse_color=[1, 1, 1]
+        self.alpha=1
+        # specular
+        self.specular_toon_size=0
+        self.specular_hardness=5
+        self.specular_color=[1, 1, 1]
+        # ambient
+        self.mirror_color=[1, 1, 1]
+        # flag
+        self.subsurface_scattering=SSS()
+        # texture
+        self.texture_slots=[]
+
+
 class OneSkinMesh(object):
     __slots__=['vertexArray', 'morphList', 'rigidbodies', 'constraints', ]
     def __init__(self):
@@ -358,7 +381,11 @@ class OneSkinMesh(object):
                 for g in v.groups:
                     setWeight(i, obj.vertex_groups[g.group].name, g.weight)
             else:
-                setWeight(i, obj.vertex_groups[0].name, 1)
+                try:
+                    setWeight(i, obj.vertex_groups[0].name, 1)
+                except:
+                    # no vertex_groups
+                    pass
 
         # 合計値が1になるようにする
         for i in xrange(len(mesh.vertices)):
@@ -375,10 +402,14 @@ class OneSkinMesh(object):
         return weightMap, secondWeightMap
 
     def __processFaces(self, obj_name, mesh, weightMap, secondWeightMap):
+        default_material=DefaultMatrial()
         # 各面の処理
         for i, face in enumerate(mesh.faces):
             faceVertexCount=bl.face.getVertexCount(face)
-            material=mesh.materials[bl.face.getMaterialIndex(face)]
+            try:
+                material=mesh.materials[bl.face.getMaterialIndex(face)]
+            except IndexError as e:
+                material=default_material
             v=[mesh.vertices[index] for index in bl.face.getVertices(face)]
             uv=bl.mesh.getFaceUV(
                     mesh, i, face, bl.face.getVertexCount(face))
@@ -804,7 +835,7 @@ class BoneBuilder(object):
 
     def __boneByName(self, name):
         return self.boneMap[name]
-                    
+
     def __getBone(self, parent, b):
         if len(b.children)==0:
             parent.type=7
@@ -918,7 +949,10 @@ class PmdExporter(object):
         vertexCount=self.oneSkinMesh.getVertexCount()
         for material_name, indices in self.oneSkinMesh.vertexArray.each():
             #print('material:', material_name)
-            m=bl.material.get(material_name)
+            try:
+                m=bl.material.get(material_name)
+            except KeyError as e:
+                m=DefaultMatrial()
             # マテリアル
             material=io.addMaterial()
             setMaterialParams(material, m)
@@ -962,7 +996,9 @@ class PmdExporter(object):
 
             # english name
             bone_english_name=toCP932(b.name)
-            assert(len(bone_english_name)<20)
+            if len(bone_english_name)>=20:
+                print(bone_english_name)
+                #assert(len(bone_english_name)<20)
             bone.english_name=bone_english_name
 
             if len(v)>=3:
