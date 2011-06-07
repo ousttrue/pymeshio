@@ -117,7 +117,7 @@ def setMaterialParams(material, m):
     # flag
     material.flag=1 if m.subsurface_scattering.use else 0
     # toon
-    material.toon_index=7
+    material.toon_index=0
 
 def toCP932(s):
     return s.encode('cp932')
@@ -958,7 +958,6 @@ class PmdExporter(object):
             setMaterialParams(material, m)
 
             material.vertex_count=len(indices)
-            material.toon_index=0
             def get_texture_name(texture):
                 pos=texture.replace("\\", "/").rfind("/")
                 if pos==-1:
