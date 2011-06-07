@@ -69,7 +69,7 @@ RIGID_LINEAR_DAMPING='rigid_linear_damping'
 RIGID_ANGULAR_DAMPING='rigid_angular_damping'
 RIGID_RESTITUTION='rigid_restitution'
 RIGID_FRICTION='rigid_friction'
-CONSTRAINT_NAME='constraint_name'
+CONSTRAINT_NAME='const_name'
 CONSTRAINT_A='const_a'
 CONSTRAINT_B='const_b'
 CONSTRAINT_POS_MIN='const_pos_min'
@@ -638,7 +638,7 @@ def __importConstraints(io):
         constraintMeshes.append(meshObject)
         mesh=bl.object.getData(meshObject)
         bl.mesh.addMaterial(mesh, material)
-        meshObject.name='c_%d' % i
+        meshObject.name='c_%03d' % i
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
         meshObject.draw_type='SOLID'
@@ -707,7 +707,7 @@ def __importRigidBodies(io):
         mesh=bl.object.getData(meshObject)
         rigidMeshes.append(meshObject)
         bl.mesh.addMaterial(mesh, material)
-        meshObject.name='r_%d' % i
+        meshObject.name='r_%03d' % i
         meshObject[RIGID_NAME]=rigid._name
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
