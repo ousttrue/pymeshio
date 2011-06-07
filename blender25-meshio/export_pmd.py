@@ -935,9 +935,10 @@ class PmdExporter(object):
             v.pos.x=pos[0]
             v.pos.y=pos[2]
             v.pos.z=pos[1]
+            # convert right-handed z-up to left-handed y-up
             v.normal.x=attribute.nx
-            v.normal.y=attribute.ny
-            v.normal.z=attribute.nz
+            v.normal.y=attribute.nz
+            v.normal.z=attribute.ny
             v.uv.x=attribute.u
             v.uv.y=1.0-attribute.v # reverse vertical
             v.bone0=self.skeleton.indexByName(b0)
