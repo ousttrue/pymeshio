@@ -54,12 +54,12 @@ import sys
 
 try:
     # C extension
-    from meshio import pmd, englishmap
+    from .meshio import pmd, englishmap
     print('use meshio C module')
 except ImportError:
     # full python
-    from pymeshio import englishmap
-    from pymeshio import pmd
+    from .pymeshio import englishmap
+    from .pymeshio import pmd
 
 
 # for 2.5
@@ -67,7 +67,7 @@ import bpy
 import mathutils
 
 # wrapper
-import bl25 as bl
+from . import bl25 as bl
 
 xrange=range
 

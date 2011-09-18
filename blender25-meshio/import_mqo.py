@@ -28,6 +28,7 @@ This script imports a mqo into Blender for editing.
 2.2 20101005: update for Blender2.54.
 2.3 20101228: update for Blender2.55.
 2.4 20110429: update for Blender2.57b.
+2.6 20110918: update for Blender2.59.
 '''
 
 bl_addon_info = {
@@ -48,17 +49,17 @@ import sys
 
 try:
     # C extension
-    from meshio import mqo
+    from .meshio import mqo
     print('use meshio C module')
 except ImportError:
     # full python
-    from pymeshio import mqo
+    from .pymeshio import mqo
 
 # for 2.5
 import bpy
 
 # wrapper
-import bl25 as bl
+from . import bl25 as bl
 
 def createMqoMaterial(m):
     material = bpy.data.materials.new(m.getName())

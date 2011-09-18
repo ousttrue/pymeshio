@@ -72,7 +72,7 @@ class MQOMaterial(object):
 import bpy
 
 # wrapper
-import bl25 as bl
+from . import bl25 as bl
 
 def materialToMqo(m):
     material=MQOMaterial(m.name, 3)
@@ -228,12 +228,15 @@ class MqoExporter(object):
             # duplicate and applyMatrix
             copyMesh, copyObj=bl.object.duplicate(obj)
             # apply transform
+            """
             copyObj.scale=obj.scale
             bpy.ops.object.scale_apply()
             copyObj.rotation_euler=obj.rotation_euler
             bpy.ops.object.rotation_apply()
             copyObj.location=obj.location
             bpy.ops.object.location_apply()
+            """
+            copyMesh.transform(obj.matrix_world)
             # apply modifier
             if self.apply_modifier:
                 # remove shape key

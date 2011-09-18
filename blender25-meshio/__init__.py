@@ -28,7 +28,7 @@ try:
     from io_utils import ImportHelper, ExportHelper
 except:
     from bpy_extras.io_utils import ImportHelper, ExportHelper
-import bl25 as bl
+from . import bl25 as bl
 
 
 '''
@@ -43,7 +43,7 @@ class ImportPmd(bpy.types.Operator, ImportHelper):
     filter_glob = StringProperty(default="*.pmd", options={'HIDDEN'})
 
     def execute(self, context):
-        import import_pmd
+        from . import import_pmd
         bl.initialize('pmd_import', context.scene)
         import_pmd._execute(**self.as_keywords(
             ignore=("filter_glob",)))
@@ -71,7 +71,7 @@ class ExportPMD(bpy.types.Operator, ExportHelper):
     use_selection = BoolProperty(name="Selection Only", description="Export selected objects only", default=False)
 
     def execute(self, context):
-        import export_pmd
+        from . import export_pmd
         bl.initialize('pmd_export', context.scene)
         export_pmd._execute(**self.as_keywords(
             ignore=("check_existing", "filter_glob", "use_selection")))
@@ -105,7 +105,7 @@ class ImportMQO(bpy.types.Operator, ImportHelper):
             soft_min=0.001, soft_max=100.0, default=0.1)
 
     def execute(self, context):
-        import import_mqo
+        from . import import_mqo
         bl.initialize('mqo_import', context.scene)
         import_mqo._execute(**self.as_keywords(
             ignore=("filter_glob",)))
@@ -145,9 +145,11 @@ class ExportMQO(bpy.types.Operator, ExportHelper):
             default=False)
 
     def execute(self, context):
-        import export_mqo
+        from . import export_mqo
+        bl.initialize('mqo_export', context.scene)
         export_mqo._execute(**self.as_keywords(
             ignore=("check_existing", "filter_glob", "use_selection")))
+        bl.finalize()
         return {'FINISHED'}
 
 def menu_mqo_export(self, context):

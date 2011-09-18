@@ -38,6 +38,7 @@ This script imports a pmd into Blender for editing.
 2.3 20101228: update for Blender2.55.
 2.4 20110429: update for Blender2.57b.
 2.5 20110522: implement RigidBody and Constraint.
+2.6 20110918: update for Blender2.59.
 """
 bl_addon_info = {
         'category': 'Import/Export',
@@ -62,21 +63,21 @@ import math
 
 try:
     # C extension
-    from meshio import pmd, englishmap
+    from .meshio import pmd, englishmap
     print('use meshio C module')
 except ImportError:
     # full python
-    from pymeshio import englishmap
+    from .pymeshio import englishmap
     #from .pymeshio import mmd as pmd
     #pmd.IO=pmd.PMDLoader
-    from pymeshio import pmd
+    from .pymeshio import pmd
 
 # for 2.5
 import bpy
 import mathutils
 
 # wrapper
-import bl25 as bl
+from . import bl25 as bl
 
 xrange=range
 

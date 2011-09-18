@@ -66,6 +66,7 @@ class Writer(object):
         self.io.close()
 
 
+progressBar=None
 class ProgressBar(object):
     '''
     progress bar wrapper
@@ -96,6 +97,7 @@ class ProgressBar(object):
 
 def progress_start(base):
     global progressBar
+    print("#### progressBar ####")
     progressBar=ProgressBar(base)
 
 def progress_finish():
