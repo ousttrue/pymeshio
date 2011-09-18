@@ -1,7 +1,8 @@
 bl_info = {
     "name": "meshio. (.pmd)(.mqo)",
+    "version": (1, 9),
     "author": "ousttrue",
-    "blender": (2, 5, 7),
+    "blender": (2, 5, 9),
     "api": 35622,
     "location": "File > Import-Export",
     "description": "Import-Export PMD/MQO meshes",
@@ -27,7 +28,7 @@ try:
     from io_utils import ImportHelper, ExportHelper
 except:
     from bpy_extras.io_utils import ImportHelper, ExportHelper
-from . import bl25 as bl
+import bl25 as bl
 
 
 '''
@@ -42,7 +43,7 @@ class ImportPmd(bpy.types.Operator, ImportHelper):
     filter_glob = StringProperty(default="*.pmd", options={'HIDDEN'})
 
     def execute(self, context):
-        from . import import_pmd
+        import import_pmd
         bl.initialize('pmd_import', context.scene)
         import_pmd._execute(**self.as_keywords(
             ignore=("filter_glob",)))
@@ -70,7 +71,7 @@ class ExportPMD(bpy.types.Operator, ExportHelper):
     use_selection = BoolProperty(name="Selection Only", description="Export selected objects only", default=False)
 
     def execute(self, context):
-        from . import export_pmd
+        import export_pmd
         bl.initialize('pmd_export', context.scene)
         export_pmd._execute(**self.as_keywords(
             ignore=("check_existing", "filter_glob", "use_selection")))
@@ -104,7 +105,7 @@ class ImportMQO(bpy.types.Operator, ImportHelper):
             soft_min=0.001, soft_max=100.0, default=0.1)
 
     def execute(self, context):
-        from . import import_mqo
+        import import_mqo
         bl.initialize('mqo_import', context.scene)
         import_mqo._execute(**self.as_keywords(
             ignore=("filter_glob",)))
@@ -144,7 +145,7 @@ class ExportMQO(bpy.types.Operator, ExportHelper):
             default=False)
 
     def execute(self, context):
-        from . import export_mqo
+        import export_mqo
         export_mqo._execute(**self.as_keywords(
             ignore=("check_existing", "filter_glob", "use_selection")))
         return {'FINISHED'}

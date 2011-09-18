@@ -52,13 +52,13 @@ try:
     print('use meshio C module')
 except ImportError:
     # full python
-    from .pymeshio import mqo
+    from pymeshio import mqo
 
 # for 2.5
 import bpy
 
 # wrapper
-from . import bl25 as bl
+import bl25 as bl
 
 def createMqoMaterial(m):
     material = bpy.data.materials.new(m.getName())

@@ -45,34 +45,6 @@ bl_addon_info = {
         'tracker_url': 'http://sourceforge.jp/ticket/newticket.php?group_id=5081',
         }
 
-MMD_SHAPE_GROUP_NAME='_MMD_SHAPE'
-MMD_MB_NAME='mb_name'
-MMD_MB_COMMENT='mb_comment'
-MMD_COMMENT='comment'
-BASE_SHAPE_NAME='Basis'
-RIGID_NAME='rigid_name'
-RIGID_SHAPE_TYPE='rigid_shape_type'
-RIGID_PROCESS_TYPE='rigid_process_type'
-RIGID_BONE_NAME='rigid_bone_name'
-#RIGID_LOCATION='rigid_loation'
-RIGID_GROUP='ribid_group'
-RIGID_INTERSECTION_GROUP='rigid_intersection_group'
-RIGID_WEIGHT='rigid_weight'
-RIGID_LINEAR_DAMPING='rigid_linear_damping'
-RIGID_ANGULAR_DAMPING='rigid_angular_damping'
-RIGID_RESTITUTION='rigid_restitution'
-RIGID_FRICTION='rigid_friction'
-CONSTRAINT_NAME='constraint_name'
-CONSTRAINT_A='const_a'
-CONSTRAINT_B='const_b'
-CONSTRAINT_POS_MIN='const_pos_min'
-CONSTRAINT_POS_MAX='const_pos_max'
-CONSTRAINT_ROT_MIN='const_rot_min'
-CONSTRAINT_ROT_MAX='const_rot_max'
-CONSTRAINT_SPRING_POS='const_spring_pos'
-CONSTRAINT_SPRING_ROT='const_spring_rot'
-TOON_TEXTURE_OBJECT='ToonTextures'
-
 
 ###############################################################################
 # import
@@ -86,8 +58,8 @@ try:
     print('use meshio C module')
 except ImportError:
     # full python
-    from .pymeshio import englishmap
-    from .pymeshio import pmd
+    from pymeshio import englishmap
+    from pymeshio import pmd
 
 
 # for 2.5
@@ -95,7 +67,7 @@ import bpy
 import mathutils
 
 # wrapper
-from . import bl25 as bl
+import bl25 as bl
 
 xrange=range
 
@@ -492,9 +464,9 @@ class OneSkinMesh(object):
                         )
 
     def __mesh(self, obj):
-        if RIGID_SHAPE_TYPE in obj:
+        if bl.RIGID_SHAPE_TYPE in obj:
             return
-        if CONSTRAINT_A in obj:
+        if bl.CONSTRAINT_A in obj:
             return
 
         bl.message("export: %s" % obj.name)
@@ -550,12 +522,12 @@ class OneSkinMesh(object):
         baseMorph=None
 
         # shape keys
-        vg=bl.object.getVertexGroup(obj, MMD_SHAPE_GROUP_NAME)
+        vg=bl.object.getVertexGroup(obj, bl.MMD_SHAPE_GROUP_NAME)
 
         # base
         used=set()
         for b in bl.object.getShapeKeys(obj):
-            if b.name==BASE_SHAPE_NAME:
+            if b.name==bl.BASE_SHAPE_NAME:
                 baseMorph=self.__getOrCreateMorph('base', 0)
                 basis=b
 
@@ -583,7 +555,7 @@ class OneSkinMesh(object):
 
         # shape keys
         for b in bl.object.getShapeKeys(obj):
-            if b.name==BASE_SHAPE_NAME:
+            if b.name==bl.BASE_SHAPE_NAME:
                 continue
 
             #print(b.name)
@@ -616,12 +588,12 @@ class OneSkinMesh(object):
         self.morphList.sort(key=getIndex)
 
     def __rigidbody(self, obj):
-        if not RIGID_SHAPE_TYPE in obj:
+        if not bl.RIGID_SHAPE_TYPE in obj:
             return
         self.rigidbodies.append(obj)
 
     def __constraint(self, obj):
-        if not CONSTRAINT_A in obj:
+        if not bl.CONSTRAINT_A in obj:
             return
         self.constraints.append(obj)
 
@@ -887,9 +859,9 @@ class PmdExporter(object):
         root=object_node_map[bl.object.getActive()]
         o=root.o
         self.englishName=o.name
-        self.englishComment=o[MMD_COMMENT] if MMD_COMMENT in o else 'blender export\n'
-        self.name=o[MMD_MB_NAME] if MMD_MB_NAME in o else 'Blenderエクスポート'
-        self.comment=o[MMD_MB_COMMENT] if MMD_MB_COMMENT in o else 'Blnderエクスポート\n'
+        self.englishComment=o[bl.MMD_COMMENT] if bl.MMD_COMMENT in o else 'blender export\n'
+        self.name=o[bl.MMD_MB_NAME] if bl.MMD_MB_NAME in o else 'Blenderエクスポート'
+        self.comment=o[bl.MMD_MB_COMMENT] if bl.MMD_MB_COMMENT in o else 'Blnderエクスポート\n'
 
         # ワンスキンメッシュを作る
         self.oneSkinMesh=OneSkinMesh()
@@ -1094,7 +1066,7 @@ class PmdExporter(object):
         toonMeshObject=None
         for o in bl.object.each():
             try:
-                if o.name.startswith(TOON_TEXTURE_OBJECT):
+                if o.name.startswith(bl.TOON_TEXTURE_OBJECT):
                     toonMeshObject=o
             except:
                 p(o.name)
@@ -1115,45 +1087,42 @@ class PmdExporter(object):
         # rigid body
         rigidNameMap={}
         for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
-            name=obj[RIGID_NAME] if RIGID_NAME in obj else obj.name
-            #print(name)
+            name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
+            print(name)
             rigidBody=pmd.RigidBody(name)
             rigidNameMap[name]=i
-            boneIndex=boneNameMap[obj[RIGID_BONE_NAME]]
+            boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
             if boneIndex==0:
                 boneIndex=0xFFFF
                 bone=self.skeleton.bones[0]
             else:
                 bone=self.skeleton.bones[boneIndex]
             rigidBody.boneIndex=boneIndex
-            #rigidBody.position.x=obj[RIGID_LOCATION][0]
-            #rigidBody.position.y=obj[RIGID_LOCATION][1]
-            #rigidBody.position.z=obj[RIGID_LOCATION][2]
             rigidBody.position.x=obj.location.x-bone.pos[0]
             rigidBody.position.y=obj.location.z-bone.pos[2]
             rigidBody.position.z=obj.location.y-bone.pos[1]
             rigidBody.rotation.x=-obj.rotation_euler[0]
             rigidBody.rotation.y=-obj.rotation_euler[2]
             rigidBody.rotation.z=-obj.rotation_euler[1]
-            rigidBody.processType=obj[RIGID_PROCESS_TYPE]
-            rigidBody.group=obj[RIGID_GROUP]
-            rigidBody.target=obj[RIGID_INTERSECTION_GROUP]
-            rigidBody.weight=obj[RIGID_WEIGHT]
-            rigidBody.linearDamping=obj[RIGID_LINEAR_DAMPING]
-            rigidBody.angularDamping=obj[RIGID_ANGULAR_DAMPING]
-            rigidBody.restitution=obj[RIGID_RESTITUTION]
-            rigidBody.friction=obj[RIGID_FRICTION]
-            if obj[RIGID_SHAPE_TYPE]==0:
+            rigidBody.processType=obj[bl.RIGID_PROCESS_TYPE]
+            rigidBody.group=obj[bl.RIGID_GROUP]
+            rigidBody.target=obj[bl.RIGID_INTERSECTION_GROUP]
+            rigidBody.weight=obj[bl.RIGID_WEIGHT]
+            rigidBody.linearDamping=obj[bl.RIGID_LINEAR_DAMPING]
+            rigidBody.angularDamping=obj[bl.RIGID_ANGULAR_DAMPING]
+            rigidBody.restitution=obj[bl.RIGID_RESTITUTION]
+            rigidBody.friction=obj[bl.RIGID_FRICTION]
+            if obj[bl.RIGID_SHAPE_TYPE]==0:
                 rigidBody.shapeType=pmd.SHAPE_SPHERE
                 rigidBody.w=obj.scale[0]
                 rigidBody.d=0
                 rigidBody.h=0
-            elif obj[RIGID_SHAPE_TYPE]==1:
+            elif obj[bl.RIGID_SHAPE_TYPE]==1:
                 rigidBody.shapeType=pmd.SHAPE_BOX
                 rigidBody.w=obj.scale[0]
                 rigidBody.d=obj.scale[1]
                 rigidBody.h=obj.scale[2]
-            elif obj[RIGID_SHAPE_TYPE]==2:
+            elif obj[bl.RIGID_SHAPE_TYPE]==2:
                 rigidBody.shapeType=pmd.SHAPE_CAPSULE
                 rigidBody.w=obj.scale[0]
                 rigidBody.h=obj.scale[2]
@@ -1162,33 +1131,34 @@ class PmdExporter(object):
 
         # constraint
         for obj in self.oneSkinMesh.constraints:
-            constraint=pmd.Constraint(obj[CONSTRAINT_NAME])
-            constraint.rigidA=rigidNameMap[obj[CONSTRAINT_A]]
-            constraint.rigidB=rigidNameMap[obj[CONSTRAINT_B]]
+            print(obj)
+            constraint=pmd.Constraint(obj[bl.CONSTRAINT_NAME])
+            constraint.rigidA=rigidNameMap[obj[bl.CONSTRAINT_A]]
+            constraint.rigidB=rigidNameMap[obj[bl.CONSTRAINT_B]]
             constraint.pos.x=obj.location[0]
             constraint.pos.y=obj.location[2]
             constraint.pos.z=obj.location[1]
             constraint.rot.x=-obj.rotation_euler[0]
             constraint.rot.y=-obj.rotation_euler[2]
             constraint.rot.z=-obj.rotation_euler[1]
-            constraint.constraintPosMin.x=obj[CONSTRAINT_POS_MIN][0]
-            constraint.constraintPosMin.y=obj[CONSTRAINT_POS_MIN][1]
-            constraint.constraintPosMin.z=obj[CONSTRAINT_POS_MIN][2]
-            constraint.constraintPosMax.x=obj[CONSTRAINT_POS_MAX][0]
-            constraint.constraintPosMax.y=obj[CONSTRAINT_POS_MAX][1]
-            constraint.constraintPosMax.z=obj[CONSTRAINT_POS_MAX][2]
-            constraint.constraintRotMin.x=obj[CONSTRAINT_ROT_MIN][0]
-            constraint.constraintRotMin.y=obj[CONSTRAINT_ROT_MIN][1]
-            constraint.constraintRotMin.z=obj[CONSTRAINT_ROT_MIN][2]
-            constraint.constraintRotMax.x=obj[CONSTRAINT_ROT_MAX][0]
-            constraint.constraintRotMax.y=obj[CONSTRAINT_ROT_MAX][1]
-            constraint.constraintRotMax.z=obj[CONSTRAINT_ROT_MAX][2]
-            constraint.springPos.x=obj[CONSTRAINT_SPRING_POS][0]
-            constraint.springPos.y=obj[CONSTRAINT_SPRING_POS][1]
-            constraint.springPos.z=obj[CONSTRAINT_SPRING_POS][2]
-            constraint.springRot.x=obj[CONSTRAINT_SPRING_ROT][0]
-            constraint.springRot.y=obj[CONSTRAINT_SPRING_ROT][1]
-            constraint.springRot.z=obj[CONSTRAINT_SPRING_ROT][2]
+            constraint.constraintPosMin.x=obj[bl.CONSTRAINT_POS_MIN][0]
+            constraint.constraintPosMin.y=obj[bl.CONSTRAINT_POS_MIN][1]
+            constraint.constraintPosMin.z=obj[bl.CONSTRAINT_POS_MIN][2]
+            constraint.constraintPosMax.x=obj[bl.CONSTRAINT_POS_MAX][0]
+            constraint.constraintPosMax.y=obj[bl.CONSTRAINT_POS_MAX][1]
+            constraint.constraintPosMax.z=obj[bl.CONSTRAINT_POS_MAX][2]
+            constraint.constraintRotMin.x=obj[bl.CONSTRAINT_ROT_MIN][0]
+            constraint.constraintRotMin.y=obj[bl.CONSTRAINT_ROT_MIN][1]
+            constraint.constraintRotMin.z=obj[bl.CONSTRAINT_ROT_MIN][2]
+            constraint.constraintRotMax.x=obj[bl.CONSTRAINT_ROT_MAX][0]
+            constraint.constraintRotMax.y=obj[bl.CONSTRAINT_ROT_MAX][1]
+            constraint.constraintRotMax.z=obj[bl.CONSTRAINT_ROT_MAX][2]
+            constraint.springPos.x=obj[bl.CONSTRAINT_SPRING_POS][0]
+            constraint.springPos.y=obj[bl.CONSTRAINT_SPRING_POS][1]
+            constraint.springPos.z=obj[bl.CONSTRAINT_SPRING_POS][2]
+            constraint.springRot.x=obj[bl.CONSTRAINT_SPRING_ROT][0]
+            constraint.springRot.y=obj[bl.CONSTRAINT_SPRING_ROT][1]
+            constraint.springRot.z=obj[bl.CONSTRAINT_SPRING_ROT][2]
             io.constraints.append(constraint)
 
         # 書き込み

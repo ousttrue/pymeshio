@@ -5,6 +5,10 @@ http://meshio.sourceforge.jp/
 
 pmdとmqoの読み書きライブラリと、それを使ったblender2.57b向けaddonです。
 
+package方法
+===========
+$ python setup.py sdist
+
 blender-2.57addonのインストール
 ===============================
 アーカイブを解凍すると中にblender25-meshioというディレクトリができます。
@@ -14,10 +18,19 @@ blender-2.57addonのインストール
 
 次にblenderを起動して、(File)-(User Preferences)をオープン。
 (Add-Ons)タブを選択。
+
+[Install Add-On...]をクリック
+{blender2.57bのインストールディレクトリ}/2.57/scripts/addons/pymeshio/__init__.pyを選択
+
 Import-Exportの中から"meshio. (.pmd)(.mqo)"を探して右のチェックボックスを有効にします。これでaddonが有効になり、(File)メニューの(Import)と(Export)それぞれにpmdとmqoが現れます。
 
 更新履歴
 ========
+20110918 1.9.0
+--------------
+blender2.59に対応(from . importがよろしくない)
+剛体修正
+
 20110607 1.8.6
 --------------
 pmd exportの法線を修正。
@@ -28,7 +41,7 @@ cubeなどの単純形状をエクスポートできるように修正。
 
 20110523 1.8.4
 --------------
-2.57bより新しくしてしまったのを修正。
+blender2.57bより新しくしてしまったのを修正。
 
 20110523 1.8.3
 --------------

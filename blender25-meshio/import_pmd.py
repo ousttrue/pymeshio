@@ -52,34 +52,6 @@ bl_addon_info = {
         'tracker_url': 'http://sourceforge.jp/ticket/newticket.php?group_id=5081',
         }
 
-MMD_SHAPE_GROUP_NAME='_MMD_SHAPE'
-MMD_MB_NAME='mb_name'
-MMD_MB_COMMENT='mb_comment'
-MMD_COMMENT='comment'
-BASE_SHAPE_NAME='Basis'
-RIGID_NAME='rigid_name'
-RIGID_SHAPE_TYPE='rigid_shape_type'
-RIGID_PROCESS_TYPE='rigid_process_type'
-RIGID_BONE_NAME='rigid_bone_name'
-#RIGID_LOCATION='rigid_loation'
-RIGID_GROUP='ribid_group'
-RIGID_INTERSECTION_GROUP='rigid_intersection_group'
-RIGID_WEIGHT='rigid_weight'
-RIGID_LINEAR_DAMPING='rigid_linear_damping'
-RIGID_ANGULAR_DAMPING='rigid_angular_damping'
-RIGID_RESTITUTION='rigid_restitution'
-RIGID_FRICTION='rigid_friction'
-CONSTRAINT_NAME='const_name'
-CONSTRAINT_A='const_a'
-CONSTRAINT_B='const_b'
-CONSTRAINT_POS_MIN='const_pos_min'
-CONSTRAINT_POS_MAX='const_pos_max'
-CONSTRAINT_ROT_MIN='const_rot_min'
-CONSTRAINT_ROT_MAX='const_rot_max'
-CONSTRAINT_SPRING_POS='const_spring_pos'
-CONSTRAINT_SPRING_ROT='const_spring_rot'
-TOON_TEXTURE_OBJECT='ToonTextures'
-
 
 ###############################################################################
 # import
@@ -94,17 +66,17 @@ try:
     print('use meshio C module')
 except ImportError:
     # full python
-    from .pymeshio import englishmap
+    from pymeshio import englishmap
     #from .pymeshio import mmd as pmd
     #pmd.IO=pmd.PMDLoader
-    from .pymeshio import pmd
+    from pymeshio import pmd
 
 # for 2.5
 import bpy
 import mathutils
 
 # wrapper
-from . import bl25 as bl
+import bl25 as bl
 
 xrange=range
 
@@ -187,8 +159,8 @@ def get_group_name(g):
 
 
 def __importToonTextures(io, tex_dir):
-    mesh, meshObject=bl.mesh.create(TOON_TEXTURE_OBJECT)
-    material=bl.material.create(TOON_TEXTURE_OBJECT)
+    mesh, meshObject=bl.mesh.create(bl.TOON_TEXTURE_OBJECT)
+    material=bl.material.create(bl.TOON_TEXTURE_OBJECT)
     bl.mesh.addMaterial(mesh, material)
     for toon in (io.toon_textures._toon_textures[i] for i in range(10)):
         path=os.path.join(tex_dir, toon)
@@ -211,19 +183,19 @@ def __importShape(obj, l, vertex_map):
             base=s
 
             # create vertex group
-            bl.object.addVertexGroup(obj, MMD_SHAPE_GROUP_NAME)
+            bl.object.addVertexGroup(obj, bl.MMD_SHAPE_GROUP_NAME)
             hasShape=False
             for i in s.indices:
                 if i in vertex_map:
                     hasShape=True
                     bl.object.assignVertexGroup(
-                            obj, MMD_SHAPE_GROUP_NAME, vertex_map[i], 0)
+                            obj, bl.MMD_SHAPE_GROUP_NAME, vertex_map[i], 0)
             if not hasShape:
                 return
     assert(base)
 
     # create base key
-    baseShapeBlock=bl.object.addShapeKey(obj, BASE_SHAPE_NAME)
+    baseShapeBlock=bl.object.addShapeKey(obj, bl.BASE_SHAPE_NAME)
     # mesh
     mesh=bl.object.getData(obj)
     mesh.update()
@@ -645,15 +617,15 @@ def __importConstraints(io):
         rot=c.rot
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
-        meshObject[CONSTRAINT_NAME]=c._name
-        meshObject[CONSTRAINT_A]=io.rigidbodies[c.rigidA]._name
-        meshObject[CONSTRAINT_B]=io.rigidbodies[c.rigidB]._name
-        meshObject[CONSTRAINT_POS_MIN]=VtoV(c.constraintPosMin)
-        meshObject[CONSTRAINT_POS_MAX]=VtoV(c.constraintPosMax)
-        meshObject[CONSTRAINT_ROT_MIN]=VtoV(c.constraintRotMin)
-        meshObject[CONSTRAINT_ROT_MAX]=VtoV(c.constraintRotMax)
-        meshObject[CONSTRAINT_SPRING_POS]=VtoV(c.springPos)
-        meshObject[CONSTRAINT_SPRING_ROT]=VtoV(c.springRot)
+        meshObject[bl.CONSTRAINT_NAME]=c._name
+        meshObject[bl.CONSTRAINT_A]=io.rigidbodies[c.rigidA]._name
+        meshObject[bl.CONSTRAINT_B]=io.rigidbodies[c.rigidB]._name
+        meshObject[bl.CONSTRAINT_POS_MIN]=VtoV(c.constraintPosMin)
+        meshObject[bl.CONSTRAINT_POS_MAX]=VtoV(c.constraintPosMax)
+        meshObject[bl.CONSTRAINT_ROT_MIN]=VtoV(c.constraintRotMin)
+        meshObject[bl.CONSTRAINT_ROT_MAX]=VtoV(c.constraintRotMax)
+        meshObject[bl.CONSTRAINT_SPRING_POS]=VtoV(c.springPos)
+        meshObject[bl.CONSTRAINT_SPRING_ROT]=VtoV(c.springRot)
 
     for meshObject in reversed(constraintMeshes):
         bl.object.makeParent(container, meshObject)
@@ -708,7 +680,7 @@ def __importRigidBodies(io):
         rigidMeshes.append(meshObject)
         bl.mesh.addMaterial(mesh, material)
         meshObject.name='r_%03d' % i
-        meshObject[RIGID_NAME]=rigid._name
+        meshObject[bl.RIGID_NAME]=rigid._name
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
         meshObject.draw_type='WIRE'
@@ -716,21 +688,21 @@ def __importRigidBodies(io):
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
         # custom properties
-        meshObject[RIGID_SHAPE_TYPE]=rigid.shapeType
-        meshObject[RIGID_PROCESS_TYPE]=rigid.processType
+        meshObject[bl.RIGID_SHAPE_TYPE]=rigid.shapeType
+        meshObject[bl.RIGID_PROCESS_TYPE]=rigid.processType
 
         bone_name = englishmap.getEnglishBoneName(bone._name)
         if not bone_name:
             bone_name=bone._name
-        meshObject[RIGID_BONE_NAME]=bone_name
+        meshObject[bl.RIGID_BONE_NAME]=bone_name
 
-        meshObject[RIGID_GROUP]=rigid.group
-        meshObject[RIGID_INTERSECTION_GROUP]=rigid.target
-        meshObject[RIGID_WEIGHT]=rigid.weight
-        meshObject[RIGID_LINEAR_DAMPING]=rigid.linearDamping
-        meshObject[RIGID_ANGULAR_DAMPING]=rigid.angularDamping
-        meshObject[RIGID_RESTITUTION]=rigid.restitution
-        meshObject[RIGID_FRICTION]=rigid.friction
+        meshObject[bl.RIGID_GROUP]=rigid.group
+        meshObject[bl.RIGID_INTERSECTION_GROUP]=rigid.target
+        meshObject[bl.RIGID_WEIGHT]=rigid.weight
+        meshObject[bl.RIGID_LINEAR_DAMPING]=rigid.linearDamping
+        meshObject[bl.RIGID_ANGULAR_DAMPING]=rigid.angularDamping
+        meshObject[bl.RIGID_RESTITUTION]=rigid.restitution
+        meshObject[bl.RIGID_FRICTION]=rigid.friction
 
     for meshObject in reversed(rigidMeshes):
         bl.object.makeParent(container, meshObject)
@@ -757,9 +729,9 @@ def _execute(filepath=""):
     if len(model_name)==0:
         model_name=io._name
     root=bl.object.createEmpty(model_name)
-    root[MMD_MB_NAME]=io._name
-    root[MMD_MB_COMMENT]=io._comment
-    root[MMD_COMMENT]=io._english_comment
+    root[bl.MMD_MB_NAME]=io._name
+    root[bl.MMD_MB_COMMENT]=io._comment
+    root[bl.MMD_COMMENT]=io._english_comment
 
     # toon textures
     tex_dir=os.path.dirname(filepath)
