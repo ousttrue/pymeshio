@@ -6,7 +6,12 @@ setup(
         name='pymeshio',
         version='1.9.0',
         description='pure python 3d model io library',
-        keywords=[],
+        classfiers=[
+            'Programming Language :: Python :: 3',
+            'License :: OSI Approved :: zlib/libpng License',
+            'Topic :: Multimedia :: Graphics :: 3D Modeling',
+            ],
+        keywords=['mqo', 'pmd', 'vmd', 'vpd', 'mmd', 'blender'],
         author='ousttrue',
         author_email='ousttrue@gmail.com',
         url='http://meshio.sourceforge.jp/',
