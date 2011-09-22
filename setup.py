@@ -1,16 +1,48 @@
-#from distutils.core import setup
-import sys
 from setuptools import setup
+import sys
+
+name='pymeshio'
+version='1.9.1'
+short_description='pure python 3d model io library'
+long_description='''\
+`pymeshio` is a package for 3d model io.
+
+Requirements
+------------
+* Python 3
+
+Features
+--------
+* read/write Metasequioa mqo format
+* read/write MikuMikuDance pmd format
+* read/write MikuMikuDance vmd format
+* read/write MikuMikuDance vpd format
+
+Setup
+-----
+::
+
+   $ easy_install pymeshio
+
+History
+-------
+1.9.1 (2011-9-23)
+~~~~~~~~~~~~~~~~~~
+* register pypi
+'''
+
+classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: zlib/libpng License',
+        'Topic :: Multimedia :: Graphics :: 3D Modeling',
+        ]
 
 setup(
-        name='pymeshio',
-        version='1.9.0',
-        description='pure python 3d model io library',
-        classfiers=[
-            'Programming Language :: Python :: 3',
-            'License :: OSI Approved :: zlib/libpng License',
-            'Topic :: Multimedia :: Graphics :: 3D Modeling',
-            ],
+        name=name,
+        version=version,
+        description=short_description,
+        long_description=long_description,
+        classifiers=classifiers,
         keywords=['mqo', 'pmd', 'vmd', 'vpd', 'mmd', 'blender'],
         author='ousttrue',
         author_email='ousttrue@gmail.com',
