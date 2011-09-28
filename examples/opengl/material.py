@@ -2,7 +2,7 @@
 # coding: utf-8
 
 from OpenGL.GL import *
-import texture
+from . import texture
 
 '''
 Material

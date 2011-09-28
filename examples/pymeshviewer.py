@@ -26,7 +26,7 @@ class Frame(tkinter.Frame):
         menu_file.add_command(label='Open', under=0, command=self.onOpen)
 
         # setup opengl widget
-        self.glworld=opengl.BaseController(opengl.rokuro.RokuroView(25))
+        self.glworld=opengl.BaseController(opengl.rokuro.RokuroView(500))
         self.glwidget=togl.Widget(self, self.glworld, width=width, height=height)
         self.glwidget.pack(fill=tkinter.BOTH, expand=True)
 

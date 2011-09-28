@@ -4,8 +4,8 @@
 import time
 import os
 import pymeshio.mqo
-import material
-import vertexarraymap
+from opengl import material
+from opengl import vertexarraymap
 
 
 def build(path):

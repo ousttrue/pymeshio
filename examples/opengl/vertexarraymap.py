@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import numpy
-import vertexarray
+from . import vertexarray
 
 
 '''
