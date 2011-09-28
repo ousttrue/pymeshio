@@ -9,12 +9,19 @@ from .baseview import *
 DELEGATE_PATTERN=re.compile('^on[A-Z]')
 
 class BaseController(object):
-    def __init__(self, view, root):
-        self.view=view
-        self.root=root
+    def __init__(self, view):
         self.isInitialized=False
-        self.delegate(view)
+        self.setView(view)
+        self.root=None
+
+    def setRoot(self, root):
+        self.root=root
         self.delegate(root)
+        self.isInitialized=False
+
+    def setView(self, view):
+        self.view=view
+        self.delegate(view)
 
     def delegate(self, to):
         for name in dir(to):  
@@ -56,6 +63,7 @@ class BaseController(object):
         glLoadIdentity()
         # OpenGL•`‰æ
         self.view.updateView()
-        self.root.draw()
+        if self.root:
+            self.root.draw()
         glFlush()
 

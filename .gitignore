@@ -2,3 +2,4 @@ Makefile
 build
 dist
 pymeshio.egg-info
+*.pyc

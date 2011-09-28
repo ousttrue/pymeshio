@@ -2,12 +2,13 @@
 # coding: utf-8
 
 import sys
+import os
 import tkinter
 import tkinter.filedialog
 import togl
 import opengl
 import opengl.rokuro
-import triangle
+import mqobuilder
 
 
 class Frame(tkinter.Frame):
@@ -20,18 +21,18 @@ class Frame(tkinter.Frame):
         self.master.config(menu=menu_bar)
 
         menu_file = tkinter.Menu(menu_bar, tearoff=False)
-        menu_bar.add_cascade(label='FILE', menu=menu_file, underline=0)
+        menu_bar.add_cascade(label='File', menu=menu_file, underline=0)
 
         menu_file.add_command(label='Open', under=0, command=self.onOpen)
 
         # setup opengl widget
-        self.glworld=opengl.BaseController(opengl.rokuro.RokuroView(25), triangle.Triangle(5))
-        glwidget=togl.Widget(self, self.glworld, width=width, height=height)
-        glwidget.pack(fill=tkinter.BOTH, expand=True)
+        self.glworld=opengl.BaseController(opengl.rokuro.RokuroView(25))
+        self.glwidget=togl.Widget(self, self.glworld, width=width, height=height)
+        self.glwidget.pack(fill=tkinter.BOTH, expand=True)
 
         # event binding
         self.bind('<Key>', self.onKeyDown)
-        self.bind('<MouseWheel>', lambda e: self.glworld.onWheel(-e.delta) and glwidget.onDraw())
+        self.bind('<MouseWheel>', lambda e: self.glworld.onWheel(-e.delta) and self.glwidget.onDraw())
 
     def onOpen(self):
         filename=tkinter.filedialog.askopenfilename(
@@ -39,7 +40,24 @@ class Frame(tkinter.Frame):
                     ('poloygon model files', '*.mqo;*.pmd'),
                     ], 
                 initialdir=self.current)
-        print('open: %s' % filename)
+        if filename.lower().endswith(".mqo"):
+            self.loadMqo(filename)
+        elif filename.lower().endswith(".pmd"):
+            self.loadPmd(filename)
+        self.current=os.path.dirname(filename)
+
+    def loadMqo(self, path):
+        # load scenee
+        model=mqobuilder.build(path)
+        if not model:
+            print('fail to load %s' % path)
+            return
+        self.glworld.setRoot(model)
+        print('loadMqo %s' % path)
+        self.glwidget.onDraw()
+
+    def loadPmd(self, path):
+        print('loadPmd %s' % path)
 
     def onKeyDown(self, event):
         key=event.keycode
