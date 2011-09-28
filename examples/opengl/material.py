@@ -38,12 +38,13 @@ Material
 * テクスチャー
 '''
 class MQOMaterial(object):
-    def __init__(self, rgba):
-        self.rgba=rgba
+    def __init__(self):
+        self.rgba=(0, 0, 0, 0)
+        self.vcol=False
         self.texture=None
 
     def begin(self):
-        glColor4f(self.rgba.r, self.rgba.g, self.rgba.b, self.rgba.a)
+        glColor4f(*self.rgba)
         if self.texture:
             self.texture.begin()
 

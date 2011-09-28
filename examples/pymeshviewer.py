@@ -9,6 +9,7 @@ import togl
 import opengl
 import opengl.rokuro
 import mqobuilder
+import pmdbuilder
 
 
 class Frame(tkinter.Frame):
@@ -40,6 +41,9 @@ class Frame(tkinter.Frame):
                     ('poloygon model files', '*.mqo;*.pmd'),
                     ], 
                 initialdir=self.current)
+        self.load(path)
+
+    def load(self, path):
         model=self.loadModel(path)
         if not model:
             print('fail to load %s' % path)
@@ -70,5 +74,7 @@ if __name__ == '__main__':
     f = Frame(width=600, height=600)
     f.pack(fill=tkinter.BOTH, expand=True)
     f.focus_set()
+    if len(sys.argv)>1:
+        f.load(sys.argv[1])
     f.mainloop()
 
