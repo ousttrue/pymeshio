@@ -35,29 +35,24 @@ class Frame(tkinter.Frame):
         self.bind('<MouseWheel>', lambda e: self.glworld.onWheel(-e.delta) and self.glwidget.onDraw())
 
     def onOpen(self):
-        filename=tkinter.filedialog.askopenfilename(
+        path=tkinter.filedialog.askopenfilename(
                 filetypes=[
                     ('poloygon model files', '*.mqo;*.pmd'),
                     ], 
                 initialdir=self.current)
-        if filename.lower().endswith(".mqo"):
-            self.loadMqo(filename)
-        elif filename.lower().endswith(".pmd"):
-            self.loadPmd(filename)
-        self.current=os.path.dirname(filename)
-
-    def loadMqo(self, path):
-        # load scenee
-        model=mqobuilder.build(path)
+        model=self.loadModel(path)
         if not model:
             print('fail to load %s' % path)
             return
         self.glworld.setRoot(model)
-        print('loadMqo %s' % path)
+        print('load %s' % path)
         self.glwidget.onDraw()
 
-    def loadPmd(self, path):
-        print('loadPmd %s' % path)
+    def loadModel(self, path):
+        if path.lower().endswith(".mqo"):
+            return mqobuilder.build(path)
+        elif path.lower().endswith(".pmd"):
+            return pmdbuilder.build(path)
 
     def onKeyDown(self, event):
         key=event.keycode
