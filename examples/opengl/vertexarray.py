@@ -84,7 +84,7 @@ class IndexedVertexArray(object):
         self.materials=[]
         self.indicesMap={}
 
-    def addVertex(self, pos, normal, color, uv, b0, b1, w0):
+    def addVertex(self, pos, normal, uv, color, b0, b1, w0):
         self.vertices+=pos
         self.normal+=normal
         self.colors+=color
@@ -103,13 +103,19 @@ class IndexedVertexArray(object):
         # 位置属性
         glEnableClientState(GL_VERTEX_ARRAY)
         glVertexPointer(4, GL_FLOAT, 0, self.vertices)
+        # UV属性
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+        glTexCoordPointer(2, GL_FLOAT, 0, self.uvlist)
         # マテリアル毎の描画
         for m in self.materials:
+            m.begin()
             # 順序維持
             indices=self.indicesMap[m]
             # indexによる描画
             glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, indices)
+            m.end()
         # 後始末
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
         glDisableClientState(GL_VERTEX_ARRAY)
 
     def optimize(self):

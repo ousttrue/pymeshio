@@ -43,6 +43,12 @@ class MQOMaterial(object):
         self.vcol=False
         self.texture=None
 
+    def __enter__(self):
+        self.begin()
+
+    def __exit__(self):
+        self.end()
+
     def begin(self):
         glColor4f(*self.rgba)
         if self.texture:
@@ -61,8 +67,9 @@ class MQOMaterial(object):
             self.texture.end()
 
     def onInitialize(self):
-        if self.texture:
-            self.texture.onInitialize()
+        pass
+        #if self.texture:
+        #    self.texture.onInitialize()
 
     @staticmethod
     def create(src, basedir):

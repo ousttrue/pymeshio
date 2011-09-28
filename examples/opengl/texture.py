@@ -10,33 +10,22 @@ class Texture(object):
     def __init__(self, path):
         self.path=path
         self.image=None
+        self.id=0
+        self.isInitialized=False
 
     def onInitialize(self):
-        if not self.image:
-            self.loadImage()
-
-        assert(self.image)
-        if self.createTexture():
-            return True
-
-    def loadImage(self):
-        self.image=Image.open(self.path)
-        if self.image:
-            print("load image:", self.path)
-            return True
-        else:
-            print("failt to load image:", self.path)
-            return False
+        self.isInitialized=False
 
     def createTexture(self):
-        self.texture=glGenTextures(1)
-        if self.texture==0:
+        self.id=glGenTextures(1)
+        if self.id==0:
             print("fail to glGenTextures")
             return False
+        print("createTexture: %d" % self.id)
 
         channels=len(self.image.getbands())
         w, h=self.image.size
-        glBindTexture(GL_TEXTURE_2D, self.texture)
+        glBindTexture(GL_TEXTURE_2D, self.id)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
@@ -53,10 +42,28 @@ class Texture(object):
                     0, GL_RGB, GL_UNSIGNED_BYTE, self.image.tostring())
 
     def begin(self):
-        glEnable(GL_TEXTURE_2D)
-        glBindTexture(GL_TEXTURE_2D, self.texture)
+        if not self.isInitialized:
+            try:
+                # load image
+                if not self.image:
+                    self.image=Image.open(self.path)
+                    if self.image:
+                        print("load image:", self.path)
+                    else:
+                        print("failt to load image:", self.path)
+                        return
+                # createTexture
+                if self.image:
+                    self.createTexture()
+            except Exception as e:
+                print(e)
+                return
+            finally:
+                self.isInitialized=True
+        if self.id!=0:
+            glEnable(GL_TEXTURE_2D)
+            glBindTexture(GL_TEXTURE_2D, self.id)
 
     def end(self):
         glDisable(GL_TEXTURE_2D)
-
 

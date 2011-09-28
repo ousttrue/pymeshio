@@ -44,8 +44,9 @@ def build(path):
                 m.diffuse[1], 
                 m.diffuse[2], 
                 m.diffuse[3])
-        if m.texture!="":
-            texturepath="%s/%s" % (basedir, m.texture)
+        texturefile=m.texture.decode('cp932')
+        if texturefile!="":
+            texturepath=os.path.join(basedir, texturefile)
             if not texturepath in textureMap:
                 texture=opengl.texture.Texture(texturepath)
                 textureMap[texturepath]=texture
