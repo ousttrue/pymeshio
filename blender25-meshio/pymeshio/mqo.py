@@ -1,24 +1,8 @@
-#!BPY
+# coding: utf-8
 """ 
-Name: 'Metasequoia(.mqo)...'
-Blender: 245
-Group: 'Import'
-Tooltip: 'Import from Metasequoia file format (.mqo)'
+MQOÇÃì«Ç›çûÇ›
+http://www.metaseq.net/metaseq/format.html
 """
-__author__= 'ousttrue'
-__url__ = ["http://gunload.web.fc2.com/blender/"]
-__version__= '0.4 2009/11/25'
-__bpydoc__= '''\
-
-MQO Importer
-
-This script imports a mqo file.
-
-0.2 20080123: update.
-0.3 20091125: modify for linux.
-0.4 20100310: rewrite.
-0.5 20100311: create armature from mikoto bone.
-'''
 
 import os
 import sys
@@ -26,6 +10,7 @@ import math
 
 
 class RGBA(object):
+    """mqo color"""
     __slots__=['r', 'g', 'b', 'a']
     def __init__(self, r=0, g=0, b=0, a=0):
         self.r=r
@@ -33,7 +18,21 @@ class RGBA(object):
         self.b=b
         self.a=a
 
+    def __getitem__(self, key):
+        if key==0:
+            return self.r
+        elif key==1:
+            return self.g
+        elif key==2:
+            return self.b
+        elif key==3:
+            return self.a
+        else:
+            assert(False)
+
+
 class Vector3(object):
+    """3D coordinate"""
     __slots__=['x', 'y', 'z']
     def __init__(self, x=0, y=0, z=0):
         self.x=x
@@ -64,10 +63,12 @@ class Vector3(object):
 
     @staticmethod
     def dot(lhs, rhs):
+        """dot(inner) product"""
         return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z
 
     @staticmethod
     def cross(lhs, rhs):
+        """cross(outer) product"""
         return Vector3(
                 lhs.y*rhs.z - rhs.y*lhs.z,
                 lhs.z*rhs.x - rhs.z*lhs.x,
@@ -76,6 +77,7 @@ class Vector3(object):
 
 
 class Vector2(object):
+    """2d coordinate"""
     __slots__=['x', 'y']
     def __init__(self, x=0, y=0):
         self.x=x
@@ -89,13 +91,27 @@ class Vector2(object):
 
     @staticmethod
     def cross(lhs, rhs):
+        """cross(outer) product"""
         return lhs.x*rhs.y-lhs.y*rhs.x
 
 
-###############################################################################
-# MQO loader
-###############################################################################
+"""
+MQO loader
+"""
 class Material(object):
+    """mqo material
+
+    Attributes:
+        name: cp932
+        shader: 
+        color: rgba
+        diffuse:
+        ambient:
+        emit:
+        specular:
+        power:
+        tex: cp932 windows file path
+    """
     __slots__=[
             "name", "shader", "color", "diffuse", 
             "ambient", "emit", "specular", "power",
@@ -159,7 +175,29 @@ class Material(object):
 
 
 class Obj(object):
-    __slots__=["name", "depth", "folding", 
+    """mqo object
+
+    Attributes:
+        name: cp932
+        depth: object hierarchy 
+        folding: 
+        scale:
+        rotation:
+        translation:
+        visible:
+        locking:
+        shading:
+        facet: smoothing threshold
+        color:
+        color_type:
+        mirror: mirroring
+        mirror_axis:
+        vertices:
+        faces:
+        edges:
+        smoothing:
+    """
+     __slots__=["name", "depth", "folding", 
             "scale", "rotation", "translation",
             "visible", "locking", "shading", "facet",
             "color", "color_type", "mirror", "mirror_axis",
@@ -202,6 +240,15 @@ class Obj(object):
 
 
 class Face(object):
+    """mqo face
+
+    Attributes:
+        index_count: 2 or 3 or 4
+        indices: index x index_count
+        material_index:
+        col: vertex_color x index_count
+        uv: Vector2 x index_count
+    """
     __slots__=[
             "index_count",
             "indices", "material_index", "col", "uv",
@@ -271,6 +318,8 @@ def withio(method):
 
 
 class IO(object):
+    """mqo loader
+    """
     __slots__=[
             "has_mikoto",
             "eof", "io", "lines",
@@ -380,7 +429,7 @@ class IO(object):
                 else:
                     print(
                             "%s#readObject" % name,
-                            "unknown key: %s" % name
+                            "unknown key: %s" % key
                             )
 
         self.printError("readObject", "invalid eof")
