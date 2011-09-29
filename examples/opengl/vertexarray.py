@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from OpenGL.GL import *
+import numpy
 
 '''
 頂点配列
@@ -119,7 +120,6 @@ class IndexedVertexArray(object):
         glDisableClientState(GL_VERTEX_ARRAY)
 
     def optimize(self):
-        pass
-        #for v in self.vertexArrayMap.values():
-        #    v.vertices=numpy.array(v.vertices, 'f') 
+        self.vertices=numpy.array(self.vertices, 'f') 
+        self.uvlist=numpy.array(self.uvlist, 'f') 
 
