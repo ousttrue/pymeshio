@@ -1,6 +1,6 @@
 # coding: utf-8
 """ 
-MQO�̓ǂݍ���
+MQOの読み込み
 http://www.metaseq.net/metaseq/format.html
 """
 
