@@ -42,6 +42,7 @@ class Frame(tkinter.Frame):
                     ('poloygon model files', '*.mqo;*.pmd'),
                     ], 
                 initialdir=self.current)
+        self.current=os.path.dirname(path)
         self.load(path)
 
     def load(self, path):

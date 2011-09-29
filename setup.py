@@ -1,8 +1,10 @@
 from setuptools import setup
 import sys
+import os
+import shutil
 
 name='pymeshio'
-version='1.9.2'
+version='1.9.3'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -46,6 +48,13 @@ classifiers=[
         'Topic :: Multimedia :: Graphics :: 3D Modeling',
         ]
 
+# copy pymeshio dir for blender25 plugin
+PYMESHIO_DIR_IN_BLENDER='blender25-meshio/pymeshio'
+if os.path.exists(PYMESHIO_DIR_IN_BLENDER):
+    shutil.rmtree(PYMESHIO_DIR_IN_BLENDER)    
+print("copy pymeshio to blender-25")
+shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER)
+
 setup(
         name=name,
         version=version,
@@ -57,9 +66,9 @@ setup(
         author_email='ousttrue@gmail.com',
         url='http://meshio.sourceforge.jp/',
         license='zlib',
-        package_dir={
-            'pymeshio': 'blender25-meshio/pymeshio'
-            },
+        #package_dir={
+        #    'pymeshio': 'blender25-meshio/pymeshio'
+        #    },
         packages=['pymeshio'],
         test_suite='nose.collector',
         tests_require=['Nose'],

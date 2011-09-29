@@ -6,7 +6,8 @@ http://blog.goo.ne.jp/torisu_tetosuki/e/209ad341d3ece2b1b4df24abf619d6e4
 import os
 import sys
 import struct
-from .mmd import *
+from .common import *
+from .compatibility import *
 
 
 class Vertex(object):

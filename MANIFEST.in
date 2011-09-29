@@ -1,2 +1,3 @@
 include blender25-meshio/*.py
 include examples/*.py
+include README.*

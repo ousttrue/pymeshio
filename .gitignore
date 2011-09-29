@@ -3,3 +3,4 @@ build
 dist
 pymeshio.egg-info
 *.pyc
+__pycache__/*
