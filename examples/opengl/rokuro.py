@@ -31,8 +31,9 @@ class RokuroView(baseview.BaseView):
             self.distance*=0.9
 
     def shift(self, dx, dy):
-        self.shiftX+=dx
-        self.shiftY+=dy
+        FACTOR=0.001
+        self.shiftX+=dx * self.distance * FACTOR
+        self.shiftY+=dy * self.distance * FACTOR
 
     def rotate(self, head, pitch):
         self.head+=head

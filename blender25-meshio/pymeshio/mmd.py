@@ -1,22 +1,11 @@
 #!/usr/bin/python
 # coding: utf-8
 """
-20091202: VPD読み込みを追加
-20100318: PMD書き込みを追加
-20100731: meshioと互換になるように改造
+utitlities for pmd and vmd loading. 
 
-VMDの読み込み
-http://yumin3123.at.webry.info/200810/article_4.html
-http://atupdate.web.fc2.com/vmd_format.htm
+- python2 and python3 compatibility.
+- common structures.
 
-PMDの読み込み
-http://blog.goo.ne.jp/torisu_tetosuki/e/209ad341d3ece2b1b4df24abf619d6e4
-
-VPDの読み込み
-
-ToDo:
-    rigdid bodies
-    constraints
 """
 import sys
 import codecs
@@ -24,21 +13,20 @@ import os.path
 import struct
 import math
 import re
-#import numpy
 from decimal import *
 
 ENCODING='cp932'
 
+"""
+utility functions for python2 and python3 compatibility.
+"""
 if sys.version_info[0]>=3:
     xrange=range
 
-###############################################################################
-# utility
-###############################################################################
 if sys.version_info[0]<3:
     def truncate_zero(src):
         """
-        0x00以降を捨てる
+        drop after 0x00
         """
         assert(type(src)==bytes)
         pos = src.find(b"\x00")
@@ -49,7 +37,7 @@ if sys.version_info[0]<3:
 else:
     def truncate_zero(src):
         """
-        0x00以降を捨てる
+        drop after 0x00
         """
         assert(type(src)==bytes)
         pos = src.find(b"\x00")
@@ -61,6 +49,9 @@ else:
 
 if sys.version_info[0]<3:
     def to_str(src):
+        """
+        str or unicode to str
+        """
         t=type(src)
         if t==unicode:
             return src.encode('cp932')
@@ -70,10 +61,16 @@ if sys.version_info[0]<3:
             raise "INVALID str: %s" % t
 
     def from_str(src):
+        """
+        do nothing
+        """
         return src
 
 else:
     def to_str(src):
+        """
+        bytes or str to str
+        """
         t=type(src)
         if t==str:
             return src
@@ -83,17 +80,26 @@ else:
             raise "INVALID str: %s" % t
 
     def from_str(src):
+        """
+        str to bytes
+        """
         return src.encode('cp932')
 
 
+"""
+utility functions.
+"""
 def radian_to_degree(x):
     return x/math.pi * 180.0
 
 
-###############################################################################
-# geometry
-###############################################################################
+"""
+common structures.
+"""
 class Vector2(object):
+    """
+    2D coordinate for uv value
+    """
     __slots__=['x', 'y']
     def __init__(self, x=0, y=0):
         self.x=x
@@ -115,6 +121,9 @@ class Vector2(object):
 
 
 class Vector3(object):
+    """
+    3D coordinate for vertex position, normal direction
+    """
     __slots__=['x', 'y', 'z']
     def __init__(self, x=0, y=0, z=0):
         self.x=x
@@ -142,6 +151,9 @@ class Vector3(object):
 
 
 class Quaternion(object):
+    """
+    rotation representation in vmd motion
+    """
     __slots__=['x', 'y', 'z', 'w']
     def __init__(self, x=0, y=0, z=0, w=1):
         self.x=x
@@ -243,6 +255,9 @@ class Quaternion(object):
 
 
 class RGBA(object):
+    """
+    material color
+    """
     __slots__=['r', 'g', 'b', 'a']
     def __init__(self, r=0, g=0, b=0, a=1):
         self.r=r
@@ -261,117 +276,4 @@ class RGBA(object):
             return self.a
         else:
             assert(False)
-
-
-
-
-###############################################################################
-# interface
-###############################################################################
-def load_pmd(path):
-    size=os.path.getsize(path)
-    f=open(path, "rb")
-    l=PMDLoader()
-    if l.load(path, f, size):
-        return l
-
-def load_vmd(path):
-    size=os.path.getsize(path)
-    f=open(path, "rb")
-    l=VMDLoader()
-    if l.load(path, f, size):
-        return l
-
-def load_vpd(path):
-    f=open(path, 'rb')
-    if not f:
-        return;
-    size=os.path.getsize(path)
-    l=VPDLoader()
-    if l.load(path, f, size):
-        return l
-
-
-###############################################################################
-# debug
-###############################################################################
-def debug_pmd(path):
-    l=load_pmd(path)
-    if not l:
-        print("fail to load")
-        sys.exit()
-
-    print(unicode(l).encode(ENCODING))
-    print(l.comment.encode(ENCODING))
-    print("<ボーン>".decode('utf-8').encode(ENCODING))
-    for bone in l.no_parent_bones:
-        print(bone.name.encode(ENCODING))
-        bone.display()
-    #for bone in l.bones:
-    #    uni="%s:%s" % (bone.english_name, bone.name)
-    #    print uni.encode(ENCODING)
-    #for skin in l.morph_list:
-    #    uni="%s:%s" % (skin.english_name, skin.name)
-    #    print uni.encode(ENCODING)
-    #for i, v in enumerate(l.vertices):
-    #    print i, v
-    #for i, f in enumerate(l.indices):
-    #    print i, f
-    for m in l.materials:
-        print(m)
-
-def debug_pmd_write(path, out):
-    l=load_pmd(path)
-    if not l:
-        print("fail to load")
-        sys.exit()
-
-    if not l.write(out):
-        print("fail to write")
-        sys.exit()
-
-def debug_vmd(path):
-    l=load_vmd(path)
-    if not l:
-        print("fail to load")
-        sys.exit()
-    print(unicode(l).encode(ENCODING))
-
-    #for m in l.motions[u'センター']:
-    #    print m.frame, m.pos
-    for n, m in l.shapes.items():
-        print(unicode(n).encode(ENCODING), getEnglishSkinName(n))
-
-def debug_vpd(path):
-    l=load_vpd(path)
-    if not l:
-        print("fail to load")
-        sys.exit()
-    for bone in l.pose:
-        print(unicode(bone).encode(ENCODING))
-
-if __name__=="__main__":
-    if len(sys.argv)<2:
-        print("usage: %s {pmd file}" % sys.argv[0])
-        print("usage: %s {vmd file}" % sys.argv[0])
-        print("usage: %s {vpd file}" % sys.argv[0])
-        print("usage: %s {pmd file} {export pmdfile}" % sys.argv[0])
-        sys.exit()
-
-    path=sys.argv[1]
-    if not os.path.exists(path):
-        print("no such file: %s" % path)
-
-    if path.lower().endswith('.pmd'):
-        if len(sys.argv)==2:
-            debug_pmd(path)
-        else:
-            debug_pmd_write(path, sys.argv[2])
-    elif path.lower().endswith('.vmd'):
-        debug_vmd(path)
-    elif path.lower().endswith('.vpd'):
-        debug_vpd(path)
-    else:
-        print("unknown file type: %s" % path)
-        sys.exit()
 
