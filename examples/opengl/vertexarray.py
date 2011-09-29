@@ -120,8 +120,10 @@ class IndexedVertexArray(object):
         glDisableClientState(GL_VERTEX_ARRAY)
 
     def optimize(self):
-        self.vertices=numpy.array(self.vertices, 'f') 
-        self.uvlist=numpy.array(self.uvlist, 'f') 
+        self.vertices=numpy.array(self.vertices, numpy.float32) 
+        self.uvlist=numpy.array(self.uvlist, numpy.float32) 
+        for m, indices in self.indicesMap.items():
+            self.indicesMap[m]=numpy.array(indices, numpy.uint32)
 
     def get_boundingbox(self):
         vertices_size=len(self.vertices)
