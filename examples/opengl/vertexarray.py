@@ -123,3 +123,35 @@ class IndexedVertexArray(object):
         self.vertices=numpy.array(self.vertices, 'f') 
         self.uvlist=numpy.array(self.uvlist, 'f') 
 
+    def get_boundingbox(self):
+        vertices_size=len(self.vertices)
+        if(vertices_size==0):
+            return ([0, 0, 0], [0, 0, 0])
+        print('vertices_size %d' % vertices_size)
+        print(self.vertices[0])
+        def vertex_gen_factory():
+            for i in range(0, vertices_size, 4):
+                yield [
+                        self.vertices[i],
+                        self.vertices[i+1],
+                        self.vertices[i+2]
+                        ]
+        vertex_gen=vertex_gen_factory()
+        v=next(vertex_gen)
+        max_v=v[:]
+        min_v=v[:]
+        for v in vertex_gen:
+            if v[0]<min_v[0]:
+                min_v[0]=v[0]
+            if v[1]<min_v[1]:
+                min_v[1]=v[1]
+            if v[2]<min_v[2]:
+                min_v[2]=v[2]
+            if v[0]>max_v[0]:
+                max_v[0]=v[0]
+            if v[1]>max_v[1]:
+                max_v[1]=v[1]
+            if v[2]>max_v[2]:
+                max_v[2]=v[2]
+        return (min_v, max_v)
+

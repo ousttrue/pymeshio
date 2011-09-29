@@ -27,7 +27,8 @@ class Frame(tkinter.Frame):
         menu_file.add_command(label='Open', under=0, command=self.onOpen)
 
         # setup opengl widget
-        self.glworld=opengl.BaseController(opengl.rokuro.RokuroView(500))
+        self.view=opengl.rokuro.RokuroView()
+        self.glworld=opengl.BaseController(self.view)
         self.glwidget=togl.Widget(self, self.glworld, width=width, height=height)
         self.glwidget.pack(fill=tkinter.BOTH, expand=True)
 
@@ -50,6 +51,7 @@ class Frame(tkinter.Frame):
             return
         self.glworld.setRoot(model)
         print('load %s' % path)
+        self.view.look_bb(*model.get_boundingbox())
         self.glwidget.onDraw()
 
     def loadModel(self, path):
