@@ -33,6 +33,10 @@ Setup
 
 History
 -------
+1.9.3 (2011-9-30)
+~~~~~~~~~~~~~~~~~~
+* refactoring
+
 1.9.2 (2011-9-29)
 ~~~~~~~~~~~~~~~~~~
 * add tkinter viewer sample
