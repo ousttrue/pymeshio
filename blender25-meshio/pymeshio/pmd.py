@@ -1,17 +1,26 @@
 # coding: utf-8
+"""
+PMDの読み込み
+http://blog.goo.ne.jp/torisu_tetosuki/e/209ad341d3ece2b1b4df24abf619d6e4
+"""
 import os
 import sys
 import struct
 from .mmd import *
 
-###############################################################################
-# PMD
-###############################################################################
-def UshortVector():
-    return []
-
 
 class Vertex(object):
+    """pmd vertex struct.
+
+    Attributes:
+        pos: Vector3
+        normal: Vector3
+        uv: Vector2
+        bone0: bone index
+        bone1: bone index
+        weight0: bone0 influence
+        edge_flag: int flag
+    """
     __slots__=['pos', 'normal', 'uv', 'bone0', 'bone1', 'weight0', 'edge_flag']
     def __init__(self, x=0, y=0, z=0, nx=0, ny=0, nz=0, u=0, v=0,
             bone0=0, bone1=0, weight0=0, edge_flag=0):
@@ -24,7 +33,11 @@ class Vertex(object):
         self.edge_flag=edge_flag
 
     def __str__(self):
-        return "<%s %s %s, (%d, %d, %d)>" % (str(self.pos), str(self.normal), str(self.uv), self.bone0, self.bone1, self.weight0)
+        return "<%s %s %s, (%d, %d, %d)>" % (
+                str(self.pos), 
+                str(self.normal), 
+                str(self.uv), 
+                self.bone0, self.bone1, self.weight0)
 
     def __getitem__(self, key):
         if key==0:
@@ -38,6 +51,18 @@ class Vertex(object):
 
 
 class Material(object):
+    """pmd material struct.
+
+    Attributes:
+        diffuse: RGBA
+        shinness: float
+        specular: RGB
+        ambient: RGB
+        vertex_count: indices length
+        _texture: texture file path
+        toon_index: int
+        flag: int
+    """
     __slots__=[
             'diffuse', 'shinness', 'specular',
             'ambient', 'vertex_count', '_texture', 'toon_index', 'flag',
@@ -64,15 +89,24 @@ class Material(object):
                 )
 
 
-# @return 各マテリアルについて、そのマテリアルが保持する面の回数だけ
-# マテリアル自身を返す
-def material_per_face(materials):
-    for m in materials:
-        for x in range(int(m.vertex_count/3)):
-            yield m
-
-
 class Bone(object):
+    """pmd material struct.
+
+    Attributes:
+        _name: 
+        index:
+        type:
+        ik:
+        pos:
+        _english_name:
+        ik_index:
+        parent_index:
+        tail_index:
+
+        parent:
+        tail:
+        children:
+    """
     # kinds
     ROTATE = 0
     ROTATE_MOVE = 1
@@ -88,7 +122,12 @@ class Bone(object):
             'children', '_english_name', 'ik_index',
             'parent_index', 'tail_index', 'tail',
             ]
-    def getName(self): return from_str(self._name)
+    def getName(self): 
+        """
+        return str(multibyte) in python2
+        return bytes in python3
+        """
+        return from_str(self._name)
     def setName(self, name): self._name=to_str(name)
     name=property(getName, setName)
     def getEnglishName(self): return from_str(self._english_name)
@@ -344,6 +383,16 @@ class ToonTextures(object):
 
 
 class IO(object):
+    """pmd loader class.
+
+    Attributes:
+        io: internal use.
+        end: internal use.
+        pos: internal user.
+
+        version: pmd version number
+        _name: internal
+    """
     __slots__=['io', 'end', 'pos',
             'version', '_name', '_comment',
             '_english_name', '_english_comment',
