@@ -196,7 +196,7 @@ class Obj(object):
         faces:
         edges:
         smoothing:
-    """
+     """
      __slots__=["name", "depth", "folding", 
             "scale", "rotation", "translation",
             "visible", "locking", "shading", "facet",
