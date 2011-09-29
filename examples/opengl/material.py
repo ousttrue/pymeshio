@@ -39,7 +39,7 @@ Material
 '''
 class MQOMaterial(object):
     def __init__(self):
-        self.rgba=(0, 0, 0, 0)
+        self.rgba=(1, 1, 1, 1)
         self.vcol=False
         self.texture=None
 
@@ -70,11 +70,4 @@ class MQOMaterial(object):
         pass
         #if self.texture:
         #    self.texture.onInitialize()
-
-    @staticmethod
-    def create(src, basedir):
-        m=MQOMaterial(src.color)
-        if src.tex:
-            m.texture=texture.Texture((basedir+'/'+src.tex).replace('\\', '/'))
-        return m
 

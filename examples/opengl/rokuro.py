@@ -22,6 +22,10 @@ class RokuroView(baseview.BaseView):
         self.n=1
         self.f=10000
 
+    def __str__(self):
+        return '<RokuroView shiftX: %f, shiftY: %f, distance: %f>' % (
+                self.shiftX, self.shiftY, self.distance)
+ 
     def onResize(self, w=None, h=None):
         super(RokuroView, self).onResize(w, h)
         self.aspect=float(self.w)/float(self.h)
@@ -78,7 +82,7 @@ class RokuroView(baseview.BaseView):
         self.distance=min_v[2]+d
         cx=min_v[0]+max_v[0]
         cy=min_v[1]+max_v[1]
-        print(cx, cy)
         self.shiftX=-cx/2.0
         self.shiftY=-cy/2.0
+        print(self)
 

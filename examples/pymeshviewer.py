@@ -49,9 +49,12 @@ class Frame(tkinter.Frame):
         if not model:
             print('fail to load %s' % path)
             return
-        self.glworld.setRoot(model)
         print('load %s' % path)
-        self.view.look_bb(*model.get_boundingbox())
+        print(model)
+        self.glworld.setRoot(model)
+        bb=model.get_boundingbox()
+        print(bb)
+        self.view.look_bb(*bb)
         self.glwidget.onDraw()
 
     def loadModel(self, path):

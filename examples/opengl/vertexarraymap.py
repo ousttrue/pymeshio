@@ -42,20 +42,20 @@ class VertexArrayMap(object):
         for v in self.vertexArrayMap.values():
             v.vertices=numpy.array(v.vertices, 'f') 
 
-
 '''
 頂点配列をマテリアル毎に分別する(UV付き)
 '''
 class VertexArrayMapWithUV(object):
-    def __init__(self, materials):
-        self.materials=materials
+    def __init__(self):
+        self.materials=[]
         self.vertexArrayWithUVMap={}
+
+    def addMaterial(self, material):
+        self.materials.append(material)
+        self.vertexArrayWithUVMap[material]=vertexarray.VertexArrayWithUV([], [])
 
     def getVertexArray(self, material_index):
         material=self.materials[material_index]
-        if not material in self.vertexArrayWithUVMap:
-            vertexArray=vertexarray.VertexArrayWithUV([], [])
-            self.vertexArrayWithUVMap[material]=vertexArray
         return self.vertexArrayWithUVMap[material]
 
     def addTriangle(self, material_index, v0, v1, v2, uv0, uv1, uv2):
@@ -88,5 +88,21 @@ class VertexArrayMapWithUV(object):
             v.uvarray=numpy.array(v.uvarray, 'f') 
 
     def onInitialize(self):
-        [m.onInitialize() for m in self.materials]
+        #[m.onInitialize() for m in self.materials]
+        pass
 
+    def get_boundingbox(self):
+        if len(self.vertexArrayWithUVMap)==0:
+            return ([0, 0, 0], [0, 0, 0])
+
+        gen=iter(self.vertexArrayWithUVMap.values())
+        (min_v, max_v)=next(gen).get_boundingbox()
+        for va in gen:
+            (va_min_v, va_max_v)=va.get_boundingbox()
+            min_v[0]=min(min_v[0], va_min_v[0]) 
+            min_v[1]=min(min_v[1], va_min_v[1]) 
+            min_v[2]=min(min_v[2], va_min_v[2]) 
+            max_v[0]=max(max_v[0], va_max_v[0]) 
+            max_v[1]=max(max_v[1], va_max_v[1]) 
+            max_v[2]=max(max_v[2], va_max_v[2]) 
+        return (min_v, max_v)

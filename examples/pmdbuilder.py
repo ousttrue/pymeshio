@@ -16,7 +16,6 @@ def build(path):
     if not io.read(path):
         return
     print(time.time()-t, "sec")
-    print(io)
     # build
     basedir=os.path.dirname(path)
     indexedVertexArray=opengl.vertexarray.IndexedVertexArray()
@@ -37,7 +36,6 @@ def build(path):
             yield i
     indexGen=indices()
     for i, m in enumerate(io.materials):
-        print(i, m)
         material=opengl.material.MQOMaterial()
         material.vcol=True
         material.rgba=(
@@ -46,8 +44,8 @@ def build(path):
                 m.diffuse[2], 
                 m.diffuse[3])
         texturefile=m.texture.decode('cp932')
-        if texturefile!="":
-            texturepath=os.path.join(basedir, texturefile)
+        texturepath=os.path.join(basedir, texturefile)
+        if os.path.isfile(texturepath):
             if not texturepath in textureMap:
                 texture=opengl.texture.Texture(texturepath)
                 textureMap[texturepath]=texture

@@ -4,8 +4,9 @@
 import time
 import os
 import pymeshio.mqo
-from opengl import material
-from opengl import vertexarraymap
+import opengl.material
+import opengl.texture
+import opengl.vertexarraymap
 
 
 def build(path):
@@ -17,9 +18,15 @@ def build(path):
     print(time.time()-t, "sec")
     # build
     basedir=os.path.dirname(path)
-    vertexArrayMap=vertexarraymap.VertexArrayMapWithUV(
-            [material.MQOMaterial.create(m, basedir) 
-                for m in io.materials])
+    vertexArrayMap=opengl.vertexarraymap.VertexArrayMapWithUV()
+    for m in io.materials:
+        material=opengl.material.MQOMaterial()
+        material.rgba=(m.color.r, m.color.g, m.color.b, m.color.a)
+        if m.tex:
+            texturepath=os.path.join(basedir, m.tex)
+            material.texture=opengl.texture.Texture(texturepath)
+        vertexArrayMap.addMaterial(material)
+
     for o in io.objects:
         # skip mikoto objects
         if o.name.startswith("anchor"):
