@@ -2,10 +2,11 @@ from setuptools import setup
 import sys
 
 name='pymeshio'
-version='1.9.1'
+version='1.9.2'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
+create for blender import/expoert plugin backend.
 
 Requirements
 ------------
@@ -23,9 +24,17 @@ Setup
 ::
 
    $ easy_install pymeshio
+   or
+   $ unzip pymeshio-x.x.x.zip
+   $ cd pymeshio-x.x.x
+   $ python setup.py install
 
 History
 -------
+1.9.2 (2011-9-29)
+~~~~~~~~~~~~~~~~~~
+* add tkinter viewer sample
+
 1.9.1 (2011-9-23)
 ~~~~~~~~~~~~~~~~~~
 * register pypi
