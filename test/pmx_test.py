@@ -4,7 +4,7 @@ import pymeshio.pmx
 
 PMX_MODEL='resources/初音ミクVer2.pmx'
 
-def test_load():
+def test_read():
     io=pymeshio.pmx.IO()
     model=io.read(PMX_MODEL)
     assert model.__class__==pymeshio.pmx.Model
@@ -27,3 +27,4 @@ def test_load():
             "Copyright		CRYPTON FUTURE MEDIA, INC"
             )
 
+    assert len(model.vertices)==12354
