@@ -31,3 +31,5 @@ def test_read():
     # texture
     assert len(model.materials)==17
     assert len(model.bones)==140
+    assert len(model.morphs)==30
+    assert len(model.display_slots)==9

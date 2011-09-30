@@ -218,6 +218,47 @@ class Vertex(object):
         self.edge_factor=edge_factor
 
 
+class Morph(object):
+    """pmx morph
+
+    Attributes:
+        name: 
+        english_name: 
+        panel:
+        morph_type:
+        offsets:
+    """
+    __slots__=[
+            'name',
+            'english_name',
+            'panel',
+            'morph_type',
+            'offsets',
+            ]
+    def __init__(self, name, english_name, panel, morph_type):
+        self.name=name
+        self.english_name=english_name
+        self.panel=panel
+        self.morph_type=morph_type
+        self.offsets=[]
+
+
+class VerexMorphOffset(object):
+    """pmx vertex morph offset
+
+    Attributes:
+        vertex_index:
+        position_offset: Vector3
+    """
+    __slots__=[
+            'vertex_index',
+            'position_offset',
+            ]
+    def __init__(self, vertex_index, position_offset):
+        self.vertex_index=vertex_index
+        self.position_offset=position_offset
+
+
 class Model(object):
     """pmx data representation
 
@@ -231,6 +272,8 @@ class Model(object):
         textures:
         materials:
         bones:
+        morph:
+        display_slots:
     """
     __slots__=[
             'version', # pmx version
@@ -243,6 +286,8 @@ class Model(object):
             'textures',
             'materials',
             'bones',
+            'morphs',
+            'display_slots',
             ]
     def __init__(self, version):
         self.version=version

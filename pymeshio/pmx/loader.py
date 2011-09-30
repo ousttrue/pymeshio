@@ -20,7 +20,7 @@ class Loader(pymeshio.common.BinaryLoader):
         super(Loader, self).__init__(io)
         self.read_text=self.get_read_text(text_encoding)
         if extended_uv>0:
-            raise ParseException("extended uv is not supported", extended_uv)
+            raise pymeshio.common.ParseException("extended uv is not supported", extended_uv)
         self.read_vertex_index=lambda : self.read_uint(vertex_index_size)
         self.read_texture_index=lambda : self.read_uint(texture_index_size)
         self.read_material_index=lambda : self.read_uint(material_index_size)
@@ -58,24 +58,17 @@ class Loader(pymeshio.common.BinaryLoader):
         deform_type=self.read_uint(1)
         if deform_type==0:
             return pymeshio.pmx.Bdef1(self.read_bone_index())
-        if deform_type==1:
+        elif deform_type==1:
             return pymeshio.pmx.Bdef2(
                     self.read_bone_index(),
                     self.read_bone_index(),
                     self.read_float()
                     )
-        """
-        if deform_type==2:
-            return pymeshio.pmx.Bdef4(
-                    self.read_bone_index(),
-                    self.read_bone_index(),
-                    self.read_bone_index(),
-                    self.read_bone_index(),
-                    self.read_float(), self.read_float(),
-                    self.read_float(), self.read_float()
-                    )
-        """
-        raise ParseException("unknown deform type: {0}".format(deform_type))
+        elif deform_type==2:
+            # todo
+            raise pymeshio.common.ParseException("not implemented Bdef4")
+        else:
+            raise pymeshio.common.ParseException("unknown deform type: {0}".format(deform_type))
 
     def read_material(self):
         material=pymeshio.pmx.Material(
@@ -99,7 +92,7 @@ class Loader(pymeshio.common.BinaryLoader):
         elif material.toon_sharing_flag==1:
             material.toon_texture_index=self.read_uint(1)
         else:
-            raise ParseException("unknown toon_sharing_flag {0}".format(material.toon_sharing_flag))
+            raise pymeshio.common.ParseException("unknown toon_sharing_flag {0}".format(material.toon_sharing_flag))
         material.comment=self.read_text()
         material.index_count=self.read_uint(4)
         return material
@@ -118,7 +111,7 @@ class Loader(pymeshio.common.BinaryLoader):
         elif bone.getConnectionFlag()==1:
             bone.tail_index=self.read_bone_index()
         else:
-            raise ParseException("unknown bone conenction flag: {0}".format(
+            raise pymeshio.common.ParseException("unknown bone conenction flag: {0}".format(
                 bone.getConnectionFlag()))
 
         if bone.getRotationFlag()==1 or bone.getTranslationFlag()==1:
@@ -146,7 +139,7 @@ class Loader(pymeshio.common.BinaryLoader):
                 loop=self.read_uint(4),
                 limit_radian=self.read_float())
         link_size=self.read_uint(4)
-        ik.link=[self.read_ik_link() for i in range(link_size)]
+        ik.link=[self.read_ik_link() for _ in range(link_size)]
 
     def read_ik_link(self):
         link=pymeshio.pmx.IkLink(
@@ -158,9 +151,52 @@ class Loader(pymeshio.common.BinaryLoader):
             link.limit_min=self.read_vector3()
             link.limit_max=self.read_vector3()
         else:
-            raise ParseException("invalid ik link limit_angle: {0}".format(
+            raise pymeshio.common.ParseException("invalid ik link limit_angle: {0}".format(
                 link.limit_angle))
         return link
+
+    def read_morgh(self):
+        name=self.read_text()
+        english_name=self.read_text()
+        panel=self.read_uint(1)
+        morph_type=self.read_uint(1)
+        offset_size=self.read_uint(4)
+        if morph_type==0:
+            # todo
+            raise pymeshio.common.ParseException("not implemented GroupMorph")
+        elif morph_type==1:
+            morph=pymeshio.pmx.Morph(name, english_name, panel, morph_type)
+            morph.offsets=[self.read_vertex_morph_offset() for _ in range(offset_size)]
+            return morph
+        elif morph_type==2:
+            # todo
+            raise pymeshio.common.ParseException("not implemented BoneMorph")
+        elif morph_type==3:
+            # todo
+            raise pymeshio.common.ParseException("not implemented UvMorph")
+        elif morph_type==4:
+            # todo
+            raise pymeshio.common.ParseException("not implemented extended UvMorph1")
+        elif morph_type==5:
+            # todo
+            raise pymeshio.common.ParseException("not implemented extended UvMorph2")
+        elif morph_type==6:
+            # todo
+            raise pymeshio.common.ParseException("not implemented extended UvMorph3")
+        elif morph_type==7:
+            # todo
+            raise pymeshio.common.ParseException("not implemented extended UvMorph4")
+        elif morph_type==8:
+            # todo
+            raise pymeshio.common.ParseException("not implemented extended MaterialMorph")
+        else:
+            raise pymeshio.common.ParseException("unknown morph type: {0}".format(morph_type))
+
+    def read_vertex_morph_offset(self):
+        return pymeshio.pmx.VerexMorphOffset(self.read_vertex_index(), self.read_vector3())
+
+    def read_display_slot(self):
+        pass
 
 
 def load(path: str) -> pymeshio.pmx.Model:
@@ -172,7 +208,7 @@ def load(path: str) -> pymeshio.pmx.Model:
     # header
     signature=loader.unpack("4s", 4)
     if signature!=b"PMX ":
-        raise ParseException("invalid signature", loader.signature)
+        raise pymeshio.common.ParseException("invalid signature", loader.signature)
 
     version=loader.read_float()
     if version!=2.0:
@@ -182,7 +218,7 @@ def load(path: str) -> pymeshio.pmx.Model:
     # flags
     flag_bytes=loader.read_uint(1)
     if flag_bytes!=8:
-        raise ParseException("invalid flag length", loader.flag_bytes)
+        raise pymeshio.common.ParseException("invalid flag length", loader.flag_bytes)
     text_encoding=loader.read_uint(1)
     extended_uv=loader.read_uint(1)
     vertex_index_size=loader.read_uint(1)
@@ -210,25 +246,27 @@ def load(path: str) -> pymeshio.pmx.Model:
     model.comment = loader.read_text()
     model.english_comment = loader.read_text()
 
-    # vertices
+    # model data
     vertex_count=loader.read_uint(4)
-    model.vertices=[loader.read_vertex() for i in range(vertex_count)]
+    model.vertices=[loader.read_vertex() for _ in range(vertex_count)]
 
-    # indices
     index_count=loader.read_uint(4)
-    model.indices=[loader.read_vertex_index() for i in range(index_count)]
+    model.indices=[loader.read_vertex_index() for _ in range(index_count)]
 
-    # textures
     texture_count=loader.read_uint(4)
-    model.textures=[loader.read_text() for i in range(texture_count)]
+    model.textures=[loader.read_text() for _ in range(texture_count)]
 
-    # materials
     material_count=loader.read_uint(4)
-    model.materials=[loader.read_material() for i in range(material_count)]
+    model.materials=[loader.read_material() for _ in range(material_count)]
 
-    # bones
     bone_count=loader.read_uint(4)
-    model.bones=[loader.read_bone() for i in range(bone_count)]
+    model.bones=[loader.read_bone() for _ in range(bone_count)]
+
+    morph_count=loader.read_uint(4)
+    model.morphs=[loader.read_morgh() for _ in range(morph_count)]
+
+    display_slot_count=loader.read_uint(4)
+    model.display_slots=[loader.read_display_slot() for _ in range(display_slot_count)]
 
     return model
 
