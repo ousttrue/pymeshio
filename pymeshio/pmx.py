@@ -21,6 +21,66 @@ class ParseException(Exception):
     pass
 
 
+class Material(object):
+    """material
+
+    Attributes: see __init__
+    """
+    __slots__=[
+            'name',
+            'english_name',
+            'diffuse_color',
+            'diffuse_alpha',
+            'specular_color',
+            'specular_factor',
+            'ambient_color',
+            'flag',
+            'edge_color',
+            'edge_size',
+            'texture_index',
+            'sphia_texture_index',
+            'sphia_mode',
+            'toon_sharing_flag',
+            'toon_texture_index',
+            'comment',
+            'index_count',
+            ]
+    def __init__(self,
+            name: str,
+            english_name: str,
+            diffuse_color: common.RGB,
+            diffuse_alpha: float,
+            specular_color: common.RGB,
+            specular_factor: float,
+            ambient_color: common.RGB,
+            flag: int,
+            edge_color: common.RGBA,
+            edge_size: float,
+            texture_index: int,
+            sphia_texture_index: int,
+            sphia_mode: int,
+            toon_sharing_flag: int
+            ):
+        self.name=name
+        self.english_name=english_name
+        self.diffuse_color=diffuse_color
+        self.diffuse_alpha=diffuse_alpha
+        self.specular_color=specular_color
+        self.specular_factor=specular_factor
+        self.ambient_color=ambient_color
+        self.flag=flag
+        self.edge_color=edge_color
+        self.edge_size=edge_size
+        self.texture_index=texture_index
+        self.sphia_texture_index=sphia_texture_index
+        self.sphia_mode=sphia_mode
+        self.toon_sharing_flag=toon_sharing_flag
+        #
+        self.toon_texture_index=None
+        self.comment=''
+        self.index_count=0
+
+
 class Deform(object):
     pass
 
@@ -79,6 +139,9 @@ class Model(object):
         comment: 
         english_comment: 
         vertices:
+        textures:
+        materials:
+        bones:
     """
     __slots__=[
             'version', # pmx version
@@ -86,7 +149,11 @@ class Model(object):
             'english_name', # model name in english
             'comment', # model comment
             'english_comment', # model comment in english
-            'vertices'
+            'vertices',
+            'indices',
+            'textures',
+            'materials',
+            'bones',
             ]
     def __init__(self):
         self.version=0.0
@@ -95,6 +162,10 @@ class Model(object):
         self.comment=''
         self.english_comment=''
         self.vertices=[]
+        self.indices=[]
+        self.textures=[]
+        self.materials=[]
+        self.bones=[]
 
 
 class IO(object):
@@ -170,10 +241,37 @@ class IO(object):
         ####################
         # vertices
         ####################
-        #vertex_count=self.__read_int(self.vertex_index_size)
-        # pmdeditor 131c bug?
-        vertex_count=self.__read_int(4)
-        self.__model.vertices=[self.__read_vertex() for i in range(vertex_count)]
+        vertex_count=self.__read_uint(4)
+        self.__model.vertices=[self.__read_vertex() 
+                for i in range(vertex_count)]
+
+        ####################
+        # indices
+        ####################
+        index_count=self.__read_uint(4)
+        self.__model.indices=[self.__read_uint(self.vertex_index_size) 
+                for i in range(index_count)]
+
+        ####################
+        # textures
+        ####################
+        texture_count=self.__read_uint(4)
+        self.__model.textures=[self.__read_text() 
+                for i in range(texture_count)]
+
+        ####################
+        # materials
+        ####################
+        material_count=self.__read_uint(4)
+        self.__model.materials=[self.__read_material() 
+                for i in range(material_count)]
+
+        ####################
+        # bones
+        ####################
+        bone_count=self.__read_uint(4)
+        self.__model.bones=[self.__read_bone() 
+                for i in range(bone_count)]
 
         return True
 
@@ -202,7 +300,7 @@ class IO(object):
         else:
             print("unknown text encoding", self.text_encoding)
 
-    def __read_int(self, size):
+    def __read_uint(self, size):
         if size==1:
             return self.__unpack("B", size)
         if size==2:
@@ -222,41 +320,83 @@ class IO(object):
                 )
 
     def __read_vector2(self):
-        print(self.__pos)
         return common.Vector2(
                 self.__unpack("f", 4), 
                 self.__unpack("f", 4)
                 )
 
     def __read_vector3(self):
-        print(self.__pos)
         return common.Vector3(
                 self.__unpack("f", 4), 
                 self.__unpack("f", 4), 
                 self.__unpack("f", 4)
                 )
 
+    def __read_rgba(self):
+        return common.RGBA(
+                self.__unpack("f", 4), 
+                self.__unpack("f", 4), 
+                self.__unpack("f", 4),
+                self.__unpack("f", 4)
+                )
+
+    def __read_rgb(self):
+        return common.RGB(
+                self.__unpack("f", 4), 
+                self.__unpack("f", 4), 
+                self.__unpack("f", 4)
+                )
+
     def __read_deform(self):
-        print(self.__pos)
         deform_type=self.__unpack("B", 1)
         if deform_type==0:
-            return Bdef1(self.__read_int(self.bone_index_size))
+            return Bdef1(self.__read_uint(self.bone_index_size))
         if deform_type==1:
             return Bdef2(
-                    self.__read_int(self.bone_index_size),
-                    self.__read_int(self.bone_index_size),
+                    self.__read_uint(self.bone_index_size),
+                    self.__read_uint(self.bone_index_size),
                     self.__unpack("f", 4)
                     )
         """
         if deform_type==2:
             return Bdef4(
-                    self.__read_int(self.bone_index_size),
-                    self.__read_int(self.bone_index_size),
-                    self.__read_int(self.bone_index_size),
-                    self.__read_int(self.bone_index_size),
+                    self.__read_uint(self.bone_index_size),
+                    self.__read_uint(self.bone_index_size),
+                    self.__read_uint(self.bone_index_size),
+                    self.__read_uint(self.bone_index_size),
                     self.__unpack("f", 4), self.__unpack("f", 4),
                     self.__unpack("f", 4), self.__unpack("f", 4)
                     )
         """
         raise ParseException("unknown deform type: {0}".format(deform_type))
+
+    def __read_material(self):
+        material=Material(
+                name=self.__read_text(),
+                english_name=self.__read_text(),
+                diffuse_color=self.__read_rgb(),
+                diffuse_alpha=self.__unpack("f", 4),
+                specular_color=self.__read_rgb(),
+                specular_factor=self.__unpack("f", 4),
+                ambient_color=self.__read_rgb(),
+                flag=self.__read_uint(1),
+                edge_color=self.__read_rgba(),
+                edge_size=self.__unpack("f", 4),
+                texture_index=self.__read_uint(self.texture_index_size),
+                sphia_texture_index=self.__read_uint(self.texture_index_size),
+                sphia_mode=self.__read_uint(1),
+                toon_sharing_flag=self.__read_uint(1),
+                )
+        if material.toon_sharing_flag==0:
+            material.toon_texture_index=self.__read_uint(self.texture_index_size)
+        elif material.toon_sharing_flag==1:
+            material.toon_texture_index=self.__read_uint(1)
+        else:
+            raise ParseException("unknown toon_sharing_flag {0}".format(material.toon_sharing_flag))
+        material.comment=self.__read_text()
+        material.index_count=self.__read_uint(4)
+        return material
+
+    def __read_bone(self):
+        return None
 

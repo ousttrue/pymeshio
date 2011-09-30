@@ -171,6 +171,27 @@ class Quaternion(object):
         return Quaternion(axis[0]*s, axis[1]*s, axis[2]*s, c)
 
 
+class RGB(object):
+    """
+    material color
+    """
+    __slots__=['r', 'g', 'b']
+    def __init__(self, r=0, g=0, b=0):
+        self.r=r
+        self.g=g
+        self.b=b
+
+    def __getitem__(self, key):
+        if key==0:
+            return self.r
+        elif key==1:
+            return self.g
+        elif key==2:
+            return self.b
+        else:
+            assert(False)
+
+
 class RGBA(object):
     """
     material color
