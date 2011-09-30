@@ -259,6 +259,28 @@ class VerexMorphOffset(object):
         self.position_offset=position_offset
 
 
+class DisplaySlot(object):
+    """pmx display slot
+
+    Attributes:
+        name: 
+        english_name: 
+        special_flag:
+        refrences: list of (ref_type, ref_index)
+    """
+    __slots__=[
+            'name',
+            'english_name',
+            'special_flag',
+            'refrences',
+            ]
+    def __init__(self, name, english_name, special_flag):
+        self.name=name
+        self.english_name=english_name
+        self.special_flag=special_flag
+        self.refrences=[]
+
+
 class Model(object):
     """pmx data representation
 
