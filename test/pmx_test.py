@@ -28,9 +28,10 @@ def test_read():
 
     assert len(model.vertices)==12354
     assert len(model.indices)==22961 * 3
-    # texture
+    print("{0} textures".format(len(model.textures)))
     assert len(model.materials)==17
     assert len(model.bones)==140
     assert len(model.morphs)==30
     assert len(model.display_slots)==9
     assert len(model.rigidbodies)==45
+    assert len(model.joints)==27

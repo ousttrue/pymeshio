@@ -250,6 +250,22 @@ class Loader(pymeshio.common.BinaryLoader):
                 mode=self.read_uint(1)
                 )
 
+    def read_joint(self):
+        return pymeshio.pmx.Joint(
+                name=self.read_text(),
+                english_name=self.read_text(),
+                joint_type=self.read_uint(1),
+                rigidbody_index_a=self.read_rigidbody_index(),
+                rigidbody_index_b=self.read_rigidbody_index(),
+                position=self.read_vector3(),
+                rotation=self.read_vector3(),
+                translation_limit_min=self.read_vector3(),
+                translation_limit_max=self.read_vector3(),
+                rotation_limit_min=self.read_vector3(),
+                rotation_limit_max=self.read_vector3(),
+                spring_constant_translation=self.read_vector3(),
+                spring_constant_rotation=self.read_vector3())
+
 
 def load(path: str) -> pymeshio.pmx.Model:
     # general binary loader
@@ -316,6 +332,8 @@ def load(path: str) -> pymeshio.pmx.Model:
     model.display_slots=[loader.read_display_slot() 
             for _ in range(loader.read_uint(4))]
     model.rigidbodies=[loader.read_rigidbody()
+            for _ in range(loader.read_uint(4))]
+    model.joints=[loader.read_joint()
             for _ in range(loader.read_uint(4))]
 
     return model

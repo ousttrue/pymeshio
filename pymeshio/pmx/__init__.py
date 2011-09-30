@@ -331,6 +331,7 @@ class RigidBodyParam(object):
         self.restitution=restitution
         self.friction=friction
 
+
 class RigidBody(object):
     """pmx rigidbody
 
@@ -391,6 +392,67 @@ class RigidBody(object):
         self.mode=mode
 
 
+class Joint(object):
+    """pmx joint
+
+    Attributes:
+        name: 
+        english_name: 
+        joint_type:
+        rigidbody_index_a:
+        rigidbody_index_b:
+        position: Vector3
+        rotation: Vector3
+        translation_limit_min: Vector3
+        translation_limit_max: Vector3
+        rotation_limit_min: Vector3
+        rotation_limit_max: Vector3
+        spring_constant_translation: Vector3
+        spring_constant_rotation: Vector3
+    """
+    __slots__=[
+            'name',
+            'english_name',
+            'joint_type',
+            'rigidbody_index_a',
+            'rigidbody_index_b',
+            'position',
+            'rotation',
+            'translation_limit_min',
+            'translation_limit_max',
+            'rotation_limit_min',
+            'rotation_limit_max',
+            'spring_constant_translation',
+            'spring_constant_rotation',
+            ]
+    def __init__(self, name, english_name,
+            joint_type,
+            rigidbody_index_a,
+            rigidbody_index_b,
+            position,
+            rotation,
+            translation_limit_min,
+            translation_limit_max,
+            rotation_limit_min,
+            rotation_limit_max,
+            spring_constant_translation,
+            spring_constant_rotation
+            ):
+        self.name=name
+        self.english_name=english_name
+        self.joint_type=joint_type
+        self.rigidbody_index_a=rigidbody_index_a
+        self.rigidbody_index_b=rigidbody_index_b
+        self.position=position
+        self.rotation=rotation
+        self.translation_limit_min=translation_limit_min
+        self.translation_limit_max=translation_limit_max
+        self.rotation_limit_min=rotation_limit_min
+        self.rotation_limit_max=rotation_limit_max
+        self.spring_constant_translation=spring_constant_translation
+        self.spring_constant_rotation=spring_constant_rotation
+
+
 class Model(object):
     """pmx data representation
 
@@ -407,6 +469,7 @@ class Model(object):
         morph:
         display_slots:
         rigidbodies:
+        joints:
     """
     __slots__=[
             'version', # pmx version
@@ -422,6 +485,7 @@ class Model(object):
             'morphs',
             'display_slots',
             'rigidbodies',
+            'joints',
             ]
     def __init__(self, version):
         self.version=version
@@ -435,4 +499,5 @@ class Model(object):
         self.materials=[]
         self.bones=[]
         self.rigidbodies=[]
+        self.joints=[]
 
