@@ -281,6 +281,116 @@ class DisplaySlot(object):
         self.refrences=[]
 
 
+class Shape(object):
+    pass
+
+
+class SphereShape(Shape):
+    __slots__=['radius']
+    def __init__(self, radius):
+        self.radius=radius
+
+
+class CapsuleShape(Shape):
+    __slots__=['short_radius', 'long_radius']
+    def __init__(self, short_radius, long_radius): 
+        self.short_radius=short_radius
+        self.long_radius=long_radius
+
+
+class BoxShape(Shape):
+    __slots__=['x', 'y', 'z']
+    def __init__(self, x, y, z):
+        self.x=x
+        self.y=y
+        self.z=z
+
+
+class RigidBodyParam(object):
+    """pmx rigidbody param(for bullet)
+
+    Attributes:
+        mass:
+        linear_damping:
+        angular_damping:
+        restitution:
+        friction:
+    """
+    __slots__=[
+            'mass',
+            'linear_damping',
+            'angular_damping',
+            'restitution',
+            'friction',
+            ]
+    def __init__(self, mass, 
+            linear_damping, angular_damping, restitution, friction):
+        self.mass=mass
+        self.linear_damping=linear_damping
+        self.angular_damping=angular_damping
+        self.restitution=restitution
+        self.friction=friction
+
+class RigidBody(object):
+    """pmx rigidbody
+
+    Attributes:
+        name: 
+        english_name: 
+        bone_index:
+        collision_group:
+        no_collision_flag:
+        shape:
+        param:
+        mode:
+    """
+    __slots__=[
+            'name',
+            'english_name',
+            'bone_index',
+            'collision_group',
+            'no_collision_flag',
+            'shape',
+            'param',
+            'mode',
+            ]
+    def __init__(self,
+            name,
+            english_name,
+            bone_index,
+            collision_group,
+            no_collision_flag,
+            shape_type,
+            shape_size,
+            shape_position,
+            shape_rotation,
+            mass,
+            linear_damping,
+            angular_damping,
+            restitution,
+            friction,
+            mode
+            ):
+        self.name=name
+        self.english_name=english_name
+        self.bone_index=bone_index
+        self.collision_group=collision_group
+        self.no_collision_flag=no_collision_flag
+        if shape_type==0:
+            self.shape=SphereShape(shape_size.x)
+        elif shape_type==1:
+            self.shape=BoxShape(shape_size.x, shape_size.y, shape_size.z)
+        elif shape_type==2:
+            self.shape=CapsuleShape(shape_size.x, shape_size.y)
+        else:
+            raise pymeshio.common.ParseException(
+                    "unknown shape_type: {0}".format(shape_type))
+        self.param=RigidBodyParam(mass,
+                linear_damping, angular_damping,
+                restitution, friction)
+        self.mode=mode
+
+
 class Model(object):
     """pmx data representation
 
@@ -296,6 +406,7 @@ class Model(object):
         bones:
         morph:
         display_slots:
+        rigidbodies:
     """
     __slots__=[
             'version', # pmx version
@@ -310,6 +421,7 @@ class Model(object):
             'bones',
             'morphs',
             'display_slots',
+            'rigidbodies',
             ]
     def __init__(self, version):
         self.version=version
@@ -322,4 +434,5 @@ class Model(object):
         self.textures=[]
         self.materials=[]
         self.bones=[]
+        self.rigidbodies=[]
 

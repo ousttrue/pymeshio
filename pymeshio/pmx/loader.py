@@ -231,6 +231,25 @@ class Loader(pymeshio.common.BinaryLoader):
                 raise pymeshio.common.ParseException(
                         "unknown display_type: {0}".format(display_type))
 
+    def read_rigidbody(self):
+        return pymeshio.pmx.RigidBody(
+                name=self.read_text(), 
+                english_name=self.read_text(),
+                bone_index=self.read_bone_index(),
+                collision_group=self.read_uint(1),
+                no_collision_flag=self.read_uint(2),
+                shape_type=self.read_uint(1),
+                shape_size=self.read_vector3(),
+                shape_position=self.read_vector3(),
+                shape_rotation=self.read_vector3(),
+                mass=self.read_float(),
+                linear_damping=self.read_float(),
+                angular_damping=self.read_float(),
+                restitution=self.read_float(),
+                friction=self.read_float(),
+                mode=self.read_uint(1)
+                )
+
 
 def load(path: str) -> pymeshio.pmx.Model:
     # general binary loader
@@ -282,33 +301,22 @@ def load(path: str) -> pymeshio.pmx.Model:
     model.english_comment = loader.read_text()
 
     # model data
-    vertex_count=loader.read_uint(4)
     model.vertices=[loader.read_vertex() 
-            for _ in range(vertex_count)]
-
-    index_count=loader.read_uint(4)
+            for _ in range(loader.read_uint(4))]
     model.indices=[loader.read_vertex_index() 
-            for _ in range(index_count)]
-
-    texture_count=loader.read_uint(4)
+            for _ in range(loader.read_uint(4))]
     model.textures=[loader.read_text() 
-            for _ in range(texture_count)]
-
-    material_count=loader.read_uint(4)
+            for _ in range(loader.read_uint(4))]
     model.materials=[loader.read_material() 
-            for _ in range(material_count)]
-
-    bone_count=loader.read_uint(4)
+            for _ in range(loader.read_uint(4))]
     model.bones=[loader.read_bone() 
-            for _ in range(bone_count)]
-
-    morph_count=loader.read_uint(4)
+            for _ in range(loader.read_uint(4))]
     model.morphs=[loader.read_morgh() 
-            for _ in range(morph_count)]
-
-    display_slot_count=loader.read_uint(4)
+            for _ in range(loader.read_uint(4))]
     model.display_slots=[loader.read_display_slot() 
-            for _ in range(display_slot_count)]
+            for _ in range(loader.read_uint(4))]
+    model.rigidbodies=[loader.read_rigidbody()
+            for _ in range(loader.read_uint(4))]
 
     return model
 

@@ -33,3 +33,4 @@ def test_read():
     assert len(model.bones)==140
     assert len(model.morphs)==30
     assert len(model.display_slots)==9
+    assert len(model.rigidbodies)==45
