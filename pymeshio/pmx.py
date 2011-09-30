@@ -21,6 +21,98 @@ class ParseException(Exception):
     pass
 
 
+class Ik(object):
+    """ik info
+    """
+    __slots__=[
+            'target_index',
+            'loop',
+            'limit_radian',
+            'link',
+            ]
+    def __init__(self, target_index, loop, limit_radian):
+        self.target_index=target_index
+        self.loop=loop
+        self.limit_radian=limit_radian
+        self.link=[]
+
+
+class IkLink(object):
+    """ik link info
+    """
+    __slots__=[
+            'bone_index',
+            'limit_angle',
+            'limit_min',
+            'limit_max',
+            ]
+    def __init__(self, bone_index, limit_angle):
+        self.bone_index=bone_index
+        self.limit_angle=limit_angle
+        self.limit_min=None
+        self.limit_max=None
+
+
+class Bone(object):
+    """material
+
+    Bone: see __init__
+    """
+    __slots__=[
+            'name',
+            'english_name',
+            'position',
+            'parent_index',
+            'layer',
+            'flag',
+
+            'tail_positoin',
+            'tail_index',
+            'effect_index',
+            'effect_factor',
+            'fixed_axis',
+            'local_x_vector',
+            'local_z_vector',
+            'external_key',
+            'ik',
+            ]
+    def __init__(self,
+            name: str,
+            english_name: str,
+            position: common.Vector3,
+            parent_index: int,
+            layer: int,
+            flag: int
+            ):
+        self.name=name,
+        self.english_name=english_name
+        self.position=position
+        self.parent_index=parent_index
+        self.layer=layer
+        self.flag=flag
+
+    def getConnectionFlag(self) -> int:
+        return self.flag & 0x0001
+
+    def getIkFlag(self) -> int:
+        return (self.flag & 0x0020) >> 5
+
+    def getRotationFlag(self) -> int:
+        return (self.flag & 0x0100) >> 8
+
+    def getTranslationFlag(self) -> int:
+        return (self.flag & 0x0200) >> 9
+
+    def getFixedAxisFlag(self) -> int:
+        return (self.flag & 0x0400) >> 10
+
+    def getLocalCoordinateFlag(self) -> int:
+        return (self.flag &  0x0800) >> 11
+    
+    def getExternalParentDeformFlag(self) -> int:
+        return (self.flag &  0x2000) >> 13
+
+ 
 class Material(object):
     """material
 
@@ -205,30 +297,30 @@ class IO(object):
         if signature!=b"PMX ":
             print("invalid signature", self.signature)
             return False
-        version=self.__unpack("f", 4)
+        version=self.__read_float()
         if version!=2.0:
             print("unknown version", version)
         self.__model.version=version
         # flags
-        flag_bytes=self.__unpack("B", 1)
+        flag_bytes=self.__read_uint(1)
         if flag_bytes!=8:
             print("invalid flag length", self.flag_bytes)
             return False
         # text encoding
-        self.text_encoding=self.__unpack("B", 1)
+        self.text_encoding=self.__read_uint(1)
         self.__read_text=self.__get_read_text()
         # uv
-        self.extended_uv=self.__unpack("B", 1)
+        self.extended_uv=self.__read_uint(1)
         if self.extended_uv>0:
             print("extended uv is not supported", self.extended_uv)
             return False
         # index size
-        self.vertex_index_size=self.__unpack("B", 1)
-        self.texture_index_size=self.__unpack("B", 1)
-        self.material_index_size=self.__unpack("B", 1)
-        self.bone_index_size=self.__unpack("B", 1)
-        self.morph_index_size=self.__unpack("B", 1)
-        self.rigidbody_index_size=self.__unpack("B", 1)
+        self.vertex_index_size=self.__read_uint(1)
+        self.texture_index_size=self.__read_uint(1)
+        self.material_index_size=self.__read_uint(1)
+        self.bone_index_size=self.__read_uint(1)
+        self.morph_index_size=self.__read_uint(1)
+        self.rigidbody_index_size=self.__read_uint(1)
 
         ####################
         # model info
@@ -289,12 +381,12 @@ class IO(object):
     def __get_read_text(self) -> "text process function":
         if self.text_encoding==0:
             def read_text():
-                size=self.__unpack("I", 4)
+                size=self.__read_uint(4)
                 return self.__unpack("{0}s".format(size), size).decode("UTF16")
             return read_text
         elif self.text_encoding==1:
             def read_text():
-                size=self.__unpack("I", 4)
+                size=self.__read_uint(4)
                 return self.__unpack("{0}s".format(size), size).decode("UTF8")
             return read_text
         else:
@@ -310,52 +402,55 @@ class IO(object):
         print("not reach here")
         raise ParseException("invalid int size: "+size)
 
+    def __read_float(self):
+        return self.__unpack("f", 4)
+
+    def __read_vector2(self):
+        return common.Vector2(
+                self.__read_float(), 
+                self.__read_float()
+                )
+
+    def __read_vector3(self):
+        return common.Vector3(
+                self.__read_float(), 
+                self.__read_float(), 
+                self.__read_float()
+                )
+
+    def __read_rgba(self):
+        return common.RGBA(
+                self.__read_float(), 
+                self.__read_float(), 
+                self.__read_float(),
+                self.__read_float()
+                )
+
+    def __read_rgb(self):
+        return common.RGB(
+                self.__read_float(), 
+                self.__read_float(), 
+                self.__read_float()
+                )
+
     def __read_vertex(self):
         return Vertex(
                 self.__read_vector3(), # pos
                 self.__read_vector3(), # normal
                 self.__read_vector2(), # uv
                 self.__read_deform(), # deform(bone weight)
-                self.__unpack("f", 4) # edge factor
-                )
-
-    def __read_vector2(self):
-        return common.Vector2(
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4)
-                )
-
-    def __read_vector3(self):
-        return common.Vector3(
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4)
-                )
-
-    def __read_rgba(self):
-        return common.RGBA(
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4),
-                self.__unpack("f", 4)
-                )
-
-    def __read_rgb(self):
-        return common.RGB(
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4), 
-                self.__unpack("f", 4)
+                self.__read_float() # edge factor
                 )
 
     def __read_deform(self):
-        deform_type=self.__unpack("B", 1)
+        deform_type=self.__read_uint(1)
         if deform_type==0:
             return Bdef1(self.__read_uint(self.bone_index_size))
         if deform_type==1:
             return Bdef2(
                     self.__read_uint(self.bone_index_size),
                     self.__read_uint(self.bone_index_size),
-                    self.__unpack("f", 4)
+                    self.__read_float()
                     )
         """
         if deform_type==2:
@@ -364,8 +459,8 @@ class IO(object):
                     self.__read_uint(self.bone_index_size),
                     self.__read_uint(self.bone_index_size),
                     self.__read_uint(self.bone_index_size),
-                    self.__unpack("f", 4), self.__unpack("f", 4),
-                    self.__unpack("f", 4), self.__unpack("f", 4)
+                    self.__read_float(), self.__read_float(),
+                    self.__read_float(), self.__read_float()
                     )
         """
         raise ParseException("unknown deform type: {0}".format(deform_type))
@@ -375,13 +470,13 @@ class IO(object):
                 name=self.__read_text(),
                 english_name=self.__read_text(),
                 diffuse_color=self.__read_rgb(),
-                diffuse_alpha=self.__unpack("f", 4),
+                diffuse_alpha=self.__read_float(),
                 specular_color=self.__read_rgb(),
-                specular_factor=self.__unpack("f", 4),
+                specular_factor=self.__read_float(),
                 ambient_color=self.__read_rgb(),
                 flag=self.__read_uint(1),
                 edge_color=self.__read_rgba(),
-                edge_size=self.__unpack("f", 4),
+                edge_size=self.__read_float(),
                 texture_index=self.__read_uint(self.texture_index_size),
                 sphia_texture_index=self.__read_uint(self.texture_index_size),
                 sphia_mode=self.__read_uint(1),
@@ -398,5 +493,60 @@ class IO(object):
         return material
 
     def __read_bone(self):
-        return None
+        bone=Bone(
+                name=self.__read_text(),
+                english_name=self.__read_text(),
+                position=self.__read_vector3(),
+                parent_index=self.__read_uint(self.bone_index_size),
+                layer=self.__read_uint(4),
+                flag=self.__read_uint(2)                
+                )
+        if bone.getConnectionFlag()==0:
+            bone.tail_positoin=self.__read_vector3()
+        elif bone.getConnectionFlag()==1:
+            bone.tail_index=self.__read_uint(self.bone_index_size)
+        else:
+            raise ParseException("unknown bone conenction flag: {0}".format(
+                bone.getConnectionFlag()))
+
+        if bone.getRotationFlag()==1 or bone.getTranslationFlag()==1:
+            bone.effect_index=self.__read_uint(self.bone_index_size)
+            bone.effect_factor=self.__read_float()
+
+        if bone.getFixedAxisFlag()==1:
+            bone.fixed_axis=self.__read_vector3()
+
+        if bone.getLocalCoordinateFlag()==1:
+            bone.local_x_vector=self.__read_vector3()
+            bone.local_z_vector=self.__read_vector3()
+
+        if bone.getExternalParentDeformFlag()==1:
+            bone.external_key=self.__read_uint(4)
+
+        if bone.getIkFlag()==1:
+            bone.ik=self.__read_ik()
+
+        return bone
+
+    def __read_ik(self):
+        ik=Ik(
+                target_index=self.__read_uint(self.bone_index_size),
+                loop=self.__read_uint(4),
+                limit_radian=self.__read_float())
+        link_size=self.__read_uint(4)
+        ik.link=[self.__read_ik_link() for i in range(link_size)]
+
+    def __read_ik_link(self):
+        link=IkLink(
+                self.__read_uint(self.bone_index_size),
+                self.__read_uint(1))
+        if link.limit_angle==0:
+            pass
+        elif link.limit_angle==1:
+            link.limit_min=self.__read_vector3()
+            link.limit_max=self.__read_vector3()
+        else:
+            raise ParseException("invalid ik link limit_angle: {0}".format(
+                link.limit_angle))
+        return link
 
