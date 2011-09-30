@@ -4,7 +4,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='1.9.3'
+version='2.0.0'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -18,8 +18,10 @@ Features
 --------
 * read/write Metasequioa mqo format
 * read/write MikuMikuDance pmd format
+* read-only  MikuMikuDance pmx format
 * read/write MikuMikuDance vmd format
 * read/write MikuMikuDance vpd format
+
 
 Setup
 -----
@@ -33,9 +35,18 @@ Setup
 
 History
 -------
-1.9.3 (2011-9-30)
+2.0.0 (2011-9-30)
 ~~~~~~~~~~~~~~~~~~
-* refactoring
+* add pmx loader
+
+    >>> import pymeshio.pmx.loader
+    >>> m=pymeshio.pmx.loader.load('resources/初音ミクVer2.pmx')
+    >>> print(m)
+    <pymeshio.pmx.Model object at 0x0281DD50>
+    >>> print(m.name)
+    初音ミク
+    >>> print(m.english_name)
+    Miku Hatsune
 
 1.9.2 (2011-9-29)
 ~~~~~~~~~~~~~~~~~~
@@ -65,7 +76,7 @@ setup(
         description=short_description,
         long_description=long_description,
         classifiers=classifiers,
-        keywords=['mqo', 'pmd', 'vmd', 'vpd', 'mmd', 'blender'],
+        keywords=['mqo', 'pmd', 'pmx', 'vmd', 'vpd', 'mmd', 'blender'],
         author='ousttrue',
         author_email='ousttrue@gmail.com',
         url='http://meshio.sourceforge.jp/',
