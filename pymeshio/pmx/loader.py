@@ -1,88 +1,52 @@
-from pymeshio.pmx import *
-#self.__pos=self.__io.tell()
+# coding: utf-8
+import io
+import pymeshio.common
+import pymeshio.pmx
 
 
-
-class Loader(object):
+class Loader(pymeshio.common.BinaryLoader):
     """pmx loader
-
-    Attributes:
-        text_encoding: 
-        extended_uv:
-        vertex_index_size:
-        texture_index_size:
-        material_index_size:
-        bone_index_size:
-        morph_index_size:
-        rigidbody_index_size:
     """
-    def __init__(self, loader):
-        self.__io=loader
+    def __init__(self, io,
+            text_encoding,
+            extended_uv,
+            vertex_index_size,
+            texture_index_size,
+            material_index_size,
+            bone_index_size,
+            morph_index_size,
+            rigidbody_index_size
+            ):
+        super(Loader, self).__init__(io)
+        self.read_text=self.get_read_text(text_encoding)
+        if extended_uv>0:
+            raise ParseException("extended uv is not supported", extended_uv)
+        self.read_vertex_index=lambda : self.read_uint(vertex_index_size)
+        self.read_texture_index=lambda : self.read_uint(texture_index_size)
+        self.read_material_index=lambda : self.read_uint(material_index_size)
+        self.read_bone_index=lambda : self.read_uint(bone_index_size)
+        self.read_morph_index=lambda : self.read_uint(morph_index_size)
+        self.read_rigidbody_index=lambda : self.read_uint(rigidbody_index_size)
 
     def __str__(self) -> str:
-        return '<PmxIO>'
+        return '<pymeshio.pmx.Loader>'
 
-    def unpack(self, fmt: str, size: int) -> "read value as format":
-        result=struct.unpack(fmt, self.__io.read(size))
-        return result[0]
-
-    def get_read_text(self) -> "text process function":
-        if self.text_encoding==0:
+    def get_read_text(self, text_encoding) -> "text process function":
+        if text_encoding==0:
             def read_text():
                 size=self.read_uint(4)
                 return self.unpack("{0}s".format(size), size).decode("UTF16")
             return read_text
-        elif self.text_encoding==1:
+        elif text_encoding==1:
             def read_text():
                 size=self.read_uint(4)
                 return self.unpack("{0}s".format(size), size).decode("UTF8")
             return read_text
         else:
-            print("unknown text encoding", self.text_encoding)
-
-    def read_uint(self, size):
-        if size==1:
-            return self.unpack("B", size)
-        if size==2:
-            return self.unpack("H", size)
-        if size==4:
-            return self.unpack("I", size)
-        print("not reach here")
-        raise ParseException("invalid int size: "+size)
-
-    def read_float(self):
-        return self.unpack("f", 4)
-
-    def read_vector2(self):
-        return common.Vector2(
-                self.read_float(), 
-                self.read_float()
-                )
-
-    def read_vector3(self):
-        return common.Vector3(
-                self.read_float(), 
-                self.read_float(), 
-                self.read_float()
-                )
-
-    def read_rgba(self):
-        return common.RGBA(
-                self.read_float(), 
-                self.read_float(), 
-                self.read_float(),
-                self.read_float()
-                )
-
-    def read_rgb(self):
-        return common.RGB(
-                self.read_float(), 
-                self.read_float(), 
-                self.read_float()
-                )
+            print("unknown text encoding", text_encoding)
 
     def read_vertex(self):
-        return Vertex(
+        return pymeshio.pmx.Vertex(
                 self.read_vector3(), # pos
                 self.read_vector3(), # normal
                 self.read_vector2(), # uv
@@ -93,20 +57,20 @@ class Loader(object):
     def read_deform(self):
         deform_type=self.read_uint(1)
         if deform_type==0:
-            return Bdef1(self.read_uint(self.bone_index_size))
+            return pymeshio.pmx.Bdef1(self.read_bone_index())
         if deform_type==1:
-            return Bdef2(
-                    self.read_uint(self.bone_index_size),
-                    self.read_uint(self.bone_index_size),
+            return pymeshio.pmx.Bdef2(
+                    self.read_bone_index(),
+                    self.read_bone_index(),
                     self.read_float()
                     )
         """
         if deform_type==2:
-            return Bdef4(
-                    self.read_uint(self.bone_index_size),
-                    self.read_uint(self.bone_index_size),
-                    self.read_uint(self.bone_index_size),
-                    self.read_uint(self.bone_index_size),
+            return pymeshio.pmx.Bdef4(
+                    self.read_bone_index(),
+                    self.read_bone_index(),
+                    self.read_bone_index(),
+                    self.read_bone_index(),
                     self.read_float(), self.read_float(),
                     self.read_float(), self.read_float()
                     )
@@ -114,7 +78,7 @@ class Loader(object):
         raise ParseException("unknown deform type: {0}".format(deform_type))
 
     def read_material(self):
-        material=Material(
+        material=pymeshio.pmx.Material(
                 name=self.read_text(),
                 english_name=self.read_text(),
                 diffuse_color=self.read_rgb(),
@@ -125,13 +89,13 @@ class Loader(object):
                 flag=self.read_uint(1),
                 edge_color=self.read_rgba(),
                 edge_size=self.read_float(),
-                texture_index=self.read_uint(self.texture_index_size),
-                sphia_texture_index=self.read_uint(self.texture_index_size),
+                texture_index=self.read_texture_index(),
+                sphia_texture_index=self.read_texture_index(),
                 sphia_mode=self.read_uint(1),
                 toon_sharing_flag=self.read_uint(1),
                 )
         if material.toon_sharing_flag==0:
-            material.toon_texture_index=self.read_uint(self.texture_index_size)
+            material.toon_texture_index=self.read_texture_index()
         elif material.toon_sharing_flag==1:
             material.toon_texture_index=self.read_uint(1)
         else:
@@ -141,24 +105,24 @@ class Loader(object):
         return material
 
     def read_bone(self):
-        bone=Bone(
+        bone=pymeshio.pmx.Bone(
                 name=self.read_text(),
                 english_name=self.read_text(),
                 position=self.read_vector3(),
-                parent_index=self.read_uint(self.bone_index_size),
+                parent_index=self.read_bone_index(),
                 layer=self.read_uint(4),
                 flag=self.read_uint(2)                
                 )
         if bone.getConnectionFlag()==0:
             bone.tail_positoin=self.read_vector3()
         elif bone.getConnectionFlag()==1:
-            bone.tail_index=self.read_uint(self.bone_index_size)
+            bone.tail_index=self.read_bone_index()
         else:
             raise ParseException("unknown bone conenction flag: {0}".format(
                 bone.getConnectionFlag()))
 
         if bone.getRotationFlag()==1 or bone.getTranslationFlag()==1:
-            bone.effect_index=self.read_uint(self.bone_index_size)
+            bone.effect_index=self.read_bone_index()
             bone.effect_factor=self.read_float()
 
         if bone.getFixedAxisFlag()==1:
@@ -177,16 +141,16 @@ class Loader(object):
         return bone
 
     def read_ik(self):
-        ik=Ik(
-                target_index=self.read_uint(self.bone_index_size),
+        ik=pymeshio.pmx.Ik(
+                target_index=self.read_bone_index(),
                 loop=self.read_uint(4),
                 limit_radian=self.read_float())
         link_size=self.read_uint(4)
         ik.link=[self.read_ik_link() for i in range(link_size)]
 
     def read_ik_link(self):
-        link=IkLink(
-                self.read_uint(self.bone_index_size),
+        link=pymeshio.pmx.IkLink(
+                self.read_bone_index(),
                 self.read_uint(1))
         if link.limit_angle==0:
             pass
@@ -199,85 +163,72 @@ class Loader(object):
         return link
 
 
-def load(path: str) -> Model:
-    with open(path, "rb") as f:
-        model=Model()
-        loader=Loader(f)
+def load(path: str) -> pymeshio.pmx.Model:
+    # general binary loader
+    loader=pymeshio.common.BinaryLoader(
+            io.BytesIO(
+                pymeshio.common.readall(path)))
 
-        ####################
-        # header
-        ####################
-        signature=loader.unpack("4s", 4)
-        if signature!=b"PMX ":
-            raise ParseException("invalid signature", loader.signature)
+    # header
+    signature=loader.unpack("4s", 4)
+    if signature!=b"PMX ":
+        raise ParseException("invalid signature", loader.signature)
 
-        version=loader.read_float()
-        if version!=2.0:
-            print("unknown version", version)
+    version=loader.read_float()
+    if version!=2.0:
+        print("unknown version", version)
+    model=pymeshio.pmx.Model(version)
 
-        model.version=version
-        # flags
-        flag_bytes=loader.read_uint(1)
-        if flag_bytes!=8:
-            raise ParseException("invalid flag length", loader.flag_bytes)
+    # flags
+    flag_bytes=loader.read_uint(1)
+    if flag_bytes!=8:
+        raise ParseException("invalid flag length", loader.flag_bytes)
+    text_encoding=loader.read_uint(1)
+    extended_uv=loader.read_uint(1)
+    vertex_index_size=loader.read_uint(1)
+    texture_index_size=loader.read_uint(1)
+    material_index_size=loader.read_uint(1)
+    bone_index_size=loader.read_uint(1)
+    morph_index_size=loader.read_uint(1)
+    rigidbody_index_size=loader.read_uint(1)
+    
+    # pmx custom loader
+    loader=Loader(loader.io,
+            text_encoding,
+            extended_uv,
+            vertex_index_size,
+            texture_index_size,
+            material_index_size,
+            bone_index_size,
+            morph_index_size,
+            rigidbody_index_size
+            )
 
-        # text encoding
-        loader.text_encoding=loader.read_uint(1)
-        loader.read_text=loader.get_read_text()
-        # uv
-        loader.extended_uv=loader.read_uint(1)
-        if loader.extended_uv>0:
-            raise ParseException("extended uv is not supported", loader.extended_uv)
+    # model info
+    model.name = loader.read_text()
+    model.english_name = loader.read_text()
+    model.comment = loader.read_text()
+    model.english_comment = loader.read_text()
 
-        # index size
-        loader.vertex_index_size=loader.read_uint(1)
-        loader.texture_index_size=loader.read_uint(1)
-        loader.material_index_size=loader.read_uint(1)
-        loader.bone_index_size=loader.read_uint(1)
-        loader.morph_index_size=loader.read_uint(1)
-        loader.rigidbody_index_size=loader.read_uint(1)
+    # vertices
+    vertex_count=loader.read_uint(4)
+    model.vertices=[loader.read_vertex() for i in range(vertex_count)]
 
-        ####################
-        # model info
-        ####################
-        model.name = loader.read_text()
-        model.english_name = loader.read_text()
-        model.comment = loader.read_text()
-        model.english_comment = loader.read_text()
+    # indices
+    index_count=loader.read_uint(4)
+    model.indices=[loader.read_vertex_index() for i in range(index_count)]
 
-        ####################
-        # vertices
-        ####################
-        vertex_count=loader.read_uint(4)
-        model.vertices=[loader.read_vertex() 
-                for i in range(vertex_count)]
+    # textures
+    texture_count=loader.read_uint(4)
+    model.textures=[loader.read_text() for i in range(texture_count)]
 
-        ####################
-        # indices
-        ####################
-        index_count=loader.read_uint(4)
-        model.indices=[loader.read_uint(loader.vertex_index_size) 
-                for i in range(index_count)]
+    # materials
+    material_count=loader.read_uint(4)
+    model.materials=[loader.read_material() for i in range(material_count)]
 
-        ####################
-        # textures
-        ####################
-        texture_count=loader.read_uint(4)
-        model.textures=[loader.read_text() 
-                for i in range(texture_count)]
+    # bones
+    bone_count=loader.read_uint(4)
+    model.bones=[loader.read_bone() for i in range(bone_count)]
 
-        ####################
-        # materials
-        ####################
-        material_count=loader.read_uint(4)
-        model.materials=[loader.read_material() 
-                for i in range(material_count)]
-
-        ####################
-        # bones
-        ####################
-        bone_count=loader.read_uint(4)
-        model.bones=[loader.read_bone() 
-                for i in range(bone_count)]
-        return model
+    return model
 

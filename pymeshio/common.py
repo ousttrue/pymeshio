@@ -3,20 +3,12 @@
 common utilities.
 """
 import math
-
-def radian_to_degree(x):
-    """darian to deglee"""
-
-    return x/math.pi * 180.0
+import struct
 
 
 """
 common structures.
 """
-class ParseException(Exception):
-    pass
-
-
 class Vector2(object):
     """
     2D coordinate for uv value
@@ -218,4 +210,73 @@ class RGBA(object):
             return self.a
         else:
             assert(False)
+
+
+"""
+utilities
+"""
+def radian_to_degree(x):
+    """darian to deglee"""
+
+    return x/math.pi * 180.0
+
+
+class ParseException(Exception):
+    pass
+
+
+def readall(path: str) -> bytes:
+    with open(path, "rb") as f:
+        return f.read()
+
+
+class BinaryLoader(object):
+    def __init__(self, io):
+        self.io=io
+
+    def unpack(self, fmt: str, size: int) -> "read value as format":
+        result=struct.unpack(fmt, self.io.read(size))
+        return result[0]
+
+    def read_uint(self, size):
+        if size==1:
+            return self.unpack("B", size)
+        if size==2:
+            return self.unpack("H", size)
+        if size==4:
+            return self.unpack("I", size)
+        print("not reach here")
+        raise ParseException("invalid int size: "+size)
+
+    def read_float(self):
+        return self.unpack("f", 4)
+
+    def read_vector2(self):
+        return Vector2(
+                self.read_float(), 
+                self.read_float()
+                )
+
+    def read_vector3(self):
+        return Vector3(
+                self.read_float(), 
+                self.read_float(), 
+                self.read_float()
+                )
+
+    def read_rgba(self):
+        return RGBA(
+                self.read_float(), 
+                self.read_float(), 
+                self.read_float(),
+                self.read_float()
+                )
+
+    def read_rgb(self):
+        return RGB(
+                self.read_float(), 
+                self.read_float(), 
+                self.read_float()
+                )
+
 

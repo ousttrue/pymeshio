@@ -244,8 +244,8 @@ class Model(object):
             'materials',
             'bones',
             ]
-    def __init__(self):
-        self.version=0.0
+    def __init__(self, version):
+        self.version=version
         self.name=''
         self.english_name=''
         self.comment=''
