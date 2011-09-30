@@ -13,6 +13,10 @@ def radian_to_degree(x):
 """
 common structures.
 """
+class ParseException(Exception):
+    pass
+
+
 class Vector2(object):
     """
     2D coordinate for uv value

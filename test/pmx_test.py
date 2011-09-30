@@ -1,12 +1,11 @@
 # coding: utf-8
-import pymeshio.pmx
+import pymeshio.pmx.loader
 
 
 PMX_MODEL='resources/初音ミクVer2.pmx'
 
 def test_read():
-    io=pymeshio.pmx.IO()
-    model=io.read(PMX_MODEL)
+    model=pymeshio.pmx.loader.load(PMX_MODEL)
     assert model.__class__==pymeshio.pmx.Model
     assert model.name=='初音ミク'
     assert model.english_name=='Miku Hatsune'
