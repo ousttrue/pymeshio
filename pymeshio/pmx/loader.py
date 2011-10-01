@@ -99,7 +99,7 @@ class Loader(pymeshio.common.BinaryLoader):
                     "unknown toon_sharing_flag {0}".format(
                         material.toon_sharing_flag))
         material.comment=self.read_text()
-        material.index_count=self.read_uint(4)
+        material.vertex_count=self.read_uint(4)
         return material
 
     def read_bone(self):
@@ -272,6 +272,8 @@ def load(path: str) -> pymeshio.pmx.Model:
     loader=pymeshio.common.BinaryLoader(
             io.BytesIO(
                 pymeshio.common.readall(path)))
+    #loader=pymeshio.common.BinaryLoader(open(path, 'rb'))
+
 
     # header
     signature=loader.unpack("4s", 4)

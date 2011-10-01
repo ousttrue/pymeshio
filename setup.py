@@ -1,10 +1,12 @@
+#!/usr/bin/env python
+
 from setuptools import setup
 import sys
 import os
 import shutil
 
 name='pymeshio'
-version='2.0.0'
+version='2.0.1'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -33,20 +35,37 @@ Setup
    $ cd pymeshio-x.x.x
    $ python setup.py install
 
-History
--------
-2.0.0 (2011-9-30)
-~~~~~~~~~~~~~~~~~~
-* add pmx loader
+Usage
+-----
+::
 
     >>> import pymeshio.pmx.loader
     >>> m=pymeshio.pmx.loader.load('resources/初音ミクVer2.pmx')
     >>> print(m)
-    <pymeshio.pmx.Model object at 0x0281DD50>
-    >>> print(m.name)
-    初音ミク
-    >>> print(m.english_name)
-    Miku Hatsune
+    <pmx-2.0 "Miku Hatsune" 12354vertices>
+    >>> print(dir(m))
+    ['__class__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', 'bones', 'comment', 'display_slots', 'english_comment', 'english_name', 'indices', 'joints', 'materials', 'morphs', 'name', 'rigidbodies', 'textures', 'version', 'vertices']
+
+ToDo
+--------
+
+* pmx writer
+* pmd to pmx converter
+* blender importer for pmx
+* blender exporter for pmx
+
+
+History
+-------
+2.0.0 (2011-10-01)
+~~~~~~~~~~~~~~~~~~
+* fix pymeshio.pmx.Bdef1.bone_index to index0
+* fix pymeshio.pmx.Material.index_count to vertex_count
+* add pmx example
+
+2.0.0 (2011-9-30)
+~~~~~~~~~~~~~~~~~~
+* add pmx loader
 
 1.9.2 (2011-9-29)
 ~~~~~~~~~~~~~~~~~~

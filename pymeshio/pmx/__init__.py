@@ -132,7 +132,7 @@ class Material(object):
             'toon_sharing_flag',
             'toon_texture_index',
             'comment',
-            'index_count',
+            'vertex_count',
             ]
     def __init__(self,
             name: str,
@@ -167,7 +167,12 @@ class Material(object):
         #
         self.toon_texture_index=None
         self.comment=''
-        self.index_count=0
+        self.vertex_count=0
+
+    def __str__(self):
+        return ("<pmx.Material {name}>".format(
+            name=self.english_name
+            ))
 
 
 class Deform(object):
@@ -179,9 +184,9 @@ class Bdef1(object):
 
     Attributes: see __init__
     """
-    __slots__=[ 'bone_index']
-    def __init__(self, bone_index: int):
-        self.bone_index=bone_index
+    __slots__=[ 'index0']
+    def __init__(self, index0: int):
+        self.index0=index0
 
 
 class Bdef2(object):
@@ -500,4 +505,11 @@ class Model(object):
         self.bones=[]
         self.rigidbodies=[]
         self.joints=[]
+
+    def __str__(self):
+        return ('<pmx-{version} "{name}" {vertices}vertices>'.format(
+            version=self.version,
+            name=self.english_name,
+            vertices=len(self.vertices)
+            ))
 

@@ -10,6 +10,7 @@ import opengl
 import opengl.rokuro
 import mqobuilder
 import pmdbuilder
+import pmxbuilder
 
 
 class Frame(tkinter.Frame):
@@ -39,7 +40,7 @@ class Frame(tkinter.Frame):
     def onOpen(self):
         path=tkinter.filedialog.askopenfilename(
                 filetypes=[
-                    ('poloygon model files', '*.mqo;*.pmd'),
+                    ('poloygon model files', '*.mqo;*.pmd;*.pmx'),
                     ], 
                 initialdir=self.current)
         self.current=os.path.dirname(path)
@@ -63,6 +64,10 @@ class Frame(tkinter.Frame):
             return mqobuilder.build(path)
         elif path.lower().endswith(".pmd"):
             return pmdbuilder.build(path)
+        elif path.lower().endswith(".pmx"):
+            return pmxbuilder.build(path)
+        else:
+            print("unknown file format: {0}".format(path))
 
     def onKeyDown(self, event):
         key=event.keycode
