@@ -9,6 +9,7 @@ import sys
 import math
 import pymeshio.common
 import pymeshio.mqo.loader
+import warnings
 
 
 """
@@ -231,6 +232,7 @@ class IO(object):
         pass
 
     def read(self, path):
+        warnings.warn("'pymeshio.mqo.IO.read' will be replaced by 'pymeshio.mqo.loader.load'")
         model=pymeshio.mqo.loader.load(path)
         if model:
             self.has_mikoto=model.has_mikoto
