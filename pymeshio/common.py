@@ -225,7 +225,7 @@ class ParseException(Exception):
     pass
 
 
-def readall(path: str) -> bytes:
+def readall(path):
     with open(path, "rb") as f:
         return f.read()
 
@@ -234,7 +234,7 @@ class BinaryLoader(object):
     def __init__(self, io):
         self.io=io
 
-    def unpack(self, fmt: str, size: int) -> "read value as format":
+    def unpack(self, fmt, size):
         result=struct.unpack(fmt, self.io.read(size))
         return result[0]
 

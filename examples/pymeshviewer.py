@@ -1,10 +1,23 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""
+this script require pyOpenGL, PIL, numpy and Togl(tck/tk).
+
+Togl install on Windows
+=======================
+
+* download Togl2.0-8.4-Windows.zip
+* copy Togl2.0-8.4-Windows/lib/Togl2.0 to C:/PythonXX/tcl/Togl2.0
+"""
 
 import sys
 import os
-import tkinter
-import tkinter.filedialog
+try:
+    import tkinter
+    import tkinter.filedialog as tkinter_filedialog
+except ImportError as e:
+    import Tkinter as tkinter
+    import tkFileDialog as tkinter_filedialog
 import togl
 import opengl
 import opengl.rokuro
@@ -15,7 +28,8 @@ import pmxbuilder
 
 class Frame(tkinter.Frame):
     def __init__(self, width, height, master=None, **kw):
-        super(Frame, self).__init__(master, **kw)
+        #super(Frame, self).__init__(master, **kw)
+        tkinter.Frame.__init__(self, master, **kw)
         self.master.title('pymeshio viewer')
         self.current='.'
         # setup menu
@@ -38,7 +52,7 @@ class Frame(tkinter.Frame):
         self.bind('<MouseWheel>', lambda e: self.glworld.onWheel(-e.delta) and self.glwidget.onDraw())
 
     def onOpen(self):
-        path=tkinter.filedialog.askopenfilename(
+        path=tkinter_filedialog.askopenfilename(
                 filetypes=[
                     ('poloygon model files', '*.mqo;*.pmd;*.pmx'),
                     ], 

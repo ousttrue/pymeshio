@@ -6,7 +6,8 @@ import OpenGL.Tk
 
 class Widget(OpenGL.Tk.RawOpengl):
     def __init__(self, master, engine, *args, **kw):
-        super(Widget, self).__init__(master, *args, **kw)
+        #super(Widget, self).__init__(master, *args, **kw)
+        OpenGL.Tk.RawOpengl.__init__(self, master, *args, **kw)
         self.engine=engine
         self.bind('<Map>', self.onDraw)
         self.bind('<Expose>', self.onDraw)

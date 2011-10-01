@@ -74,12 +74,12 @@ class Bone(object):
             'ik',
             ]
     def __init__(self,
-            name: str,
-            english_name: str,
-            position: common.Vector3,
-            parent_index: int,
-            layer: int,
-            flag: int
+            name,
+            english_name,
+            position,
+            parent_index,
+            layer,
+            flag
             ):
         self.name=name,
         self.english_name=english_name
@@ -88,25 +88,25 @@ class Bone(object):
         self.layer=layer
         self.flag=flag
 
-    def getConnectionFlag(self) -> int:
+    def getConnectionFlag(self):
         return self.flag & 0x0001
 
-    def getIkFlag(self) -> int:
+    def getIkFlag(self):
         return (self.flag & 0x0020) >> 5
 
-    def getRotationFlag(self) -> int:
+    def getRotationFlag(self):
         return (self.flag & 0x0100) >> 8
 
-    def getTranslationFlag(self) -> int:
+    def getTranslationFlag(self):
         return (self.flag & 0x0200) >> 9
 
-    def getFixedAxisFlag(self) -> int:
+    def getFixedAxisFlag(self):
         return (self.flag & 0x0400) >> 10
 
-    def getLocalCoordinateFlag(self) -> int:
+    def getLocalCoordinateFlag(self):
         return (self.flag &  0x0800) >> 11
     
-    def getExternalParentDeformFlag(self) -> int:
+    def getExternalParentDeformFlag(self):
         return (self.flag &  0x2000) >> 13
 
  
@@ -135,20 +135,20 @@ class Material(object):
             'vertex_count',
             ]
     def __init__(self,
-            name: str,
-            english_name: str,
-            diffuse_color: common.RGB,
-            diffuse_alpha: float,
-            specular_color: common.RGB,
-            specular_factor: float,
-            ambient_color: common.RGB,
-            flag: int,
-            edge_color: common.RGBA,
-            edge_size: float,
-            texture_index: int,
-            sphia_texture_index: int,
-            sphia_mode: int,
-            toon_sharing_flag: int
+            name,
+            english_name,
+            diffuse_color,
+            diffuse_alpha,
+            specular_color,
+            specular_factor,
+            ambient_color,
+            flag,
+            edge_color,
+            edge_size,
+            texture_index,
+            sphia_texture_index,
+            sphia_mode,
+            toon_sharing_flag
             ):
         self.name=name
         self.english_name=english_name
@@ -185,7 +185,7 @@ class Bdef1(object):
     Attributes: see __init__
     """
     __slots__=[ 'index0']
-    def __init__(self, index0: int):
+    def __init__(self, index0):
         self.index0=index0
 
 
@@ -196,9 +196,9 @@ class Bdef2(object):
     """
     __slots__=[ 'index0', 'index1', 'weight0']
     def __init__(self, 
-            index0: int,
-            index1: int,
-            weight0: float):
+            index0,
+            index1,
+            weight0):
         self.index0=index0
         self.index1=index1
         self.weight0=weight0
@@ -211,11 +211,11 @@ class Vertex(object):
     """
     __slots__=[ 'position', 'normal', 'uv', 'deform', 'edge_factor' ]
     def __init__(self, 
-            position: common.Vector3, 
-            normal: common.Vector3, 
-            uv: common.Vector2, 
-            deform: Deform, 
-            edge_factor: float):
+            position, 
+            normal, 
+            uv, 
+            deform, 
+            edge_factor):
         self.position=position 
         self.normal=normal
         self.uv=uv

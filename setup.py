@@ -16,6 +16,7 @@ create for blender import/expoert plugin backend.
 Requirements
 ------------
 * Python 3
+* Python 2.7
 
 Features
 --------
@@ -58,8 +59,9 @@ ToDo
 
 History
 -------
-2.0.0 (2011-10-01)
+2.0.2 (2011-10-01)
 ~~~~~~~~~~~~~~~~~~
+* fix for Python 2.7(remove anotation)
 * fix pymeshio.pmx.Bdef1.bone_index to index0
 * fix pymeshio.pmx.Material.index_count to vertex_count
 * add pmx example

@@ -29,10 +29,10 @@ class Loader(pymeshio.common.BinaryLoader):
         self.read_morph_index=lambda : self.read_uint(morph_index_size)
         self.read_rigidbody_index=lambda : self.read_uint(rigidbody_index_size)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return '<pymeshio.pmx.Loader>'
 
-    def get_read_text(self, text_encoding) -> "text process function":
+    def get_read_text(self, text_encoding):
         if text_encoding==0:
             def read_text():
                 size=self.read_uint(4)
@@ -267,7 +267,7 @@ class Loader(pymeshio.common.BinaryLoader):
                 spring_constant_rotation=self.read_vector3())
 
 
-def load(path: str) -> pymeshio.pmx.Model:
+def load(path):
     # general binary loader
     loader=pymeshio.common.BinaryLoader(
             io.BytesIO(

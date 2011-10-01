@@ -2,28 +2,28 @@
 import pymeshio.pmx.loader
 
 
-PMX_MODEL='resources/初音ミクVer2.pmx'
+PMX_MODEL=u'resources/初音ミクVer2.pmx'
 
 def test_read():
     model=pymeshio.pmx.loader.load(PMX_MODEL)
     assert model.__class__==pymeshio.pmx.Model
-    assert model.name=='初音ミク'
-    assert model.english_name=='Miku Hatsune'
+    assert model.name==u'初音ミク'
+    assert model.english_name==u'Miku Hatsune'
     assert model.comment==(
-            "PolyMo用モデルデータ：初音ミク ver.2.3\r\n"+
-            "(物理演算対応モデル)\r\n"+
-            "\r\n"+
-            "モデリング	：あにまさ氏\r\n"+
-            "データ変換	：あにまさ氏\r\n"+
-            "Copyright	：CRYPTON FUTURE MEDIA, INC"
+            u"PolyMo用モデルデータ：初音ミク ver.2.3\r\n"+
+            u"(物理演算対応モデル)\r\n"+
+            u"\r\n"+
+            u"モデリング	：あにまさ氏\r\n"+
+            u"データ変換	：あにまさ氏\r\n"+
+            u"Copyright	：CRYPTON FUTURE MEDIA, INC"
             )
     assert model.english_comment==(
-            "MMD Model: Miku Hatsune ver.2.3\r\n"+
-            "(Physical Model)\r\n"+
-            "\r\n"+
-            "Modeling by	Animasa\r\n"+
-            "Converted by	Animasa\r\n"+
-            "Copyright		CRYPTON FUTURE MEDIA, INC"
+            u"MMD Model: Miku Hatsune ver.2.3\r\n"+
+            u"(Physical Model)\r\n"+
+            u"\r\n"+
+            u"Modeling by	Animasa\r\n"+
+            u"Converted by	Animasa\r\n"+
+            u"Copyright		CRYPTON FUTURE MEDIA, INC"
             )
 
     assert len(model.vertices)==12354
