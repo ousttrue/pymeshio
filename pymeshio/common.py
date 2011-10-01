@@ -32,6 +32,10 @@ class Vector2(object):
     def to_tuple(self):
         return (self.x, self.y)
 
+    def cross(self, rhs):
+        """cross(outer) product"""
+        return self.x*rhs.y-self.y*rhs.x
+
 
 class Vector3(object):
     """
@@ -59,8 +63,39 @@ class Vector3(object):
     def to_tuple(self):
         return (self.x, self.y, self.z)
 
-    def __add__(l, r):
-        return Vector3(l.x+r.x, l.y+r.y, l.z+r.z)
+    def __add__(self, r):
+        return Vector3(self.x+r.x, self.y+r.y, self.z+r.z)
+
+    def __sub__(self, rhs):
+        return Vector3(self.x-rhs.x, self.y-rhs.y, self.z-rhs.z)
+
+    def getSqNorm(self):
+        return self.x*self.x + self.y*self.y + self.z*self.z
+
+    def getNorm(self):
+        return math.sqrt(self.getSqNorm())
+
+    def normalize(self):
+        factor=1.0/self.getNorm()
+        self.x*=factor
+        self.y*=factor
+        self.z*=factor
+        return self
+
+    def to_a(self):
+        return [self.x, self.y, self.z]
+
+    def dot(self, rhs):
+        """dot(inner) product"""
+        return self.x*rhs.x + self.y*rhs.y + self.z*rhs.z
+
+    def cross(self, rhs):
+        """cross(outer) product"""
+        return Vector3(
+                self.y*rhs.z - rhs.y*self.z,
+                self.z*rhs.x - rhs.z*self.x,
+                self.x*rhs.y - rhs.x*self.y,
+                )
 
 
 class Quaternion(object):
@@ -226,11 +261,15 @@ class ParseException(Exception):
 
 
 def readall(path):
+    """read all bytes from path
+    """
     with open(path, "rb") as f:
         return f.read()
 
 
 class BinaryLoader(object):
+    """general BinaryLoader
+    """
     def __init__(self, io):
         self.io=io
 
@@ -278,5 +317,4 @@ class BinaryLoader(object):
                 self.read_float(), 
                 self.read_float()
                 )
-
 
