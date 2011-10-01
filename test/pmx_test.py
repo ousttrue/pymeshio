@@ -2,10 +2,10 @@
 import pymeshio.pmx.loader
 
 
-PMX_MODEL=u'resources/初音ミクVer2.pmx'
+PMX_FILE=u'resources/初音ミクVer2.pmx'
 
 def test_read():
-    model=pymeshio.pmx.loader.load(PMX_MODEL)
+    model=pymeshio.pmx.loader.load(PMX_FILE)
     assert model.__class__==pymeshio.pmx.Model
     assert model.name==u'初音ミク'
     assert model.english_name==u'Miku Hatsune'
