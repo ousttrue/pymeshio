@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.0.1'
+version='2.0.2'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
