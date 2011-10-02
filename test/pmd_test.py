@@ -3,7 +3,7 @@ import sys
 import io
 import unittest
 import pymeshio.pmd
-import pymeshio.pmd.loader
+import pymeshio.pmd.reader
 import pymeshio.pmd.writer
 
 
@@ -20,8 +20,8 @@ class TestPmd(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_load(self):
-        model=pymeshio.pmd.loader.load_from_file(PMD_FILE)
+    def test_read(self):
+        model=pymeshio.pmd.reader.read_from_file(PMD_FILE)
         self.assertEqual(pymeshio.pmd.Model,  model.__class__)
         self.assertEqual(u'初音ミク'.encode('cp932'),  model.name)
         self.assertEqual(u'Miku Hatsune'.encode('cp932'),  model.english_name)
@@ -53,11 +53,11 @@ class TestPmd(unittest.TestCase):
     def test_write(self):
         # read source file
         buf=pymeshio.common.readall(PMD_FILE)
-        # load and write to out
-        model=pymeshio.pmd.loader.load(io.BytesIO(buf))
+        # read and write to out
+        model=pymeshio.pmd.reader.read(io.BytesIO(buf))
         out=io.BytesIO()
         pymeshio.pmd.writer.write(out, model)
         # read out buffer again
-        model2=pymeshio.pmd.loader.load(io.BytesIO(out.getvalue()))
+        model2=pymeshio.pmd.reader.read(io.BytesIO(out.getvalue()))
         self.assertEqual(model, model2)
 

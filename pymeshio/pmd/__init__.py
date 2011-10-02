@@ -535,7 +535,7 @@ class Model(object):
     def getUV(self, i): return self.vertices[i].uv
 
     def __str__(self):
-        return '<PMDLoader version: %g, model: "%s", vertex: %d, face: %d, material: %d, bone: %d ik: %d, skin: %d>' % (
+        return '<pmd-%g, "%s" vertex: %d, face: %d, material: %d, bone: %d ik: %d, skin: %d>' % (
             self.version, self.name, len(self.vertices), len(self.indices),
             len(self.materials), len(self.bones), len(self.ik_list), len(self.morph_list))
 
@@ -567,7 +567,7 @@ class IO(object):
 
     def read(self, path):
         warnings.warn("'pymeshio.mqo.IO.read' will be replaced by 'pymeshio.mqo.loader.load'")
-        model=pymeshio.pmd.loader.load_from_file(path)
+        model=pymeshio.pmd.reader.read_from_file(path)
         if model:
             return True
 

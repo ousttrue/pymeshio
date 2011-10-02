@@ -4,8 +4,8 @@ import pymeshio.common
 import pymeshio.pmx
 
 
-class Loader(pymeshio.common.BinaryLoader):
-    """pmx loader
+class Reader(pymeshio.common.BinaryReader):
+    """pmx reader
     """
     def __init__(self, ios,
             text_encoding,
@@ -17,7 +17,7 @@ class Loader(pymeshio.common.BinaryLoader):
             morph_index_size,
             rigidbody_index_size
             ):
-        super(Loader, self).__init__(ios)
+        super(Reader, self).__init__(ios)
         self.read_text=self.get_read_text(text_encoding)
         if extended_uv>0:
             raise pymeshio.common.ParseException(
@@ -30,7 +30,7 @@ class Loader(pymeshio.common.BinaryLoader):
         self.read_rigidbody_index=lambda : self.read_uint(rigidbody_index_size)
 
     def __str__(self):
-        return '<pymeshio.pmx.Loader>'
+        return '<pymeshio.pmx.Reader>'
 
     def get_read_text(self, text_encoding):
         if text_encoding==0:
@@ -267,41 +267,41 @@ class Loader(pymeshio.common.BinaryLoader):
                 spring_constant_rotation=self.read_vector3())
 
 
-def load_from_file(path):
-    return load(io.BytesIO(pymeshio.common.readall(path)))
+def read_from_file(path):
+    return read(io.BytesIO(pymeshio.common.readall(path)))
 
 
-def load(ios):
+def read(ios):
     assert(isinstance(ios, io.IOBase))
-    loader=pymeshio.common.BinaryLoader(ios)
+    reader=pymeshio.common.BinaryReader(ios)
 
     # header
-    signature=loader.unpack("4s", 4)
+    signature=reader.unpack("4s", 4)
     if signature!=b"PMX ":
         raise pymeshio.common.ParseException(
                 "invalid signature", signature)
 
-    version=loader.read_float()
+    version=reader.read_float()
     if version!=2.0:
         print("unknown version", version)
     model=pymeshio.pmx.Model(version)
 
     # flags
-    flag_bytes=loader.read_uint(1)
+    flag_bytes=reader.read_uint(1)
     if flag_bytes!=8:
         raise pymeshio.common.ParseException(
-                "invalid flag length", loader.flag_bytes)
-    text_encoding=loader.read_uint(1)
-    extended_uv=loader.read_uint(1)
-    vertex_index_size=loader.read_uint(1)
-    texture_index_size=loader.read_uint(1)
-    material_index_size=loader.read_uint(1)
-    bone_index_size=loader.read_uint(1)
-    morph_index_size=loader.read_uint(1)
-    rigidbody_index_size=loader.read_uint(1)
+                "invalid flag length", reader.flag_bytes)
+    text_encoding=reader.read_uint(1)
+    extended_uv=reader.read_uint(1)
+    vertex_index_size=reader.read_uint(1)
+    texture_index_size=reader.read_uint(1)
+    material_index_size=reader.read_uint(1)
+    bone_index_size=reader.read_uint(1)
+    morph_index_size=reader.read_uint(1)
+    rigidbody_index_size=reader.read_uint(1)
     
-    # pmx custom loader
-    loader=Loader(loader.io,
+    # pmx custom reader
+    reader=Reader(reader.io,
             text_encoding,
             extended_uv,
             vertex_index_size,
@@ -313,30 +313,30 @@ def load(ios):
             )
 
     # model info
-    model.name = loader.read_text()
-    model.english_name = loader.read_text()
-    model.comment = loader.read_text()
-    model.english_comment = loader.read_text()
+    model.name = reader.read_text()
+    model.english_name = reader.read_text()
+    model.comment = reader.read_text()
+    model.english_comment = reader.read_text()
 
     # model data
-    model.vertices=[loader.read_vertex() 
-            for _ in range(loader.read_uint(4))]
-    model.indices=[loader.read_vertex_index() 
-            for _ in range(loader.read_uint(4))]
-    model.textures=[loader.read_text() 
-            for _ in range(loader.read_uint(4))]
-    model.materials=[loader.read_material() 
-            for _ in range(loader.read_uint(4))]
-    model.bones=[loader.read_bone() 
-            for _ in range(loader.read_uint(4))]
-    model.morphs=[loader.read_morgh() 
-            for _ in range(loader.read_uint(4))]
-    model.display_slots=[loader.read_display_slot() 
-            for _ in range(loader.read_uint(4))]
-    model.rigidbodies=[loader.read_rigidbody()
-            for _ in range(loader.read_uint(4))]
-    model.joints=[loader.read_joint()
-            for _ in range(loader.read_uint(4))]
+    model.vertices=[reader.read_vertex() 
+            for _ in range(reader.read_uint(4))]
+    model.indices=[reader.read_vertex_index() 
+            for _ in range(reader.read_uint(4))]
+    model.textures=[reader.read_text() 
+            for _ in range(reader.read_uint(4))]
+    model.materials=[reader.read_material() 
+            for _ in range(reader.read_uint(4))]
+    model.bones=[reader.read_bone() 
+            for _ in range(reader.read_uint(4))]
+    model.morphs=[reader.read_morgh() 
+            for _ in range(reader.read_uint(4))]
+    model.display_slots=[reader.read_display_slot() 
+            for _ in range(reader.read_uint(4))]
+    model.rigidbodies=[reader.read_rigidbody()
+            for _ in range(reader.read_uint(4))]
+    model.joints=[reader.read_joint()
+            for _ in range(reader.read_uint(4))]
 
     return model
 

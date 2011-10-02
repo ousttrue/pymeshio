@@ -15,8 +15,8 @@ import pymeshio.mqo
 """
 
 
-class Loader(object):
-    """mqo loader
+class Reader(object):
+    """mqo reader
     """
     __slots__=[
             "has_mikoto",
@@ -168,27 +168,27 @@ class Loader(object):
         return False
 
 
-def load_from_file(path):
+def read_from_file(path):
     with open(path, 'rb') as ios:
-        load(ios)
+        read(ios)
 
 
-def load(ios):
+def read(ios):
     assert(isinstance(ios, io.IOBase))
-    loader=Loader(ios)
+    reader=Reader(ios)
     model=pymeshio.mqo.Model()
 
-    line=loader.getline()
+    line=reader.getline()
     if line!="Metasequoia Document":
         print("invalid signature")
         return False
 
-    line=loader.getline()
+    line=reader.getline()
     if line!="Format Text Ver 1.0":
         print("unknown version: %s" % line)
 
     while True:
-        line=loader.getline()
+        line=reader.getline()
         if line==None:
             # eof
             break;
@@ -201,22 +201,22 @@ def load(ios):
         if key=="Eof":
             return model
         elif key=="Scene":
-            if not loader.readChunk():
+            if not reader.readChunk():
                 return
         elif key=="Material":
-            materials=loader.readMaterial()
+            materials=reader.readMaterial()
             if not materials:
                 return
             model.materials=materials
         elif key=="Object":
             firstQuote=line.find('"')
             secondQuote=line.find('"', firstQuote+1)
-            obj=loader.readObject(line[firstQuote+1:secondQuote])
+            obj=reader.readObject(line[firstQuote+1:secondQuote])
             if not obj:
                 return
             model.objects.append(obj)
         elif key=="BackImage":
-            if not loader.readChunk():
+            if not reader.readChunk():
                 return
         elif key=="IncludeXml":
             firstQuote=line.find('"')
@@ -224,7 +224,7 @@ def load(ios):
             print("IncludeXml", line[firstQuote+1:secondQuote])
         else:
             print("unknown key: %s" % key)
-            if not loader.readChunk():
+            if not reader.readChunk():
                 return
     # error not reach here
     raise ParseException("invalid eof")

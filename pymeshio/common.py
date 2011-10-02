@@ -276,8 +276,8 @@ def readall(path):
         return f.read()
 
 
-class BinaryLoader(object):
-    """general BinaryLoader
+class BinaryReader(object):
+    """general BinaryReader
     """
     def __init__(self, ios):
         self.ios=ios

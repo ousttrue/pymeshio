@@ -4,11 +4,11 @@ import pymeshio.common
 import pymeshio.pmd
 
 
-class Loader(pymeshio.common.BinaryLoader):
-    """pmx loader
+class Reader(pymeshio.common.BinaryReader):
+    """pmx reader
     """
     def __init__(self, ios, version):
-        super(Loader, self).__init__(ios)
+        super(Reader, self).__init__(ios)
         self.version=version
 
     def read_text(self, size):
@@ -107,95 +107,95 @@ class Loader(pymeshio.common.BinaryLoader):
 
 
 
-def __load(loader, model):
+def __read(reader, model):
     # model info
-    model.name=loader.read_text(20)
-    model.comment=loader.read_text(256) 
+    model.name=reader.read_text(20)
+    model.comment=reader.read_text(256) 
 
     # model data
-    model.vertices=[loader.read_vertex()
-            for _ in range(loader.read_uint(4))]
-    model.indices=[loader.read_uint(2)
-            for _ in range(loader.read_uint(4))]
-    model.materials=[loader.read_material()
-            for _ in range(loader.read_uint(4))]
-    model.bones=[loader.read_bone()
-            for _ in range(loader.read_uint(2))]
-    model.ik_list=[loader.read_ik()
-            for _ in range(loader.read_uint(2))]
-    model.morphs=[loader.read_morph()
-            for _ in range(loader.read_uint(2))]
-    model.morph_indices=[loader.read_uint(2)
-            for _ in range(loader.read_uint(1))]
-    model.bone_group_list=[loader.read_text(50)
-            for _ in range(loader.read_uint(1))]
-    model.bone_display_list=[(loader.read_uint(2), loader.read_uint(1))
-            for _i in range(loader.read_uint(4))]
+    model.vertices=[reader.read_vertex()
+            for _ in range(reader.read_uint(4))]
+    model.indices=[reader.read_uint(2)
+            for _ in range(reader.read_uint(4))]
+    model.materials=[reader.read_material()
+            for _ in range(reader.read_uint(4))]
+    model.bones=[reader.read_bone()
+            for _ in range(reader.read_uint(2))]
+    model.ik_list=[reader.read_ik()
+            for _ in range(reader.read_uint(2))]
+    model.morphs=[reader.read_morph()
+            for _ in range(reader.read_uint(2))]
+    model.morph_indices=[reader.read_uint(2)
+            for _ in range(reader.read_uint(1))]
+    model.bone_group_list=[reader.read_text(50)
+            for _ in range(reader.read_uint(1))]
+    model.bone_display_list=[(reader.read_uint(2), reader.read_uint(1))
+            for _i in range(reader.read_uint(4))]
 
-    if loader.is_end():
+    if reader.is_end():
         # EOF
         return True
 
     ############################################################
     # extend1: english name
     ############################################################
-    if loader.read_uint(1)==0:
+    if reader.read_uint(1)==0:
         print("no extend flag")
         return True
-    model.english_name=loader.read_text(20)
-    model.english_comment=loader.read_text(256)
+    model.english_name=reader.read_text(20)
+    model.english_comment=reader.read_text(256)
     for bone in model.bones:
-        bone.english_name=loader.read_text(20)
+        bone.english_name=reader.read_text(20)
     for morph in model.morphs:
         if morph.name==b'base':
             continue
-        morph.english_name=loader.read_text(20)
-    model.bone_group_english_list=[loader.read_text(50)
+        morph.english_name=reader.read_text(20)
+    model.bone_group_english_list=[reader.read_text(50)
             for _ in model.bone_group_list]
 
     ############################################################
     # extend2: toon_textures
     ############################################################
-    if loader.is_end():
+    if reader.is_end():
         # EOF
         return True
-    model.toon_textures=[loader.read_text(100)
+    model.toon_textures=[reader.read_text(100)
             for _ in range(10)]
 
     ############################################################
     # extend2: rigidbodies and joints
     ############################################################
-    if loader.is_end():
+    if reader.is_end():
         # EOF
         return True
-    model.rigidbodies=[loader.read_rigidbody()
-            for _ in range(loader.read_uint(4))]
-    model.joints=[loader.read_joint()
-            for _ in range(loader.read_uint(4))]
+    model.rigidbodies=[reader.read_rigidbody()
+            for _ in range(reader.read_uint(4))]
+    model.joints=[reader.read_joint()
+            for _ in range(reader.read_uint(4))]
 
     return True
 
 
-def load_from_file(path):
-    return load(io.BytesIO(pymeshio.common.readall(path)))
+def read_from_file(path):
+    return read(io.BytesIO(pymeshio.common.readall(path)))
 
 
-def load(ios):
+def read(ios):
     assert(isinstance(ios, io.IOBase))
-    loader=pymeshio.common.BinaryLoader(ios)
+    reader=pymeshio.common.BinaryReader(ios)
 
     # header
-    signature=loader.unpack("3s", 3)
+    signature=reader.unpack("3s", 3)
     if signature!=b"Pmd":
         raise pymeshio.common.ParseException(
                 "invalid signature: {0}".format(signature))
-    version=loader.read_float()
+    version=reader.read_float()
 
     model=pymeshio.pmd.Model(version)
-    loader=Loader(loader.ios, version)
-    if(__load(loader, model)):
+    reader=Reader(reader.ios, version)
+    if(__read(reader, model)):
         # check eof
-        if not loader.is_end():
+        if not reader.is_end():
             #print("can not reach eof.")
             pass
 
