@@ -35,7 +35,7 @@ class Reader(object):
     def getline(self):
         line=self.ios.readline()
         self.lines+=1
-        if line=="":
+        if line==b"":
             self.eof=True
             return None
         return line.strip()
@@ -50,22 +50,22 @@ class Reader(object):
             if line==None:
                 # eof
                 break;
-            if line=="":
+            if line==b"":
                 # empty line
                 continue
 
-            if line=="}":
+            if line==b"}":
                 return obj
             else:
                 tokens=line.split()
                 key=tokens[0]
-                if key=="vertex":
+                if key==b"vertex":
                     if not self.readVertex(obj):
                         return False
-                elif key=="face":
+                elif key==b"face":
                     if not self.readFace(obj):
                         return False
-                elif key=="depth":
+                elif key==b"depth":
                     obj.depth=int(tokens[1])
                 else:
                     print(
@@ -82,15 +82,15 @@ class Reader(object):
             if line==None:
                 # eof
                 break;
-            if line=="":
+            if line==b"":
                 # empty line
                 continue
 
-            if line=="}":
+            if line==b"}":
                 return True
             else:
                 # face
-                tokens=line.split(' ', 1)
+                tokens=line.split(b' ', 1)
                 try:
                     obj.addFace(pymeshio.mqo.Face(int(tokens[0]), tokens[1]))
                 except ValueError as ex:
@@ -106,11 +106,11 @@ class Reader(object):
             if line==None:
                 # eof
                 break;
-            if line=="":
+            if line==b"":
                 # empty line
                 continue
 
-            if line=="}":
+            if line==b"}":
                 return True
             else:
                 # vertex
@@ -126,15 +126,15 @@ class Reader(object):
             if line==None:
                 # eof
                 break;
-            if line=="":
+            if line==b"":
                 # empty line
                 continue
 
-            if line=="}":
+            if line==b"}":
                 return materials
             else:
                 # material
-                secondQuaote=line.find('"', 1)                
+                secondQuaote=line.find(b'"', 1)                
                 material=pymeshio.mqo.Material(line[1:secondQuaote])
                 try:
                     material.parse(line[secondQuaote+2:])
@@ -153,15 +153,15 @@ class Reader(object):
             if line==None:
                 # eof
                 break;
-            if line=="":
+            if line==b"":
                 # empty line
                 continue
 
-            if line=="}":
+            if line==b"}":
                 level-=1
                 if level==0:
                     return True
-            elif line.find("{")!=-1:
+            elif line.find(b"{")!=-1:
                 level+=1
 
         self.printError("readChunk", "invalid eof")
@@ -180,12 +180,12 @@ def read(ios):
     model=pymeshio.mqo.Model()
 
     line=reader.getline()
-    if line!="Metasequoia Document":
+    if line!=b"Metasequoia Document":
         print("invalid signature")
         return False
 
     line=reader.getline()
-    if line!="Format Text Ver 1.0":
+    if line!=b"Format Text Ver 1.0":
         print("unknown version: %s" % line)
 
     while True:
@@ -193,35 +193,35 @@ def read(ios):
         if line==None:
             # eof
             break;
-        if line=="":
+        if line==b"":
             # empty line
             continue
 
         tokens=line.split()
         key=tokens[0]
-        if key=="Eof":
+        if key==b"Eof":
             return model
-        elif key=="Scene":
+        elif key==b"Scene":
             if not reader.readChunk():
                 return
-        elif key=="Material":
+        elif key==b"Material":
             materials=reader.readMaterial()
             if not materials:
                 return
             model.materials=materials
-        elif key=="Object":
-            firstQuote=line.find('"')
-            secondQuote=line.find('"', firstQuote+1)
+        elif key==b"Object":
+            firstQuote=line.find(b'"')
+            secondQuote=line.find(b'"', firstQuote+1)
             obj=reader.readObject(line[firstQuote+1:secondQuote])
             if not obj:
                 return
             model.objects.append(obj)
-        elif key=="BackImage":
+        elif key==b"BackImage":
             if not reader.readChunk():
                 return
-        elif key=="IncludeXml":
-            firstQuote=line.find('"')
-            secondQuote=line.find('"', firstQuote+1)
+        elif key==b"IncludeXml":
+            firstQuote=line.find(b'"')
+            secondQuote=line.find(b'"', firstQuote+1)
             print("IncludeXml", line[firstQuote+1:secondQuote])
         else:
             print("unknown key: %s" % key)

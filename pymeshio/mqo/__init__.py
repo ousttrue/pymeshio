@@ -51,30 +51,30 @@ class Material(object):
     def parse(self, line):
         offset=0
         while True:
-            leftParenthesis=line.find("(", offset)
+            leftParenthesis=line.find(b"(", offset)
             if leftParenthesis==-1:
                 break
             key=line[offset:leftParenthesis]
-            rightParenthesis=line.find(")", leftParenthesis+1)
+            rightParenthesis=line.find(b")", leftParenthesis+1)
             if rightParenthesis==-1:
                 raise ValueError("assert")
 
             param=line[leftParenthesis+1:rightParenthesis]
-            if key=="shader":
+            if key==b"shader":
                 self.shader=int(param)
-            elif key=="col":
+            elif key==b"col":
                 self.color=pymeshio.common.RGBA(*[float(e) for e in param.split()])
-            elif key=="dif":
+            elif key==b"dif":
                 self.diffuse=float(param)
-            elif key=="amb":
+            elif key==b"amb":
                 self.ambient=float(param)
-            elif key=="emi":
+            elif key==b"emi":
                 self.emit=float(param)
-            elif key=="spc":
+            elif key==b"spc":
                 self.specular=float(param)
-            elif key=="power":
+            elif key==b"power":
                 self.power=float(param)
-            elif key=="tex":
+            elif key==b"tex":
                 self.tex=param[1:-1]
             else:
                 print(
@@ -179,24 +179,24 @@ class Face(object):
         self.index_count=index_count
         offset=0
         while True:
-            leftParenthesis=line.find("(", offset)
+            leftParenthesis=line.find(b"(", offset)
             if leftParenthesis==-1:
                 break
             key=line[offset:leftParenthesis]
-            rightParenthesis=line.find(")", leftParenthesis+1)
+            rightParenthesis=line.find(b")", leftParenthesis+1)
             if rightParenthesis==-1:
                 raise ValueError("assert")
             params=line[leftParenthesis+1:rightParenthesis].split()
-            if key=="V":
+            if key==b"V":
                 self.indices=[int(e) for e in params]
-            elif key=="M":
+            elif key==b"M":
                 self.material_index=int(params[0])
-            elif key=="UV":
+            elif key==b"UV":
                 uv_list=[float(e) for e in params]
                 self.uv=[]
                 for i in range(0, len(uv_list), 2):
                     self.uv.append(pymeshio.common.Vector2(uv_list[i], uv_list[i+1]))
-            elif key=="COL":
+            elif key==b"COL":
                 for n in params:
                     d=int(n)
                     # R

@@ -1,9 +1,10 @@
 # coding: utf-8
-import pymeshio.pmx.reader
 import unittest
+import pymeshio.pmd
+import pymeshio.pmx.reader
 
 
-PMX_FILE=u'resources/初音ミクVer2.pmx'
+PMX_FILE=pymeshio.unicode('resources/初音ミクVer2.pmx')
 
 
 class TestPmx(unittest.TestCase):
@@ -14,23 +15,23 @@ class TestPmx(unittest.TestCase):
     def test_read(self):
         model=pymeshio.pmx.reader.read_from_file(PMX_FILE)
         self.assertEqual(pymeshio.pmx.Model,  model.__class__)
-        self.assertEqual(u'初音ミク',  model.name)
-        self.assertEqual(u'Miku Hatsune',  model.english_name)
-        self.assertEqual(
-                u"PolyMo用モデルデータ：初音ミク ver.2.3\r\n"+
-                u"(物理演算対応モデル)\r\n"+
-                u"\r\n"+
-                u"モデリング	：あにまさ氏\r\n"+
-                u"データ変換	：あにまさ氏\r\n"+
-                u"Copyright	：CRYPTON FUTURE MEDIA, INC",
+        self.assertEqual(pymeshio.unicode('初音ミク'),  model.name)
+        self.assertEqual(pymeshio.unicode('Miku Hatsune'),  model.english_name)
+        self.assertEqual(pymeshio.unicode(
+                "PolyMo用モデルデータ：初音ミク ver.2.3\r\n"+
+                "(物理演算対応モデル)\r\n"+
+                "\r\n"+
+                "モデリング	：あにまさ氏\r\n"+
+                "データ変換	：あにまさ氏\r\n"+
+                "Copyright	：CRYPTON FUTURE MEDIA, INC"),
                 model.comment)
-        self.assertEqual(
-                u"MMD Model: Miku Hatsune ver.2.3\r\n"+
-                u"(Physical Model)\r\n"+
-                u"\r\n"+
-                u"Modeling by	Animasa\r\n"+
-                u"Converted by	Animasa\r\n"+
-                u"Copyright		CRYPTON FUTURE MEDIA, INC",
+        self.assertEqual(pymeshio.unicode(
+                "MMD Model: Miku Hatsune ver.2.3\r\n"+
+                "(Physical Model)\r\n"+
+                "\r\n"+
+                "Modeling by	Animasa\r\n"+
+                "Converted by	Animasa\r\n"+
+                "Copyright		CRYPTON FUTURE MEDIA, INC"),
                 model.english_comment)
 
         self.assertEqual(12354,  len(model.vertices))
