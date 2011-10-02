@@ -561,13 +561,3 @@ class Model(object):
                 )
 
 
-class IO(object):
-    def __init__(self):
-        pass
-
-    def read(self, path):
-        warnings.warn("'pymeshio.mqo.IO.read' will be replaced by 'pymeshio.mqo.loader.load'")
-        model=pymeshio.pmd.reader.read_from_file(path)
-        if model:
-            return True
-

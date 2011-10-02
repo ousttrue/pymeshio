@@ -10,11 +10,6 @@ import pymeshio.pmd.writer
 PMD_FILE=u'resources/初音ミクVer2.pmd'
 
 
-def test_old_pmd_load():
-    loader=pymeshio.pmd.IO()
-    assert loader.read(PMD_FILE)
-
-
 class TestPmd(unittest.TestCase):
     
     def setUp(self):

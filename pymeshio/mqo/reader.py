@@ -20,7 +20,7 @@ class Reader(object):
     """
     __slots__=[
             "has_mikoto",
-            "eof", "io", "lines",
+            "eof", "ios", "lines",
             "materials", "objects",
             ]
     def __init__(self, ios):
@@ -169,11 +169,12 @@ class Reader(object):
 
 
 def read_from_file(path):
-    with open(path, 'rb') as ios:
-        read(ios)
+    with io.open(path, 'rb') as ios:
+        return read(ios)
 
 
 def read(ios):
+    print(type(ios), ios)
     assert(isinstance(ios, io.IOBase))
     reader=Reader(ios)
     model=pymeshio.mqo.Model()

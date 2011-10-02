@@ -3,7 +3,7 @@
 
 import time
 import os
-import pymeshio.pmd
+import pymeshio.pmd.reader
 import opengl.material
 import opengl.texture
 import opengl.vertexarray
@@ -12,14 +12,14 @@ import opengl.vertexarray
 def build(path):
     # load scenee
     t=time.time()
-    io=pymeshio.pmd.IO()
-    if not io.read(path):
+    model=pymeshio.pmd.reader.read_from_file(path)
+    if not model:
         return
     print(time.time()-t, "sec")
     # build
     basedir=os.path.dirname(path)
     indexedVertexArray=opengl.vertexarray.IndexedVertexArray()
-    for v in io.vertices:
+    for v in model.vertices:
         # left-handed y-up to right-handed y-up                
         indexedVertexArray.addVertex(
                 (v.pos[0], v.pos[1], -v.pos[2], 1), 
@@ -32,18 +32,18 @@ def build(path):
     textureMap={}
     faceIndex=0
     def indices():
-        for i in io.indices:
+        for i in model.indices:
             yield i
     indexGen=indices()
-    for i, m in enumerate(io.materials):
+    for i, m in enumerate(model.materials):
         material=opengl.material.MQOMaterial()
         material.vcol=True
         material.rgba=(
-                m.diffuse[0], 
-                m.diffuse[1], 
-                m.diffuse[2], 
-                m.diffuse[3])
-        texturefile=m.texture.decode('cp932')
+                m.diffuse_color[0], 
+                m.diffuse_color[1], 
+                m.diffuse_color[2], 
+                m.alpha)
+        texturefile=m.texture_file.decode('cp932')
         texturepath=os.path.join(basedir, texturefile)
         if os.path.isfile(texturepath):
             if not texturepath in textureMap:

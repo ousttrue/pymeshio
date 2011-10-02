@@ -301,7 +301,7 @@ def read(ios):
     rigidbody_index_size=reader.read_uint(1)
     
     # pmx custom reader
-    reader=Reader(reader.io,
+    reader=Reader(reader.ios,
             text_encoding,
             extended_uv,
             vertex_index_size,

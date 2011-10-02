@@ -8,7 +8,7 @@ import os
 import sys
 import math
 import pymeshio.common
-import pymeshio.mqo.loader
+import pymeshio.mqo.reader
 import warnings
 
 
@@ -226,17 +226,4 @@ class Model(object):
         self.materials=[]
         self.objects=[]
 
-
-class IO(object):
-    def __init__(self):
-        pass
-
-    def read(self, path):
-        warnings.warn("'pymeshio.mqo.IO.read' will be replaced by 'pymeshio.mqo.loader.load'")
-        model=pymeshio.mqo.loader.load_from_file(path)
-        if model:
-            self.has_mikoto=model.has_mikoto
-            self.materials=model.materials
-            self.objects=model.objects
-            return True
 

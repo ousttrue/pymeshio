@@ -10,16 +10,15 @@ import opengl.vertexarraymap
 
 
 def build(path):
-    # load scenee
     t=time.time()
-    io=pymeshio.mqo.IO()
-    if not io.read(path):
+    model=pymeshio.mqo.reader.read_from_file(path)
+    if not model:
         return
     print(time.time()-t, "sec")
     # build
     basedir=os.path.dirname(path)
     vertexArrayMap=opengl.vertexarraymap.VertexArrayMapWithUV()
-    for m in io.materials:
+    for m in model.materials:
         material=opengl.material.MQOMaterial()
         material.rgba=(m.color.r, m.color.g, m.color.b, m.color.a)
         if m.tex:
@@ -27,7 +26,7 @@ def build(path):
             material.texture=opengl.texture.Texture(texturepath)
         vertexArrayMap.addMaterial(material)
 
-    for o in io.objects:
+    for o in model.objects:
         # skip mikoto objects
         if o.name.startswith("anchor"):
             continue

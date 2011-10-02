@@ -3,16 +3,15 @@
 
 import time
 import os
-import pymeshio.pmx.loader
+import pymeshio.pmx.reader
 import opengl.material
 import opengl.texture
 import opengl.vertexarray
 
 
 def build(path):
-    # load scenee
     t=time.time()
-    model=pymeshio.pmx.loader.load(path)
+    model=pymeshio.pmx.reader.read_from_file(path)
     if not model:
         return
     print(time.time()-t, "sec")
