@@ -1,10 +1,10 @@
 #coding: utf-8
 import io
-import pymeshio.common
-import pymeshio.pmd
+from .. import common
+from .. import pmd
 
 
-class Reader(pymeshio.common.BinaryReader):
+class Reader(common.BinaryReader):
     """pmx reader
     """
     def __init__(self, ios, version):
@@ -23,7 +23,7 @@ class Reader(pymeshio.common.BinaryReader):
             return src[:pos]
 
     def read_vertex(self):
-        return pymeshio.pmd.Vertex(
+        return pmd.Vertex(
                 self.read_vector3(),
                 self.read_vector3(),
                 self.read_vector2(),
@@ -33,7 +33,7 @@ class Reader(pymeshio.common.BinaryReader):
                 self.read_uint(1))
 
     def read_material(self):
-        return pymeshio.pmd.Material(
+        return pmd.Material(
                 diffuse_color=self.read_rgb(),
                 alpha=self.read_float(),
                 specular_factor=self.read_float(),
@@ -49,7 +49,7 @@ class Reader(pymeshio.common.BinaryReader):
         name=self.read_text(20)
         parent_index=self.read_uint(2)
         tail_index=self.read_uint(2)
-        bone=pymeshio.pmd.createBone(name, self.read_uint(1))
+        bone=pmd.createBone(name, self.read_uint(1))
         bone.parent_index=parent_index
         bone.tail_index=tail_index
         bone.ik_index = self.read_uint(2)
@@ -57,7 +57,7 @@ class Reader(pymeshio.common.BinaryReader):
         return bone
 
     def read_ik(self):
-        ik=pymeshio.pmd.IK(self.read_uint(2), self.read_uint(2))
+        ik=pmd.IK(self.read_uint(2), self.read_uint(2))
         ik.length = self.read_uint(1)
         ik.iterations = self.read_uint(2)
         ik.weight = self.read_float()
@@ -65,7 +65,7 @@ class Reader(pymeshio.common.BinaryReader):
         return ik
 
     def read_morph(self):
-        morph=pymeshio.pmd.Morph(self.read_text(20))
+        morph=pmd.Morph(self.read_text(20))
         morph_size = self.read_uint(4)
         morph.type = self.read_uint(1)
         for j in range(morph_size):
@@ -74,7 +74,7 @@ class Reader(pymeshio.common.BinaryReader):
         return morph
 
     def read_rigidbody(self):
-        return pymeshio.pmd.RigidBody(
+        return pmd.RigidBody(
                 name=self.read_text(20), 
                 bone_index=self.read_uint(2),
                 collision_group=self.read_uint(1),
@@ -92,7 +92,7 @@ class Reader(pymeshio.common.BinaryReader):
                 )
 
     def read_joint(self):
-        return pymeshio.pmd.Joint(
+        return pmd.Joint(
                 name=self.read_text(20),
                 rigidbody_index_a=self.read_uint(4),
                 rigidbody_index_b=self.read_uint(4),
@@ -177,21 +177,21 @@ def __read(reader, model):
 
 
 def read_from_file(path):
-    return read(io.BytesIO(pymeshio.common.readall(path)))
+    return read(io.BytesIO(common.readall(path)))
 
 
 def read(ios):
     assert(isinstance(ios, io.IOBase))
-    reader=pymeshio.common.BinaryReader(ios)
+    reader=common.BinaryReader(ios)
 
     # header
     signature=reader.unpack("3s", 3)
     if signature!=b"Pmd":
-        raise pymeshio.common.ParseException(
+        raise common.ParseException(
                 "invalid signature: {0}".format(signature))
     version=reader.read_float()
 
-    model=pymeshio.pmd.Model(version)
+    model=pmd.Model(version)
     reader=Reader(reader.ios, version)
     if(__read(reader, model)):
         # check eof

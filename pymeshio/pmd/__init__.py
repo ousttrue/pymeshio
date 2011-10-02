@@ -7,7 +7,7 @@ import os
 import sys
 import struct
 import warnings
-import pymeshio.common
+from .. import common
 
 
 class Vertex(object):
@@ -154,10 +154,10 @@ class Bone(object):
         self.type=type
         self.parent_index=0xFFFF
         self.tail_index=0
-        self.tail=pymeshio.common.Vector3(0, 0, 0)
+        self.tail=common.Vector3(0, 0, 0)
         self.parent=None
         self.ik_index=0xFFFF
-        self.pos=pymeshio.common.Vector3(0, 0, 0)
+        self.pos=common.Vector3(0, 0, 0)
         self.children=[]
         self.english_name=''
 
@@ -467,24 +467,6 @@ class Joint(object):
                 )
 
 
-class ToonTextures(object):
-    __slots__=['_toon_textures']
-    def __init__(self):
-        self._toon_textures=[]
-        for i in range(10):
-            self._toon_textures.append('toon%02d.bmp' % (i+1))
-
-    def __getitem__(self, key):
-        return from_str(self._toon_textures[key])
-
-    def __setitem__(self, key, value):
-        self._toon_textures[key]=to_str(value)
-
-    def __iter__(self):
-        for toon_texture in self._toon_textures:
-            yield from_str(toon_texture)
-
-
 class Model(object):
     """pmd loader class.
 
@@ -525,7 +507,7 @@ class Model(object):
         self.bone_display_list=[]
         # extend
         self.bone_group_english_list=[]
-        self.toon_textures=ToonTextures()
+        self.toon_textures=[b'']*10
         self.rigidbodies=[]
         self.joints=[]
         # innner use

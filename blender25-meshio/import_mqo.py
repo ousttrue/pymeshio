@@ -8,28 +8,27 @@ Tooltip: 'Import from Metasequoia file format (.mqo)'
 """
 __author__=['ousttrue']
 __url__ = ["http://gunload.web.fc2.com/blender/"]
-__version__= '2.4'
 __bpydoc__= '''\
 
 MQO Importer
 
 This script imports a mqo into Blender for editing.
 
-0.2 20080123: update.
-0.3 20091125: modify for linux.
-0.4 20100310: rewrite.
-0.5 20100311: create armature from mikoto bone.
-0.6 20100505: C extension.
-0.7 20100606: integrate 2.4 and 2.5.
-0.8 20100619: fix multibyte object name.
-0.9 20100626: refactoring.
-2.0 20100724: update for Blender2.53.
-2.1 20100731: add full python module.
-2.2 20101005: update for Blender2.54.
-2.3 20101228: update for Blender2.55.
-2.4 20110429: update for Blender2.57b.
-2.6 20110918: update for Blender2.59.
-2.7 20111002: update for pymeshio-2.1.0
+20080123: update.
+20091125: modify for linux.
+20100310: rewrite.
+20100311: create armature from mikoto bone.
+20100505: C extension.
+20100606: integrate 2.4 and 2.5.
+20100619: fix multibyte object name.
+20100626: refactoring.
+20100724: update for Blender2.53.
+20100731: add full python module.
+20101005: update for Blender2.54.
+20101228: update for Blender2.55.
+20110429: update for Blender2.57b.
+20110918: update for Blender2.59.
+20111002: update for pymeshio-2.1.0
 '''
 
 bl_addon_info = {

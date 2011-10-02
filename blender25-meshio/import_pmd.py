@@ -7,38 +7,38 @@
  Tooltip: 'Import PMD file for MikuMikuDance.'
 """
 __author__= ["ousttrue"]
-__version__= "2.5"
 __url__=()
 __bpydoc__="""
 pmd Importer
 
 This script imports a pmd into Blender for editing.
 
-0.1 20091126: first implement.
-0.2 20091209: implement IK.
-0.3 20091210: implement morph target.
-0.4 20100305: use english name.
-0.5 20100408: cleanup not used vertices.
-0.6 20100416: fix fornt face. texture load fail safe. add progress.
-0.7 20100506: C extension.
-0.8 20100521: add shape_key group.
-1.0 20100530: add invisilbe bone tail(armature layer 2).
-1.1 20100608: integrate 2.4 and 2.5.
-1.2 20100616: implement rigid body.
-1.3 20100619: fix for various models.
-1.4 20100623: fix constraint name.
-1.5 20100626: refactoring.
-1.6 20100629: sphere map.
-1.7 20100703: implement bone group.
-1.8 20100710: implement toon texture.
-1.9 20100718: keep model name, comment.
-2.0 20100724: update for Blender2.53.
-2.1 20100731: add full python module.
-2.2 20101005: update for Blender2.54.
-2.3 20101228: update for Blender2.55.
-2.4 20110429: update for Blender2.57b.
-2.5 20110522: implement RigidBody and Constraint.
-2.6 20110918: update for Blender2.59.
+20091126: first implement.
+20091209: implement IK.
+20091210: implement morph target.
+20100305: use english name.
+20100408: cleanup not used vertices.
+20100416: fix fornt face. texture load fail safe. add progress.
+20100506: C extension.
+20100521: add shape_key group.
+20100530: add invisilbe bone tail(armature layer 2).
+20100608: integrate 2.4 and 2.5.
+20100616: implement rigid body.
+20100619: fix for various models.
+20100623: fix constraint name.
+20100626: refactoring.
+20100629: sphere map.
+20100703: implement bone group.
+20100710: implement toon texture.
+20100718: keep model name, comment.
+20100724: update for Blender2.53.
+20100731: add full python module.
+20101005: update for Blender2.54.
+20101228: update for Blender2.55.
+20110429: update for Blender2.57b.
+20110522: implement RigidBody and Constraint.
+20110918: update for Blender2.59.
+20111002: update for pymeshio-2.1.0
 """
 bl_addon_info = {
         'category': 'Import/Export',
@@ -61,16 +61,9 @@ import os
 import sys
 import math
 
-try:
-    # C extension
-    from .meshio import pmd, englishmap
-    print('use meshio C module')
-except ImportError:
-    # full python
-    from .pymeshio import englishmap
-    #from .pymeshio import mmd as pmd
-    #pmd.IO=pmd.PMDLoader
-    from .pymeshio import pmd
+from .pymeshio import pmd
+from .pymeshio.pmd import reader
+from .pymeshio import englishmap
 
 # for 2.5
 import bpy
@@ -85,16 +78,16 @@ def createPmdMaterial(m, index):
     material = bpy.data.materials.new("Material")
     # diffuse
     material.diffuse_shader='FRESNEL'
-    material.diffuse_color=([m.diffuse.r, m.diffuse.g, m.diffuse.b])
-    material.alpha=m.diffuse.a
+    material.diffuse_color=([m.diffuse_color.r, m.diffuse_color.g, m.diffuse_color.b])
+    material.alpha=m.alpha
     # specular
     material.specular_shader='TOON'
-    material.specular_color=([m.specular.r, m.specular.g, m.specular.b])
-    material.specular_toon_size=int(m.shinness)
+    material.specular_color=([m.specular_color.r, m.specular_color.g, m.specular_color.b])
+    material.specular_toon_size=int(m.specular_factor)
     # ambient
-    material.mirror_color=([m.ambient.r, m.ambient.g, m.ambient.b])
+    material.mirror_color=([m.ambient_color.r, m.ambient_color.g, m.ambient_color.b])
     # flag
-    material.subsurface_scattering.use=True if m.flag==1 else False
+    material.subsurface_scattering.use=True if m.edge_flag==1 else False
     # other
     material.name="m_%02d" % index
     material.preview_render_type='FLAT'
@@ -141,21 +134,21 @@ def to_radian(degree):
 
 def get_bone_name(l, index):
     if index==0xFFFF:
-        return l.bones[0]._name
+        return l.bones[0].name.decode('cp932')
 
     if index < len(l.bones):
-        name=englishmap.getEnglishBoneName(l.bones[index]._name)
+        name=englishmap.getEnglishBoneName(l.bones[index].name.decode('cp932'))
         if name:
             return name
-        return l.bones[index]._name
+        return l.bones[index].name.decode('cp932')
     print('invalid bone index', index)
-    return l.bones[0]._name
+    return l.bones[0].name.decode('cp932')
 
 
 def get_group_name(g):
-    group_name=englishmap.getEnglishBoneGroupName(g._name.strip())
+    group_name=englishmap.getEnglishBoneGroupName(g.decode('cp932').strip())
     if not group_name:
-        group_name=g._name.strip()
+        group_name=g.decode('cp932').strip()
     return group_name
 
 
@@ -163,15 +156,16 @@ def __importToonTextures(io, tex_dir):
     mesh, meshObject=bl.mesh.create(bl.TOON_TEXTURE_OBJECT)
     material=bl.material.create(bl.TOON_TEXTURE_OBJECT)
     bl.mesh.addMaterial(mesh, material)
-    for toon in (io.toon_textures._toon_textures[i] for i in range(10)):
-        path=os.path.join(tex_dir, toon)
+    for i in range(10):
+        toon=io.toon_textures[i]
+        path=os.path.join(tex_dir, toon.decode('cp932'))
         texture, image=bl.texture.create(path)
         bl.material.addTexture(material, texture, False)
     return meshObject, material
 
 
 def __importShape(obj, l, vertex_map):
-    if len(l.morph_list)==0:
+    if len(l.morphs)==0:
         return
 
     # set shape_key pin
@@ -179,7 +173,7 @@ def __importShape(obj, l, vertex_map):
 
     # find base
     base=None
-    for s in l.morph_list:
+    for s in l.morphs:
         if s.type==0:
             base=s
 
@@ -202,14 +196,14 @@ def __importShape(obj, l, vertex_map):
     mesh.update()
 
     # each skin
-    for s in l.morph_list:
+    for s in l.morphs:
         if s.type==0:
             continue
 
         # name
-        name=englishmap.getEnglishSkinName(s._name)
+        name=englishmap.getEnglishSkinName(s.name.decode('cp932'))
         if not name:
-            name=s._name
+            name=s.name.decode('cp932')
 
         # 25
         new_shape_key=bl.object.addShapeKey(obj, name)
@@ -232,9 +226,9 @@ def __importShape(obj, l, vertex_map):
 
 
 def __build(armature, b, p, parent):
-    name=englishmap.getEnglishBoneName(b._name)
+    name=englishmap.getEnglishBoneName(b.name.decode('cp932'))
     if not name:
-        name=b._name
+        name=b.name.decode('cp932')
 
     bone=bl.armature.createBone(armature, name)
 
@@ -289,9 +283,9 @@ def __importArmature(l):
     pose = bl.object.getPose(armature_object)
     for ik in l.ik_list:
         target=l.bones[ik.target]
-        name = englishmap.getEnglishBoneName(target._name)
+        name = englishmap.getEnglishBoneName(target.name.decode('cp932'))
         if not name:
-            name=target._name
+            name=target.name.decode('cp932')
         p_bone = pose.bones[name]
         if not p_bone:
             print('not found', name)
@@ -300,9 +294,9 @@ def __importArmature(l):
             print('over MAX_CHAINLEN', ik, len(ik.children))
             continue
         effector_name=englishmap.getEnglishBoneName(
-                l.bones[ik.index]._name)
+                l.bones[ik.index].name.decode('cp932'))
         if not effector_name:
-            effector_name=l.bones[ik.index]._name
+            effector_name=l.bones[ik.index].name.decode('cp932')
 
         constraint=bl.armature.createIkConstraint(armature_object,
                 p_bone, effector_name, ik)
@@ -320,9 +314,9 @@ def __importArmature(l):
     for b_index, g_index in l.bone_display_list:
         # bone
         b=l.bones[b_index]
-        bone_name=englishmap.getEnglishBoneName(b._name)
+        bone_name=englishmap.getEnglishBoneName(b.name.decode('cp932'))
         if not bone_name:
-            bone_name=b._name
+            bone_name=b.name.decode('cp932')
         # group
         g=l.bone_group_list[g_index-1]
         group_name=get_group_name(g)
@@ -358,7 +352,7 @@ def __import16MaerialAndMesh(meshObject, l,
         material=createPmdMaterial(m, material_index)
 
         # main texture
-        texture_name=m._texture
+        texture_name=m.texture_file.decode('cp932')
         if texture_name!='':
             for i, t in enumerate(texture_name.split('*')):
                 if t in textureMap:
@@ -517,10 +511,10 @@ def __importMaterialAndMesh(io, tex_dir, toon_material):
     ############################################################
     # shapeキーで使われる頂点インデックスを集める
     shape_key_used_vertices=set()
-    if len(io.morph_list)>0:
+    if len(io.morphs)>0:
         # base
         base=None
-        for s in io.morph_list:
+        for s in io.morphs:
             if s.type!=0:
                 continue
             base=s
@@ -599,12 +593,12 @@ def __importConstraints(io):
     material=bl.material.create('constraint')
     material.diffuse_color=(1, 0, 0)
     constraintMeshes=[]
-    for i, c in enumerate(io.constraints):
+    for i, c in enumerate(io.joints):
         bpy.ops.mesh.primitive_uv_sphere_add(
                 segments=8,
                 ring_count=4,
                 size=0.1,
-                location=(c.pos.x, c.pos.z, c.pos.y),
+                location=(c.position.x, c.position.z, c.position.y),
                 layers=layers
                 )
         meshObject=bl.object.getActive()
@@ -615,18 +609,18 @@ def __importConstraints(io):
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
         meshObject.draw_type='SOLID'
-        rot=c.rot
+        rot=c.rotation
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
-        meshObject[bl.CONSTRAINT_NAME]=c._name
-        meshObject[bl.CONSTRAINT_A]=io.rigidbodies[c.rigidA]._name
-        meshObject[bl.CONSTRAINT_B]=io.rigidbodies[c.rigidB]._name
-        meshObject[bl.CONSTRAINT_POS_MIN]=VtoV(c.constraintPosMin)
-        meshObject[bl.CONSTRAINT_POS_MAX]=VtoV(c.constraintPosMax)
-        meshObject[bl.CONSTRAINT_ROT_MIN]=VtoV(c.constraintRotMin)
-        meshObject[bl.CONSTRAINT_ROT_MAX]=VtoV(c.constraintRotMax)
-        meshObject[bl.CONSTRAINT_SPRING_POS]=VtoV(c.springPos)
-        meshObject[bl.CONSTRAINT_SPRING_ROT]=VtoV(c.springRot)
+        meshObject[bl.CONSTRAINT_NAME]=c.name.decode('cp932')
+        meshObject[bl.CONSTRAINT_A]=io.rigidbodies[c.rigidbody_index_a].name.decode('cp932')
+        meshObject[bl.CONSTRAINT_B]=io.rigidbodies[c.rigidbody_index_b].name.decode('cp932')
+        meshObject[bl.CONSTRAINT_POS_MIN]=VtoV(c.translation_limit_min)
+        meshObject[bl.CONSTRAINT_POS_MAX]=VtoV(c.translation_limit_max)
+        meshObject[bl.CONSTRAINT_ROT_MIN]=VtoV(c.rotation_limit_min)
+        meshObject[bl.CONSTRAINT_ROT_MAX]=VtoV(c.rotation_limit_max)
+        meshObject[bl.CONSTRAINT_SPRING_POS]=VtoV(c.spring_constant_translation)
+        meshObject[bl.CONSTRAINT_SPRING_ROT]=VtoV(c.spring_constant_rotation)
 
     for meshObject in reversed(constraintMeshes):
         bl.object.makeParent(container, meshObject)
@@ -645,34 +639,34 @@ def __importRigidBodies(io):
     material=bl.material.create('rigidBody')
     rigidMeshes=[]
     for i, rigid in enumerate(io.rigidbodies):
-        if rigid.boneIndex==0xFFFF:
+        if rigid.bone_index==0xFFFF:
             # no reference bone
             bone=io.bones[0]
         else:
-            bone=io.bones[rigid.boneIndex]
-        pos=bone.pos+rigid.position
+            bone=io.bones[rigid.bone_index]
+        pos=bone.pos+rigid.shape_position
 
-        if rigid.shapeType==pmd.SHAPE_SPHERE:
+        if rigid.shape_type==pmd.SHAPE_SPHERE:
             bpy.ops.mesh.primitive_ico_sphere_add(
                     location=(pos.x, pos.z, pos.y),
                     layers=layers
                     )
             bpy.ops.transform.resize(
-                    value=(rigid.w, rigid.w, rigid.w))
-        elif rigid.shapeType==pmd.SHAPE_BOX:
+                    value=rigid.shape_size.to_a())
+        elif rigid.shape_type==pmd.SHAPE_BOX:
             bpy.ops.mesh.primitive_cube_add(
                     location=(pos.x, pos.z, pos.y),
                     layers=layers
                     )
             bpy.ops.transform.resize(
-                    value=(rigid.w, rigid.d, rigid.h))
-        elif rigid.shapeType==pmd.SHAPE_CAPSULE:
+                    value=rigid.shape_size.to_a())
+        elif rigid.shape_type==pmd.SHAPE_CAPSULE:
             bpy.ops.mesh.primitive_cylinder_add(
                     location=(pos.x, pos.z, pos.y),
                     layers=layers
                     )
             bpy.ops.transform.resize(
-                    value=(rigid.w, rigid.w, rigid.h))
+                    value=rigid.shape_size.to_a())
         else:
             assert(False)
 
@@ -681,27 +675,27 @@ def __importRigidBodies(io):
         rigidMeshes.append(meshObject)
         bl.mesh.addMaterial(mesh, material)
         meshObject.name='r_%03d' % i
-        meshObject[bl.RIGID_NAME]=rigid._name
+        meshObject[bl.RIGID_NAME]=rigid.name.decode('cp932')
         #meshObject.draw_transparent=True
         #meshObject.draw_wire=True
         meshObject.draw_type='WIRE'
-        rot=rigid.rotation
+        rot=rigid.shape_rotation
         meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
 
         # custom properties
-        meshObject[bl.RIGID_SHAPE_TYPE]=rigid.shapeType
-        meshObject[bl.RIGID_PROCESS_TYPE]=rigid.processType
+        meshObject[bl.RIGID_SHAPE_TYPE]=rigid.shape_type
+        meshObject[bl.RIGID_PROCESS_TYPE]=rigid.mode
 
-        bone_name = englishmap.getEnglishBoneName(bone._name)
+        bone_name = englishmap.getEnglishBoneName(bone.name.decode('cp932'))
         if not bone_name:
-            bone_name=bone._name
+            bone_name=bone.name.decode('cp932')
         meshObject[bl.RIGID_BONE_NAME]=bone_name
 
-        meshObject[bl.RIGID_GROUP]=rigid.group
-        meshObject[bl.RIGID_INTERSECTION_GROUP]=rigid.target
-        meshObject[bl.RIGID_WEIGHT]=rigid.weight
-        meshObject[bl.RIGID_LINEAR_DAMPING]=rigid.linearDamping
-        meshObject[bl.RIGID_ANGULAR_DAMPING]=rigid.angularDamping
+        meshObject[bl.RIGID_GROUP]=rigid.collision_group
+        meshObject[bl.RIGID_INTERSECTION_GROUP]=rigid.no_collision_group
+        meshObject[bl.RIGID_WEIGHT]=rigid.mass
+        meshObject[bl.RIGID_LINEAR_DAMPING]=rigid.linear_damping
+        meshObject[bl.RIGID_ANGULAR_DAMPING]=rigid.angular_damping
         meshObject[bl.RIGID_RESTITUTION]=rigid.restitution
         meshObject[bl.RIGID_FRICTION]=rigid.friction
 
@@ -719,33 +713,33 @@ def _execute(filepath=""):
     # load pmd
     bl.progress_set('load %s' % filepath, 0.0)
 
-    io=pmd.IO()
-    if not io.read(filepath):
+    model=reader.read_from_file(filepath)
+    if not model:
         bl.message("fail to load %s" % filepath)
         return
     bl.progress_set('loaded', 0.1)
 
     # create root object
-    model_name=io._english_name
+    model_name=model.english_name.decode('cp932')
     if len(model_name)==0:
-        model_name=io._name
+        model_name=model.name.decode('cp932')
     root=bl.object.createEmpty(model_name)
-    root[bl.MMD_MB_NAME]=io._name
-    root[bl.MMD_MB_COMMENT]=io._comment
-    root[bl.MMD_COMMENT]=io._english_comment
+    root[bl.MMD_MB_NAME]=model.name.decode('cp932')
+    root[bl.MMD_MB_COMMENT]=model.comment.decode('cp932')
+    root[bl.MMD_COMMENT]=model.english_comment.decode('cp932')
 
     # toon textures
     tex_dir=os.path.dirname(filepath)
-    toonTextures, toonMaterial=__importToonTextures(io, tex_dir)
+    toonTextures, toonMaterial=__importToonTextures(model, tex_dir)
     bl.object.makeParent(root, toonTextures)
 
     # import mesh
-    mesh_objects=__importMaterialAndMesh(io, tex_dir, toonMaterial)
+    mesh_objects=__importMaterialAndMesh(model, tex_dir, toonMaterial)
     for o in mesh_objects:
         bl.object.makeParent(root, o)
 
     # import armature
-    armature_object=__importArmature(io)
+    armature_object=__importArmature(model)
     if armature_object:
         bl.object.makeParent(root, armature_object)
         armature = bl.object.getData(armature_object)
@@ -759,12 +753,12 @@ def _execute(filepath=""):
             poseBoneLimit(n, b)
 
     # import rigid bodies
-    rigidBodies=__importRigidBodies(io)
+    rigidBodies=__importRigidBodies(model)
     if rigidBodies:
         bl.object.makeParent(root, rigidBodies)
 
     # import constraints
-    constraints=__importConstraints(io)
+    constraints=__importConstraints(model)
     if constraints:
         bl.object.makeParent(root, constraints)
 

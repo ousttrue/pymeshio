@@ -1,11 +1,11 @@
 # coding: utf-8
 import io
 import struct
-import pymeshio.common
-import pymeshio.pmd
+from .. import common
+from .. import pmd
 
 
-class Writer(pymeshio.common.BinaryWriter):
+class Writer(common.BinaryWriter):
     def write_veritices(self, vertices):
         self.write_uint(len(vertices), 4)
         for v in vertices:
@@ -117,7 +117,7 @@ class Writer(pymeshio.common.BinaryWriter):
 
 def write(ios, model):
     assert(isinstance(ios, io.IOBase))
-    assert(isinstance(model, pymeshio.pmd.Model))
+    assert(isinstance(model, pmd.Model))
     writer=Writer(ios)
     writer.write_text(b"Pmd")
     writer.write_float(model.version)
