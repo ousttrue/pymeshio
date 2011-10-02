@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.0.2'
+version='2.1.0'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -41,8 +41,8 @@ Usage
 -----
 ::
 
-    >>> import pymeshio.pmx.loader
-    >>> m=pymeshio.pmx.loader.load('resources/初音ミクVer2.pmx')
+    >>> import pymeshio.pmx.reader
+    >>> m=pymeshio.pmx.reader.read('resources/初音ミクVer2.pmx')
     >>> print(m)
     <pmx-2.0 "Miku Hatsune" 12354vertices>
     >>> print(dir(m))
@@ -59,6 +59,10 @@ ToDo
 
 History
 -------
+2.1.0 (2011-10-02)
+
+* refactoring api
+
 2.0.2 (2011-10-01)
 ~~~~~~~~~~~~~~~~~~
 * fix for Python 2.7(remove anotation)

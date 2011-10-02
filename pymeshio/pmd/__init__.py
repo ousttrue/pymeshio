@@ -352,6 +352,9 @@ class BoneGroup(object):
         self.name=name
         self.english_name=english_name
 
+    def __eq__(self, rhs):
+        return self.name==rhs.name and self.english_name==rhs.english_name
+
 
 SHAPE_SPHERE=0
 SHAPE_BOX=1
@@ -541,4 +544,53 @@ class Model(object):
                 and self.joints==rhs.joints
                 )
 
+    def diff(self, rhs):
+        if self.name!=rhs.name: 
+            print(self.name, rhs.name)
+            return
+        if self.comment!=rhs.comment: 
+            print(self.comment, rhs.comment)
+            return
+        if self.english_name!=rhs.english_name: 
+            print(self.english_name, rhs.english_name)
+            return
+        if self.english_comment!=rhs.english_comment: 
+            print(self.english_comment, rhs.english_comment)
+            return
+        if self.vertices!=rhs.vertices: 
+            print(self.vertices, rhs.vertices)
+            return
+        if self.indices!=rhs.indices: 
+            print(self.indices, rhs.indices)
+            return
+        if self.materials!=rhs.materials: 
+            print(self.materials, rhs.materials)
+            return
+        if self.bones!=rhs.bones: 
+            print(self.bones, rhs.bones)
+            return
+        if self.ik_list!=rhs.ik_list: 
+            print(self.ik_list, rhs.ik_list)
+            return
+        if self.morphs!=rhs.morphs: 
+            print(self.morphs, rhs.morphs)
+            return
+        if self.morph_indices!=rhs.morph_indices: 
+            print(self.morph_indices, rhs.morph_indices)
+            return
+        if self.bone_group_list!=rhs.bone_group_list: 
+            print(self.bone_group_list, rhs.bone_group_list)
+            return
+        if self.bone_display_list!=rhs.bone_display_list: 
+            print(self.bone_display_list, rhs.bone_display_list)
+            return
+        if self.toon_textures!=rhs.toon_textures: 
+            print(self.toon_textures, rhs.toon_textures)
+            return
+        if self.rigidbodies!=rhs.rigidbodies: 
+            print(self.rigidbodies, rhs.rigidbodies)
+            return
+        if self.joints!=rhs.joints: 
+            print(self.joints, rhs.joints)
+            return
 

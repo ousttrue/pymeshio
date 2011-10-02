@@ -54,5 +54,7 @@ class TestPmd(unittest.TestCase):
         pymeshio.pmd.writer.write(out, model)
         # read out buffer again
         model2=pymeshio.pmd.reader.read(io.BytesIO(out.getvalue()))
+        model.diff(model2)
         self.assertEqual(model, model2)
+
 
