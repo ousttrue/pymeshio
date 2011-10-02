@@ -22,17 +22,17 @@ def build(path):
         material=opengl.material.MQOMaterial()
         material.rgba=(m.color.r, m.color.g, m.color.b, m.color.a)
         if m.tex:
-            texturepath=os.path.join(basedir, m.tex)
+            texturepath=os.path.join(basedir, m.tex.decode('cp932'))
             material.texture=opengl.texture.Texture(texturepath)
         vertexArrayMap.addMaterial(material)
 
     for o in model.objects:
         # skip mikoto objects
-        if o.name.startswith("anchor"):
+        if o.name.startswith(b"anchor"):
             continue
-        if o.name.startswith("bone:"):
+        if o.name.startswith(b"bone:"):
             continue
-        if o.name.startswith("MCS:"):
+        if o.name.startswith(b"MCS:"):
             continue
 
         for f in o.faces:
