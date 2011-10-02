@@ -233,7 +233,7 @@ class IO(object):
 
     def read(self, path):
         warnings.warn("'pymeshio.mqo.IO.read' will be replaced by 'pymeshio.mqo.loader.load'")
-        model=pymeshio.mqo.loader.load(path)
+        model=pymeshio.mqo.loader.load_from_file(path)
         if model:
             self.has_mikoto=model.has_mikoto
             self.materials=model.materials

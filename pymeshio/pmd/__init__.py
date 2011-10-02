@@ -40,6 +40,17 @@ class Vertex(object):
                 str(self.uv), 
                 self.bone0, self.bone1, self.weight0)
 
+    def __eq__(self, rhs):
+        return (
+                self.pos==rhs.pos
+                and self.normal==rhs.normal
+                and self.uv==rhs.uv
+                and self.bone0==rhs.bone0
+                and self.bone1==rhs.bone1
+                and self.weight0==rhs.weight0
+                and self.edge_flag==rhs.edge_flag
+                )
+
     def __getitem__(self, key):
         if key==0:
             return self.pos.x
@@ -90,6 +101,19 @@ class Material(object):
                 self.diffuse[2], self.diffuse[3],
                 )
 
+    def __eq__(self, rhs):
+        return (
+                self.diffuse_color==rhs.diffuse_color
+                and self.alpha==rhs.alpha
+                and self.specular_factor==rhs.specular_factor
+                and self.specular_color==rhs.specular_color
+                and self.ambient_color==rhs.ambient_color
+                and self.toon_index==rhs.toon_index
+                and self.edge_flag==rhs.edge_flag
+                and self.vertex_count==rhs.vertex_count
+                and self.texture_file==rhs.texture_file
+                )
+
 
 class Bone(object):
     """pmd material struct.
@@ -136,6 +160,20 @@ class Bone(object):
         self.pos=pymeshio.common.Vector3(0, 0, 0)
         self.children=[]
         self.english_name=''
+
+    def __eq__(self, rhs):
+        return (
+                self.name==rhs.name
+                and self.index==rhs.index
+                and self.type==rhs.type
+                and self.parent_index==rhs.parent_index
+                and self.tail_index==rhs.tail_index
+                and self.tail==rhs.tail
+                and self.ik_index==rhs.ik_index
+                and self.pos==rhs.pos
+                and self.children==rhs.children
+                and self.english_name==rhs.english_name
+                )
 
     def hasParent(self):
         return self.parent_index!=0xFFFF
@@ -268,11 +306,20 @@ class IK(object):
     def __str__(self):
         return "<IK index: %d, target: %d, iterations: %d, weight: %f, children: %s(%d)>" %(self.index, self.target, self.iterations, self.weight, '-'.join([str(i) for i in self.children]), len(self.children))
 
+    def __eq__(self, rhs):
+        return (
+                self.index==rhs.index
+                and self.target==rhs.target
+                and self.iterations==rhs.iterations
+                and self.weight==rhs.weight
+                and self.children==rhs.children
+                )
 
-class Skin(object):
+
+class Morph(object):
     __slots__=['name', 'type', 'indices', 'pos_list', 'english_name',
             'vertex_count']
-    def __init__(self, name='skin'):
+    def __init__(self, name):
         self.name=name
         self.type=None
         self.indices=[]
@@ -287,6 +334,16 @@ class Skin(object):
     def __str__(self):
         return '<Skin name: "%s", type: %d, vertex: %d>' % (
             self.name, self.type, len(self.indices))
+
+    def __eq__(self, rhs):
+        return (
+                self.name==rhs.name
+                and self.type==rhs.type
+                and self.indices==rhs.indices
+                and self.pos_list==rhs.pos_list
+                and self.english_name==rhs.english_name
+                and self.vertex_count==rhs.vertex_count
+                )
 
 
 class BoneGroup(object):
@@ -349,6 +406,24 @@ class RigidBody(object):
         self.friction=friction
         self.mode=mode
 
+    def __eq__(self, rhs):
+        return (
+                self.name==rhs.name
+                and self.bone_index==rhs.bone_index
+                and self.collision_group==rhs.collision_group
+                and self.no_collision_group==rhs.no_collision_group
+                and self.shape_type==rhs.shape_type
+                and self.shape_size==rhs.shape_size
+                and self.shape_position==rhs.shape_position
+                and self.shape_rotation==rhs.shape_rotation
+                and self.mass==rhs.mass
+                and self.linear_damping==rhs.linear_damping
+                and self.angular_damping==rhs.angular_damping
+                and self.restitution==rhs.restitution
+                and self.friction==rhs.friction
+                and self.mode==rhs.mode
+                )
+
 
 class Joint(object):
     __slots__=[ 'name', 'rigidbody_index_a', 'rigidbody_index_b', 
@@ -375,6 +450,21 @@ class Joint(object):
         self.rotation_limit_min=rotation_limit_min
         self.spring_constant_translation=spring_constant_translation
         self.spring_constant_rotation=spring_constant_rotation
+
+    def __eq__(self, rhs):
+        return (
+                self.name==rhs.name
+                and self.rigidbody_index_a==rhs.rigidbody_index_a
+                and self.rigidbody_index_b==rhs.rigidbody_index_b
+                and self.position==rhs.position
+                and self.rotation==rhs.rotation
+                and self.translation_limit_max==rhs.translation_limit_max
+                and self.translation_limit_min==rhs.translation_limit_min
+                and self.rotation_limit_max==rhs.rotation_limit_max
+                and self.rotation_limit_min==rhs.rotation_limit_min
+                and self.spring_constant_translation==rhs.spring_constant_translation
+                and self.spring_constant_rotation==rhs.spring_constant_rotation
+                )
 
 
 class ToonTextures(object):
@@ -412,9 +502,11 @@ class Model(object):
             'vertices', 'indices', 'materials', 'bones', 
             'ik_list', 'morphs',
             'morph_indices', 'bone_group_list', 'bone_display_list',
+            'bone_group_english_list',
             'toon_textures',
-            'no_parent_bones',
             'rigidbodies', 'joints',
+
+            'no_parent_bones',
             ]
     def __init__(self, version):
         self.version=version
@@ -432,6 +524,7 @@ class Model(object):
         self.bone_group_list=[]
         self.bone_display_list=[]
         # extend
+        self.bone_group_english_list=[]
         self.toon_textures=ToonTextures()
         self.rigidbodies=[]
         self.joints=[]
@@ -446,6 +539,27 @@ class Model(object):
             self.version, self.name, len(self.vertices), len(self.indices),
             len(self.materials), len(self.bones), len(self.ik_list), len(self.morph_list))
 
+    def __eq__(self, rhs):
+        return (
+                self.name==rhs.name
+                and self.comment==rhs.comment
+                and self.english_name==rhs.english_name
+                and self.english_comment==rhs.english_comment
+                and self.vertices==rhs.vertices
+                and self.indices==rhs.indices
+                and self.materials==rhs.materials
+                and self.bones==rhs.bones
+                and self.ik_list==rhs.ik_list
+                and self.morphs==rhs.morphs
+                and self.morph_indices==rhs.morph_indices
+                and self.bone_group_list==rhs.bone_group_list
+                and self.bone_display_list==rhs.bone_display_list
+                and self.bone_group_english_list==rhs.bone_group_english_list
+                and self.toon_textures==rhs.toon_textures
+                and self.rigidbodies==rhs.rigidbodies
+                and self.joints==rhs.joints
+                )
+
 
 class IO(object):
     def __init__(self):
@@ -453,7 +567,7 @@ class IO(object):
 
     def read(self, path):
         warnings.warn("'pymeshio.mqo.IO.read' will be replaced by 'pymeshio.mqo.loader.load'")
-        model=pymeshio.pmd.loader.load(path)
+        model=pymeshio.pmd.loader.load_from_file(path)
         if model:
             return True
 

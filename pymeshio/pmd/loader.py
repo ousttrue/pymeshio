@@ -7,8 +7,8 @@ import pymeshio.pmd
 class Loader(pymeshio.common.BinaryLoader):
     """pmx loader
     """
-    def __init__(self, io, version):
-        super(Loader, self).__init__(io)
+    def __init__(self, ios, version):
+        super(Loader, self).__init__(ios)
         self.version=version
 
     def read_text(self, size):
@@ -65,13 +65,13 @@ class Loader(pymeshio.common.BinaryLoader):
         return ik
 
     def read_morph(self):
-        skin=pymeshio.pmd.Skin(self.read_text(20))
-        skin_size = self.read_uint(4)
-        skin.type = self.read_uint(1)
-        for j in range(skin_size):
-            skin.indices.append(self.read_uint(4))
-            skin.pos_list.append(self.read_vector3())
-        return skin
+        morph=pymeshio.pmd.Morph(self.read_text(20))
+        morph_size = self.read_uint(4)
+        morph.type = self.read_uint(1)
+        for j in range(morph_size):
+            morph.indices.append(self.read_uint(4))
+            morph.pos_list.append(self.read_vector3())
+        return morph
 
     def read_rigidbody(self):
         return pymeshio.pmd.RigidBody(
@@ -150,8 +150,8 @@ def __load(loader, model):
         if morph.name==b'base':
             continue
         morph.english_name=loader.read_text(20)
-    for bone_group in model.bone_group_list:
-        bone_group=loader.read_text(50)
+    model.bone_group_english_list=[loader.read_text(50)
+            for _ in model.bone_group_list]
 
     ############################################################
     # extend2: toon_textures
@@ -176,10 +176,13 @@ def __load(loader, model):
     return True
 
 
-def load(path):
-    # general binary loader
-    #loader=pymeshio.common.BinaryLoader(open(path, 'rb'))
-    loader=pymeshio.common.BinaryLoader(io.BytesIO(pymeshio.common.readall(path)))
+def load_from_file(path):
+    return load(io.BytesIO(pymeshio.common.readall(path)))
+
+
+def load(ios):
+    assert(isinstance(ios, io.IOBase))
+    loader=pymeshio.common.BinaryLoader(ios)
 
     # header
     signature=loader.unpack("3s", 3)
@@ -189,11 +192,12 @@ def load(path):
     version=loader.read_float()
 
     model=pymeshio.pmd.Model(version)
-    loader=Loader(loader.io, version)
+    loader=Loader(loader.ios, version)
     if(__load(loader, model)):
         # check eof
         if not loader.is_end():
-            print("can not reach eof.")
+            #print("can not reach eof.")
+            pass
 
         # build bone tree
         for i, child in enumerate(model.bones):
@@ -206,143 +210,11 @@ def load(path):
                 parent=model.bones[child.parent_index]
                 child.parent=parent
                 parent.children.append(child)
-            # ��ʒu
+            # 後位置
             if child.hasChild():
                 child.tail=model.bones[child.tail_index].pos
 
         return model
 
 
-def save(self, path):
-    io=open(path, 'wb')
-    if not io:
-        return False
-    # Header
-    io.write(b"Pmd")
-    io.write(struct.pack("f", self.version))
-    io.write(struct.pack("20s", self.name))
-    io.write(struct.pack("256s", self.comment))
-
-    # Vertices
-    io.write(struct.pack("I", len(self.vertices)))
-    sVertex=struct.Struct("=8f2H2B") # 38byte
-    assert(sVertex.size==38)
-    for v in self.vertices:
-        data=sVertex.pack( 
-            v.pos[0], v.pos[1], v.pos[2],
-            v.normal[0], v.normal[1], v.normal[2],
-            v.uv[0], v.uv[1],
-            v.bone0, v.bone1, v.weight0, v.edge_flag)
-        io.write(data)
-
-    # Faces
-    io.write(struct.pack("I", len(self.indices)))
-    io.write(struct.pack("=%dH" % len(self.indices), *self.indices))
-
-    # material
-    io.write(struct.pack("I", len(self.materials)))
-    sMaterial=struct.Struct("=3fff3f3fBBI20s") # 70byte
-    assert(sMaterial.size==70)
-    for m in self.materials:
-        io.write(sMaterial.pack(
-            m.diffuse[0], m.diffuse[1], m.diffuse[2], m.diffuse[3],
-            m.shinness, 
-            m.specular[0], m.specular[1], m.specular[2],
-            m.ambient[0], m.ambient[1], m.ambient[2],
-            m.toon_index, m.flag,
-            m.vertex_count,
-            m.texture
-            ))
-
-    # bone
-    io.write(struct.pack("H", len(self.bones)))
-    sBone=struct.Struct("=20sHHBH3f")
-    assert(sBone.size==39)
-    for b in self.bones:
-        io.write(sBone.pack(
-            b.name,
-            b.parent_index, b.tail_index, b.type, b.ik_index,
-            b.pos[0], b.pos[1], b.pos[2]))
-
-    # IK
-    io.write(struct.pack("H", len(self.ik_list)))
-    for ik in self.ik_list:
-        io.write(struct.pack("=2HBHf", 
-            ik.index, ik.target, ik.length, ik.iterations, ik.weight
-            ))
-        for c in ik.children:
-            io.write(struct.pack("H", c))
-
-    # skin
-    io.write(struct.pack("H", len(self.morph_list)))
-    for s in self.morph_list:
-        io.write(struct.pack("20sIB", 
-            s.name, len(s.indices), s.type))
-        for i, v in zip(s.indices, s.pos_list):
-            io.write(struct.pack("I3f", i, v[0], v[1], v[2]))
-
-    # skin disp list
-    io.write(struct.pack("B", len(self.face_list)))
-    for i in self.face_list:
-        io.write(struct.pack("H", i))
-
-    # bone disp list
-    io.write(struct.pack("B", len(self.bone_group_list)))
-    for g in self.bone_group_list:
-        io.write(struct.pack("50s", g.name))
-
-    io.write(struct.pack("I", len(self.bone_display_list)))
-    for l in self.bone_display_list:
-        io.write(struct.pack("=HB", *l))
-
-    ############################################################
-    # extend data
-    ############################################################
-    io.write(struct.pack("B", 1))
-    # english name
-    io.write(struct.pack("=20s", self.english_name))
-    io.write(struct.pack("=256s", self.english_comment))
-    # english bone name
-    for bone in self.bones:
-        io.write(struct.pack("=20s", bone.english_name))
-    # english skin list
-    for skin in self.morph_list:
-        #print(skin.name)
-        if skin.name==b'base':
-            continue
-        io.write(struct.pack("=20s", skin.english_name))
-    # english bone list
-    for bone_group in self.bone_group_list:
-        io.write(struct.pack("50s", bone_group.english_name))
-    # toon texture
-    for toon_texture in self.toon_textures:
-        io.write(struct.pack("=100s", toon_texture))
-    # rigid
-    io.write(struct.pack("I", len(self.rigidbodies)))
-    for r in self.rigidbodies:
-        io.write(struct.pack("=20sHBHB14fB",
-            r.name, r.boneIndex, r.group, r.target, r.shapeType,
-            r.w, r.h, r.d, 
-            r.position.x, r.position.y, r.position.z, 
-            r.rotation.x, r.rotation.y, r.rotation.z, 
-            r.weight,
-            r.linearDamping, r.angularDamping, r.restitution,
-            r.friction, r.processType))
-
-    # constraint
-    io.write(struct.pack("I", len(self.constraints)))
-    for c in self.constraints:
-        io.write(struct.pack("=20sII24f",
-            c.name, c.rigidA, c.rigidB,
-            c.pos.x, c.pos.y, c.pos.z,
-            c.rot.x, c.rot.y, c.rot.z,
-            c.constraintPosMin.x, c.constraintPosMin.y, c.constraintPosMin.z,
-            c.constraintPosMax.x, c.constraintPosMax.y, c.constraintPosMax.z,
-            c.constraintRotMin.x, c.constraintRotMin.y, c.constraintRotMin.z,
-            c.constraintRotMax.x, c.constraintRotMax.y, c.constraintRotMax.z,
-            c.springPos.x, c.springPos.y, c.springPos.z,
-            c.springRot.x, c.springRot.y, c.springRot.z
-            ))
-
-    return True
 

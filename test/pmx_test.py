@@ -12,7 +12,7 @@ class TestPmx(unittest.TestCase):
         pass
 
     def test_read(self):
-        model=pymeshio.pmx.loader.load(PMX_FILE)
+        model=pymeshio.pmx.loader.load_from_file(PMX_FILE)
         self.assertEqual(pymeshio.pmx.Model,  model.__class__)
         self.assertEqual(u'初音ミク',  model.name)
         self.assertEqual(u'Miku Hatsune',  model.english_name)

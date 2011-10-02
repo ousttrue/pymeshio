@@ -1,16 +1,18 @@
 # coding: utf-8
+import sys
+import io
+import unittest
 import pymeshio.pmd
 import pymeshio.pmd.loader
-import sys
-import unittest
+import pymeshio.pmd.writer
 
 
 PMD_FILE=u'resources/初音ミクVer2.pmd'
 
 
 def test_old_pmd_load():
-    io=pymeshio.pmd.IO()
-    assert io.read(PMD_FILE)
+    loader=pymeshio.pmd.IO()
+    assert loader.read(PMD_FILE)
 
 
 class TestPmd(unittest.TestCase):
@@ -18,8 +20,8 @@ class TestPmd(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_read(self):
-        model=pymeshio.pmd.loader.load(PMD_FILE)
+    def test_load(self):
+        model=pymeshio.pmd.loader.load_from_file(PMD_FILE)
         self.assertEqual(pymeshio.pmd.Model,  model.__class__)
         self.assertEqual(u'初音ミク'.encode('cp932'),  model.name)
         self.assertEqual(u'Miku Hatsune'.encode('cp932'),  model.english_name)
@@ -47,4 +49,15 @@ class TestPmd(unittest.TestCase):
         self.assertEqual(31,  len(model.morphs))
         self.assertEqual(45,  len(model.rigidbodies))
         self.assertEqual(27,  len(model.joints))
+
+    def test_write(self):
+        # read source file
+        buf=pymeshio.common.readall(PMD_FILE)
+        # load and write to out
+        model=pymeshio.pmd.loader.load(io.BytesIO(buf))
+        out=io.BytesIO()
+        pymeshio.pmd.writer.write(out, model)
+        # read out buffer again
+        model2=pymeshio.pmd.loader.load(io.BytesIO(out.getvalue()))
+        self.assertEqual(model, model2)
 

@@ -7,7 +7,7 @@ import pymeshio.pmx
 class Loader(pymeshio.common.BinaryLoader):
     """pmx loader
     """
-    def __init__(self, io,
+    def __init__(self, ios,
             text_encoding,
             extended_uv,
             vertex_index_size,
@@ -17,7 +17,7 @@ class Loader(pymeshio.common.BinaryLoader):
             morph_index_size,
             rigidbody_index_size
             ):
-        super(Loader, self).__init__(io)
+        super(Loader, self).__init__(ios)
         self.read_text=self.get_read_text(text_encoding)
         if extended_uv>0:
             raise pymeshio.common.ParseException(
@@ -267,13 +267,13 @@ class Loader(pymeshio.common.BinaryLoader):
                 spring_constant_rotation=self.read_vector3())
 
 
-def load(path):
-    # general binary loader
-    loader=pymeshio.common.BinaryLoader(
-            io.BytesIO(
-                pymeshio.common.readall(path)))
-    #loader=pymeshio.common.BinaryLoader(open(path, 'rb'))
+def load_from_file(path):
+    return load(io.BytesIO(pymeshio.common.readall(path)))
 
+
+def load(ios):
+    assert(isinstance(ios, io.IOBase))
+    loader=pymeshio.common.BinaryLoader(ios)
 
     # header
     signature=loader.unpack("4s", 4)

@@ -21,6 +21,9 @@ class Vector2(object):
     def __str__(self):
         return "<%f %f>" % (self.x, self.y)
 
+    def __eq__(self, rhs):
+        return self.x==rhs.x and self.y==rhs.y
+
     def __getitem__(self, key):
         if key==0:
             return self.x
@@ -49,6 +52,9 @@ class Vector3(object):
 
     def __str__(self):
         return "<%f %f %f>" % (self.x, self.y, self.z)
+
+    def __eq__(self, rhs):
+        return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z
 
     def __getitem__(self, key):
         if key==0:
@@ -212,6 +218,9 @@ class RGB(object):
         self.g=g
         self.b=b
 
+    def __eq__(self, rhs):
+        return self.r==rhs.r and self.g==rhs.g and self.b==rhs.b
+
     def __getitem__(self, key):
         if key==0:
             return self.r
@@ -270,14 +279,14 @@ def readall(path):
 class BinaryLoader(object):
     """general BinaryLoader
     """
-    def __init__(self, io):
-        self.io=io
+    def __init__(self, ios):
+        self.ios=ios
 
     def is_end(self):
-        return not self.io.readable()
+        return not self.ios.readable()
 
     def unpack(self, fmt, size):
-        result=struct.unpack(fmt, self.io.read(size))
+        result=struct.unpack(fmt, self.ios.read(size))
         return result[0]
 
     def read_uint(self, size):
@@ -320,4 +329,38 @@ class BinaryLoader(object):
                 self.read_float(), 
                 self.read_float()
                 )
+
+
+class BinaryWriter(object):
+    def __init__(self, ios):
+        self.ios=ios
+
+    def write_text(self, v, size=None):
+        if size:
+            self.ios.write(struct.pack("={0}s".format(size), v))
+        else:
+            self.ios.write(v)
+
+    def write_float(self, v):
+        self.ios.write(struct.pack("f", v))
+
+    def write_uint(self, v, size):
+        if size==1:
+            self.ios.write(struct.pack("B", v))
+        elif size==2:
+            self.ios.write(struct.pack("H", v))
+        elif size==4:
+            self.ios.write(struct.pack("I", v))
+        else:
+            raise WriteError("invalid int uint size")
+
+    def write_vector2(self, v):
+        self.ios.write(struct.pack("=2f", v.x, v.y))
+
+    def write_vector3(self, v):
+        self.ios.write(struct.pack("=3f", v.x, v.y, v.z))
+
+    def write_rgb(self, v):
+        self.ios.write(struct.pack("=3f", v.r, v.g, v.b))
+
 

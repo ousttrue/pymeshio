@@ -23,8 +23,8 @@ class Loader(object):
             "eof", "io", "lines",
             "materials", "objects",
             ]
-    def __init__(self, io):
-        self.io=io
+    def __init__(self, ios):
+        self.ios=ios
         self.eof=False
         self.lines=0
 
@@ -33,7 +33,7 @@ class Loader(object):
                 self.lines, len(self.materials), len(self.objects))
 
     def getline(self):
-        line=self.io.readline()
+        line=self.ios.readline()
         self.lines+=1
         if line=="":
             self.eof=True
@@ -168,59 +168,64 @@ class Loader(object):
         return False
 
 
-def load(path):
-    with open(path, 'rb') as io:
-        loader=Loader(io)
-        model=pymeshio.mqo.Model()
+def load_from_file(path):
+    with open(path, 'rb') as ios:
+        load(ios)
 
+
+def load(ios):
+    assert(isinstance(ios, io.IOBase))
+    loader=Loader(ios)
+    model=pymeshio.mqo.Model()
+
+    line=loader.getline()
+    if line!="Metasequoia Document":
+        print("invalid signature")
+        return False
+
+    line=loader.getline()
+    if line!="Format Text Ver 1.0":
+        print("unknown version: %s" % line)
+
+    while True:
         line=loader.getline()
-        if line!="Metasequoia Document":
-            print("invalid signature")
-            return False
+        if line==None:
+            # eof
+            break;
+        if line=="":
+            # empty line
+            continue
 
-        line=loader.getline()
-        if line!="Format Text Ver 1.0":
-            print("unknown version: %s" % line)
-
-        while True:
-            line=loader.getline()
-            if line==None:
-                # eof
-                break;
-            if line=="":
-                # empty line
-                continue
-
-            tokens=line.split()
-            key=tokens[0]
-            if key=="Eof":
-                return model
-            elif key=="Scene":
-                if not loader.readChunk():
-                    return
-            elif key=="Material":
-                materials=loader.readMaterial()
-                if not materials:
-                    return
-                model.materials=materials
-            elif key=="Object":
-                firstQuote=line.find('"')
-                secondQuote=line.find('"', firstQuote+1)
-                obj=loader.readObject(line[firstQuote+1:secondQuote])
-                if not obj:
-                    return
-                model.objects.append(obj)
-            elif key=="BackImage":
-                if not loader.readChunk():
-                    return
-            elif key=="IncludeXml":
-                firstQuote=line.find('"')
-                secondQuote=line.find('"', firstQuote+1)
-                print("IncludeXml", line[firstQuote+1:secondQuote])
-            else:
-                print("unknown key: %s" % key)
-                if not loader.readChunk():
-                    return
-        # error not reach here
-        raise ParseException("invalid eof")
+        tokens=line.split()
+        key=tokens[0]
+        if key=="Eof":
+            return model
+        elif key=="Scene":
+            if not loader.readChunk():
+                return
+        elif key=="Material":
+            materials=loader.readMaterial()
+            if not materials:
+                return
+            model.materials=materials
+        elif key=="Object":
+            firstQuote=line.find('"')
+            secondQuote=line.find('"', firstQuote+1)
+            obj=loader.readObject(line[firstQuote+1:secondQuote])
+            if not obj:
+                return
+            model.objects.append(obj)
+        elif key=="BackImage":
+            if not loader.readChunk():
+                return
+        elif key=="IncludeXml":
+            firstQuote=line.find('"')
+            secondQuote=line.find('"', firstQuote+1)
+            print("IncludeXml", line[firstQuote+1:secondQuote])
+        else:
+            print("unknown key: %s" % key)
+            if not loader.readChunk():
+                return
+    # error not reach here
+    raise ParseException("invalid eof")
 
