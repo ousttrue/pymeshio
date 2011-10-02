@@ -127,7 +127,7 @@ def __read(reader, model):
             for _ in range(reader.read_uint(2))]
     model.morph_indices=[reader.read_uint(2)
             for _ in range(reader.read_uint(1))]
-    model.bone_group_list=[reader.read_text(50)
+    model.bone_group_list=[pmd.BoneGroup(reader.read_text(50))
             for _ in range(reader.read_uint(1))]
     model.bone_display_list=[(reader.read_uint(2), reader.read_uint(1))
             for _i in range(reader.read_uint(4))]
@@ -150,8 +150,9 @@ def __read(reader, model):
         if morph.name==b'base':
             continue
         morph.english_name=reader.read_text(20)
-    model.bone_group_english_list=[reader.read_text(50)
-            for _ in model.bone_group_list]
+    for g in model.bone_group_list:
+        g.english_name=reader.read_text(50)
+
 
     ############################################################
     # extend2: toon_textures

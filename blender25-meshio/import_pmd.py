@@ -307,7 +307,7 @@ def __importArmature(l):
 
     # create bone group
     for i, g in enumerate(l.bone_group_list):
-        name=get_group_name(g)
+        name=get_group_name(g.name)
         bl.object.createBoneGroup(armature_object, name, "THEME%02d" % (i+1))
 
     # assign bone to group
@@ -319,7 +319,7 @@ def __importArmature(l):
             bone_name=b.name.decode('cp932')
         # group
         g=l.bone_group_list[g_index-1]
-        group_name=get_group_name(g)
+        group_name=get_group_name(g.name)
 
         # assign
         pose.bones[bone_name].bone_group=pose.bone_groups[group_name]

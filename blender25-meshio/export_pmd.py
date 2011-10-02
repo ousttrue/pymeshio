@@ -14,22 +14,23 @@ pmd Importer
 
 This script exports a pmd model.
 
-0.1 20100318: first implementation.
-0.2 20100519: refactoring. use C extension.
-1.0 20100530: implement basic features.
-1.1 20100612: integrate 2.4 and 2.5.
-1.2 20100616: implement rigid body.
-1.3 20100619: fix rigid body, bone weight.
-1.4 20100626: refactoring.
-1.5 20100629: sphere map.
-1.6 20100710: toon texture & bone group.
-1.7 20100711: separate vertex with normal or uv.
-2.0 20100724: update for Blender2.53.
-2.1 20100731: add full python module.
-2.2 20101005: update for Blender2.54.
-2.3 20101228: update for Blender2.55.
-2.4 20110429: update for Blender2.57b.
-2.5 20110522: implement RigidBody and Constraint.
+20100318: first implementation.
+20100519: refactoring. use C extension.
+20100530: implement basic features.
+20100612: integrate 2.4 and 2.5.
+20100616: implement rigid body.
+20100619: fix rigid body, bone weight.
+20100626: refactoring.
+20100629: sphere map.
+20100710: toon texture & bone group.
+20100711: separate vertex with normal or uv.
+20100724: update for Blender2.53.
+20100731: add full python module.
+20101005: update for Blender2.54.
+20101228: update for Blender2.55.
+20110429: update for Blender2.57b.
+20110522: implement RigidBody and Constraint.
+20111002: update for pymeshio-2.1.0
 """
 
 bl_addon_info = {
@@ -51,15 +52,13 @@ bl_addon_info = {
 ###############################################################################
 import os
 import sys
+import io
 
-try:
-    # C extension
-    from .meshio import pmd, englishmap
-    print('use meshio C module')
-except ImportError:
-    # full python
-    from .pymeshio import englishmap
-    from .pymeshio import pmd
+
+from .pymeshio import englishmap
+from .pymeshio import common
+from .pymeshio import pmd
+from .pymeshio.pmd import writer
 
 
 # for 2.5
@@ -70,26 +69,6 @@ import mathutils
 from . import bl25 as bl
 
 xrange=range
-
-def setMaterialParams(material, m):
-    # diffuse
-    material.diffuse.r=m.diffuse_color[0]
-    material.diffuse.g=m.diffuse_color[1]
-    material.diffuse.b=m.diffuse_color[2]
-    material.diffuse.a=m.alpha
-    # specular
-    material.shinness=0 if m.specular_toon_size<1e-5 else m.specular_hardness*10
-    material.specular.r=m.specular_color[0]
-    material.specular.g=m.specular_color[1]
-    material.specular.b=m.specular_color[2]
-    # ambient
-    material.ambient.r=m.mirror_color[0]
-    material.ambient.g=m.mirror_color[1]
-    material.ambient.b=m.mirror_color[2]
-    # flag
-    material.flag=1 if m.subsurface_scattering.use else 0
-    # toon
-    material.toon_index=0
 
 def toCP932(s):
     return s.encode('cp932')
@@ -895,28 +874,25 @@ class PmdExporter(object):
             self.__createOneSkinMesh(child)
 
     def write(self, path):
-        io=pmd.IO()
-        io.name=self.name
-        io.comment=self.comment
-        io.version=1.0
+        model=pmd.Model(1.0)
+        model.name=self.name.encode('cp932')
+        model.comment=self.comment.encode('cp932')
 
         # 頂点
-        for pos, attribute, b0, b1, weight in self.oneSkinMesh.vertexArray.zip():
+        model.vertices=[pmd.Vertex(
             # convert right-handed z-up to left-handed y-up
-            v=io.addVertex()
-            v.pos.x=pos[0]
-            v.pos.y=pos[2]
-            v.pos.z=pos[1]
+            common.Vector3(pos[0], pos[2], pos[1]), 
             # convert right-handed z-up to left-handed y-up
-            v.normal.x=attribute.nx
-            v.normal.y=attribute.nz
-            v.normal.z=attribute.ny
-            v.uv.x=attribute.u
-            v.uv.y=1.0-attribute.v # reverse vertical
-            v.bone0=self.skeleton.indexByName(b0)
-            v.bone1=self.skeleton.indexByName(b1)
-            v.weight0=int(100*weight)
-            v.edge_flag=0 # edge flag, 0: enable edge, 1: not edge
+            common.Vector3(attribute.nx, attribute.nz, attribute.ny),
+            # reverse vertical
+            common.Vector2(attribute.u, 1.0-attribute.v),
+            self.skeleton.indexByName(b0),
+            self.skeleton.indexByName(b1),
+            int(100*weight),
+            # edge flag, 0: enable edge, 1: not edge
+            0 
+            )
+            for pos, attribute, b0, b1, weight in self.oneSkinMesh.vertexArray.zip()]
 
         # 面とマテリアル
         vertexCount=self.oneSkinMesh.getVertexCount()
@@ -926,11 +902,6 @@ class PmdExporter(object):
                 m=bl.material.get(material_name)
             except KeyError as e:
                 m=DefaultMatrial()
-            # マテリアル
-            material=io.addMaterial()
-            setMaterialParams(material, m)
-
-            material.vertex_count=len(indices)
             def get_texture_name(texture):
                 pos=texture.replace("\\", "/").rfind("/")
                 if pos==-1:
@@ -940,23 +911,38 @@ class PmdExporter(object):
             textures=[get_texture_name(path)
                 for path in bl.material.eachEnalbeTexturePath(m)]
             print(textures)
-            if len(textures)>0:
-                material.texture='*'.join(textures)
-            else:
-                material.texture=""
+            # マテリアル
+            model.materials.append(pmd.Material(
+                    # diffuse_color
+                    common.RGB(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2]),
+                    m.alpha,
+                    # specular_factor
+                    0 if m.specular_toon_size<1e-5 else m.specular_hardness*10,
+                    # specular_color
+                    common.RGB(m.specular_color[0], m.specular_color[1], m.specular_color[2]),
+                    # ambient_color
+                    common.RGB(m.mirror_color[0], m.mirror_color[1], m.mirror_color[2]),
+                    # flag
+                    1 if m.subsurface_scattering.use else 0,
+                    # toon
+                    0,
+                    # vertex_count
+                    len(indices),
+                    # texture
+                    ('*'.join(textures) if len(textures)>0 else "").encode('cp932')
+                    ))
             # 面
             for i in indices:
                 assert(i<vertexCount)
             for i in xrange(0, len(indices), 3):
                 # reverse triangle
-                io.indices.append(indices[i])
-                io.indices.append(indices[i+1])
-                io.indices.append(indices[i+2])
+                model.indices.append(indices[i])
+                model.indices.append(indices[i+1])
+                model.indices.append(indices[i+2])
 
         # bones
         boneNameMap={}
         for i, b in enumerate(self.skeleton.bones):
-            bone=io.addBone()
 
             # name
             boneNameMap[b.name]=i
@@ -964,7 +950,7 @@ class PmdExporter(object):
             if not v:
                 v=[b.name, b.name]
             assert(v)
-            bone.name=v[1]
+            bone=pmd.Bone(v[1].encode('cp932'))
 
             # english name
             bone_english_name=toCP932(b.name)
@@ -989,10 +975,12 @@ class PmdExporter(object):
             bone.pos.x=b.pos[0] if not near(b.pos[0], 0) else 0
             bone.pos.y=b.pos[2] if not near(b.pos[2], 0) else 0
             bone.pos.z=b.pos[1] if not near(b.pos[1], 0) else 0
+            
+            model.bones.append(bone)
 
         # IK
         for ik in self.skeleton.ik_list:
-            solver=io.addIK()
+            solver=pmd.IK()
             solver.index=self.skeleton.getIndex(ik.target)
             solver.target=self.skeleton.getIndex(ik.effector)
             solver.length=ik.length
@@ -1002,18 +990,17 @@ class PmdExporter(object):
                 b=self.skeleton.bones[b.parent_index]
             solver.iterations=ik.iterations
             solver.weight=ik.weight
+            model.ik_list.append(solver)
 
         # 表情
         for i, m in enumerate(self.oneSkinMesh.morphList):
-            # morph
-            morph=io.addMorph()
-
             v=englishmap.getUnicodeSkinName(m.name)
             if not v:
                 v=[m.name, m.name, 0]
             assert(v)
-            morph.name=v[1]
-            morph.english_name=m.name
+            # morph
+            morph=pmd.Morph(v[1].encode("cp932"))
+            morph.english_name=m.name.encode("cp932")
             m.type=v[2]
             morph.type=v[2]
             for index, offset in m.offsets:
@@ -1025,28 +1012,28 @@ class PmdExporter(object):
         # type==0はbase
         for i, m in enumerate(self.oneSkinMesh.morphList):
             if m.type==3:
-                io.face_list.append(i)
+                model.morph_indices.append(i)
         for i, m in enumerate(self.oneSkinMesh.morphList):
             if m.type==2:
-                io.face_list.append(i)
+                model.morph_indices.append(i)
         for i, m in enumerate(self.oneSkinMesh.morphList):
             if m.type==1:
-                io.face_list.append(i)
+                model.morph_indices.append(i)
         for i, m in enumerate(self.oneSkinMesh.morphList):
             if m.type==4:
-                io.face_list.append(i)
+                model.morph_indices.append(i)
 
         # ボーングループ
         for g in self.skeleton.bone_groups:
-            boneDisplayName=io.addBoneGroup()
-            # name
             name=englishmap.getUnicodeBoneGroupName(g[0])
             if not name:
                 name=g[0]
-            boneDisplayName.name=name+'\n'
-            # english
             englishName=g[0]
-            boneDisplayName.english_name=englishName+'\n'
+
+            model.bone_group_list.append(pmd.BoneGroup(
+                    (name+'\n').encode('cp932'),
+                    (englishName+'\n').encode('cp932')
+                    ))
 
         # ボーングループメンバー
         for i, b in enumerate(self.skeleton.bones):
@@ -1054,13 +1041,11 @@ class PmdExporter(object):
                continue
             if b.type in [6, 7]:
                continue
-            io.addBoneDisplay(i, self.skeleton.getBoneGroup(b))
-
-        #assert(len(io.bones)==len(io.bone_display_list)+1)
+            model.bone_display_list.append((i, self.skeleton.getBoneGroup(b)))
 
         # English
-        io.english_name=self.englishName
-        io.english_comment=self.englishComment
+        model.english_name=self.englishName.encode('cp932')
+        model.english_comment=self.englishComment.encode('cp932')
 
         # toon
         toonMeshObject=None
@@ -1077,19 +1062,18 @@ class PmdExporter(object):
             for i in range(10):
                 t=bl.material.getTexture(toonMaterial, i)
                 if t:
-                    io.toon_textures[i]="%s" % t.name
+                    model.toon_textures[i]=("%s" % t.name).encode('cp932')
                 else:
-                    io.toon_textures[i]="toon%02d.bmp" % (i+1)
+                    model.toon_textures[i]=("toon%02d.bmp" % (i+1)).encode('cp932')
         else:
             for i in range(10):
-                io.toon_textures[i]="toon%02d.bmp" % (i+1)
+                model.toon_textures[i]=("toon%02d.bmp" % (i+1)).encode('cp932')
 
         # rigid body
         rigidNameMap={}
         for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
             name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
             print(name)
-            rigidBody=pmd.RigidBody(name)
             rigidNameMap[name]=i
             boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
             if boneIndex==0:
@@ -1097,73 +1081,81 @@ class PmdExporter(object):
                 bone=self.skeleton.bones[0]
             else:
                 bone=self.skeleton.bones[boneIndex]
-            rigidBody.boneIndex=boneIndex
-            rigidBody.position.x=obj.location.x-bone.pos[0]
-            rigidBody.position.y=obj.location.z-bone.pos[2]
-            rigidBody.position.z=obj.location.y-bone.pos[1]
-            rigidBody.rotation.x=-obj.rotation_euler[0]
-            rigidBody.rotation.y=-obj.rotation_euler[2]
-            rigidBody.rotation.z=-obj.rotation_euler[1]
-            rigidBody.processType=obj[bl.RIGID_PROCESS_TYPE]
-            rigidBody.group=obj[bl.RIGID_GROUP]
-            rigidBody.target=obj[bl.RIGID_INTERSECTION_GROUP]
-            rigidBody.weight=obj[bl.RIGID_WEIGHT]
-            rigidBody.linearDamping=obj[bl.RIGID_LINEAR_DAMPING]
-            rigidBody.angularDamping=obj[bl.RIGID_ANGULAR_DAMPING]
-            rigidBody.restitution=obj[bl.RIGID_RESTITUTION]
-            rigidBody.friction=obj[bl.RIGID_FRICTION]
+            rigidBody=pmd.RigidBody(
+                    name.encode('cp932'), 
+                    boneIndex,
+                    shape_position=common.Vector3(
+                        obj.location.x-bone.pos[0],
+                        obj.location.z-bone.pos[2],
+                        obj.location.y-bone.pos[1]),
+                    shape_rotation=common.Vector3(
+                        -obj.rotation_euler[0],
+                        -obj.rotation_euler[2],
+                        -obj.rotation_euler[1]),
+                    collision_group=obj[bl.RIGID_GROUP],
+                    no_collision_group=obj[bl.RIGID_INTERSECTION_GROUP],
+                    mode=obj[bl.RIGID_PROCESS_TYPE],
+                    mass=obj[bl.RIGID_WEIGHT],
+                    linear_damping=obj[bl.RIGID_LINEAR_DAMPING],
+                    angular_damping=obj[bl.RIGID_ANGULAR_DAMPING],
+                    restitution=obj[bl.RIGID_RESTITUTION],
+                    friction=obj[bl.RIGID_FRICTION])
             if obj[bl.RIGID_SHAPE_TYPE]==0:
-                rigidBody.shapeType=pmd.SHAPE_SPHERE
-                rigidBody.w=obj.scale[0]
-                rigidBody.d=0
-                rigidBody.h=0
+                rigidBody.shape_type=pmd.SHAPE_SPHERE
+                rigidBody.shape_size=common.Vector3(obj.scale[0], 0, 0)
             elif obj[bl.RIGID_SHAPE_TYPE]==1:
-                rigidBody.shapeType=pmd.SHAPE_BOX
-                rigidBody.w=obj.scale[0]
-                rigidBody.d=obj.scale[1]
-                rigidBody.h=obj.scale[2]
+                rigidBody.shape_type=pmd.SHAPE_BOX
+                rigidBody.shape_size=common.Vector3(obj.scale[0], obj.scale[1], obj.scale[2])
             elif obj[bl.RIGID_SHAPE_TYPE]==2:
-                rigidBody.shapeType=pmd.SHAPE_CAPSULE
-                rigidBody.w=obj.scale[0]
-                rigidBody.h=obj.scale[2]
-                rigidBody.d=0
-            io.rigidbodies.append(rigidBody)
+                rigidBody.shape_type=pmd.SHAPE_CAPSULE
+                rigidBody.shape_size=common.Vector3(obj.scale[0], obj.scale[2], 0)
+            model.rigidbodies.append(rigidBody)
 
         # constraint
-        for obj in self.oneSkinMesh.constraints:
-            print(obj)
-            constraint=pmd.Constraint(obj[bl.CONSTRAINT_NAME])
-            constraint.rigidA=rigidNameMap[obj[bl.CONSTRAINT_A]]
-            constraint.rigidB=rigidNameMap[obj[bl.CONSTRAINT_B]]
-            constraint.pos.x=obj.location[0]
-            constraint.pos.y=obj.location[2]
-            constraint.pos.z=obj.location[1]
-            constraint.rot.x=-obj.rotation_euler[0]
-            constraint.rot.y=-obj.rotation_euler[2]
-            constraint.rot.z=-obj.rotation_euler[1]
-            constraint.constraintPosMin.x=obj[bl.CONSTRAINT_POS_MIN][0]
-            constraint.constraintPosMin.y=obj[bl.CONSTRAINT_POS_MIN][1]
-            constraint.constraintPosMin.z=obj[bl.CONSTRAINT_POS_MIN][2]
-            constraint.constraintPosMax.x=obj[bl.CONSTRAINT_POS_MAX][0]
-            constraint.constraintPosMax.y=obj[bl.CONSTRAINT_POS_MAX][1]
-            constraint.constraintPosMax.z=obj[bl.CONSTRAINT_POS_MAX][2]
-            constraint.constraintRotMin.x=obj[bl.CONSTRAINT_ROT_MIN][0]
-            constraint.constraintRotMin.y=obj[bl.CONSTRAINT_ROT_MIN][1]
-            constraint.constraintRotMin.z=obj[bl.CONSTRAINT_ROT_MIN][2]
-            constraint.constraintRotMax.x=obj[bl.CONSTRAINT_ROT_MAX][0]
-            constraint.constraintRotMax.y=obj[bl.CONSTRAINT_ROT_MAX][1]
-            constraint.constraintRotMax.z=obj[bl.CONSTRAINT_ROT_MAX][2]
-            constraint.springPos.x=obj[bl.CONSTRAINT_SPRING_POS][0]
-            constraint.springPos.y=obj[bl.CONSTRAINT_SPRING_POS][1]
-            constraint.springPos.z=obj[bl.CONSTRAINT_SPRING_POS][2]
-            constraint.springRot.x=obj[bl.CONSTRAINT_SPRING_ROT][0]
-            constraint.springRot.y=obj[bl.CONSTRAINT_SPRING_ROT][1]
-            constraint.springRot.z=obj[bl.CONSTRAINT_SPRING_ROT][2]
-            io.constraints.append(constraint)
+        model.joints=[pmd.Joint(
+            name=obj[bl.CONSTRAINT_NAME].encode('cp932'),
+            rigidbody_index_a=rigidNameMap[obj[bl.CONSTRAINT_A]],
+            rigidbody_index_b=rigidNameMap[obj[bl.CONSTRAINT_B]],
+            position=common.Vector3(
+                obj.location[0], 
+                obj.location[2], 
+                obj.location[1]),
+            rotation=common.Vector3(
+                -obj.rotation_euler[0], 
+                -obj.rotation_euler[2], 
+                -obj.rotation_euler[1]),
+            translation_limit_min=common.Vector3(
+                obj[bl.CONSTRAINT_POS_MIN][0],
+                obj[bl.CONSTRAINT_POS_MIN][1],
+                obj[bl.CONSTRAINT_POS_MIN][2]
+                ),
+            translation_limit_max=common.Vector3(
+                obj[bl.CONSTRAINT_POS_MAX][0],
+                obj[bl.CONSTRAINT_POS_MAX][1],
+                obj[bl.CONSTRAINT_POS_MAX][2]
+                ),
+            rotation_limit_min=common.Vector3(
+                obj[bl.CONSTRAINT_ROT_MIN][0],
+                obj[bl.CONSTRAINT_ROT_MIN][1],
+                obj[bl.CONSTRAINT_ROT_MIN][2]),
+            rotation_limit_max=common.Vector3(
+                obj[bl.CONSTRAINT_ROT_MAX][0],
+                obj[bl.CONSTRAINT_ROT_MAX][1],
+                obj[bl.CONSTRAINT_ROT_MAX][2]),
+            spring_constant_translation=common.Vector3(
+                obj[bl.CONSTRAINT_SPRING_POS][0],
+                obj[bl.CONSTRAINT_SPRING_POS][1],
+                obj[bl.CONSTRAINT_SPRING_POS][2]),
+            spring_constant_rotation=common.Vector3(
+                obj[bl.CONSTRAINT_SPRING_ROT][0],
+                obj[bl.CONSTRAINT_SPRING_ROT][1],
+                obj[bl.CONSTRAINT_SPRING_ROT][2])
+            )
+            for obj in self.oneSkinMesh.constraints]
 
         # 書き込み
         bl.message('write: %s' % path)
-        return io.write(path)
+        return writer.write(io.open(path, 'wb'), model)
 
 
 def _execute(filepath=''):

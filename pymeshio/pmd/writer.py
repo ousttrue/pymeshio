@@ -73,7 +73,7 @@ class Writer(common.BinaryWriter):
     def write_bone_group_list(self, bone_group_list):
         self.write_uint(len(bone_group_list), 1)
         for g in bone_group_list:
-            self.write_text(g, 50)
+            self.write_text(g.name, 50)
 
     def write_bone_display_list(self, bone_display_list):
         self.write_uint(len(bone_display_list), 4)
@@ -142,8 +142,8 @@ def write(ios, model):
         if skin.name==b'base':
             continue
         writer.write_text(skin.english_name, 20)
-    for english in model.bone_group_english_list:
-        writer.write_text(english, 50)
+    for g in model.bone_group_list:
+        writer.write_text(g.english_name, 50)
     for toon_texture in model.toon_textures:
         writer.write_text(toon_texture, 100)
     writer.write_rigidbodies(model.rigidbodies)

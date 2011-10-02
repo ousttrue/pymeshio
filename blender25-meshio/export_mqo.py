@@ -17,16 +17,16 @@ Usage:
 
 Run this script from "File->Export" menu.
 
-0.1 20080128:
-0.2 20100518: refactoring.
-0.3 20100606: integrate 2.4 and 2.5.
-0.4 20100626: refactoring.
-0.5 20100710: add [apply_modifier] option(2.5 only).
-0.6 20100714: remove shape_key when apply_modifier. fix material.
-2.0 20100724: update for Blender2.53.
-2.1 20101005: update for Blender2.54.
-2.2 20101228: update for Blender2.55.
-2.4 20110429: update for Blender2.57b.
+20080128:
+20100518: refactoring.
+20100606: integrate 2.4 and 2.5.
+20100626: refactoring.
+20100710: add [apply_modifier] option(2.5 only).
+20100714: remove shape_key when apply_modifier. fix material.
+20100724: update for Blender2.53.
+20101005: update for Blender2.54.
+20101228: update for Blender2.55.
+20110429: update for Blender2.57b.
 """
 
 bl_addon_info = {

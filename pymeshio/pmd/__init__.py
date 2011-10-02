@@ -329,7 +329,7 @@ class Morph(object):
 
     def append(self, index, x, y, z):
         self.indices.append(index)
-        self.pos_list.append(Vector3(x, y, z))
+        self.pos_list.append(common.Vector3(x, y, z))
 
     def __str__(self):
         return '<Skin name: "%s", type: %d, vertex: %d>' % (
@@ -347,8 +347,10 @@ class Morph(object):
 
 
 class BoneGroup(object):
-    __slots__=['_name', '_english_name']
-    def __init__(self, name='group'): self._name=name; self._english_name='center'
+    __slots__=['name', 'english_name']
+    def __init__(self, name=b'group', english_name=b'center'): 
+        self.name=name
+        self.english_name=english_name
 
 
 SHAPE_SPHERE=0
@@ -380,16 +382,16 @@ class RigidBody(object):
             bone_index, 
             collision_group, 
             no_collision_group, 
-            shape_type,
-            shape_size,
-            shape_position, 
-            shape_rotation, 
             mass,
             linear_damping, 
             angular_damping, 
             restitution, 
             friction, 
-            mode
+            mode,
+            shape_type=0,
+            shape_size=common.Vector3(),
+            shape_position=common.Vector3(), 
+            shape_rotation=common.Vector3() 
             ):
         self.name=name
         self.bone_index=bone_index
@@ -484,7 +486,6 @@ class Model(object):
             'vertices', 'indices', 'materials', 'bones', 
             'ik_list', 'morphs',
             'morph_indices', 'bone_group_list', 'bone_display_list',
-            'bone_group_english_list',
             'toon_textures',
             'rigidbodies', 'joints',
 
@@ -506,7 +507,6 @@ class Model(object):
         self.bone_group_list=[]
         self.bone_display_list=[]
         # extend
-        self.bone_group_english_list=[]
         self.toon_textures=[b'']*10
         self.rigidbodies=[]
         self.joints=[]
@@ -536,7 +536,6 @@ class Model(object):
                 and self.morph_indices==rhs.morph_indices
                 and self.bone_group_list==rhs.bone_group_list
                 and self.bone_display_list==rhs.bone_display_list
-                and self.bone_group_english_list==rhs.bone_group_english_list
                 and self.toon_textures==rhs.toon_textures
                 and self.rigidbodies==rhs.rigidbodies
                 and self.joints==rhs.joints
