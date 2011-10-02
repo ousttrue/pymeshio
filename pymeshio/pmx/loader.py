@@ -237,7 +237,7 @@ class Loader(pymeshio.common.BinaryLoader):
                 english_name=self.read_text(),
                 bone_index=self.read_bone_index(),
                 collision_group=self.read_uint(1),
-                no_collision_flag=self.read_uint(2),
+                no_collision_group=self.read_uint(2),
                 shape_type=self.read_uint(1),
                 shape_size=self.read_vector3(),
                 shape_position=self.read_vector3(),
@@ -279,7 +279,7 @@ def load(path):
     signature=loader.unpack("4s", 4)
     if signature!=b"PMX ":
         raise pymeshio.common.ParseException(
-                "invalid signature", loader.signature)
+                "invalid signature", signature)
 
     version=loader.read_float()
     if version!=2.0:

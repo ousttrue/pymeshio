@@ -345,7 +345,7 @@ class RigidBody(object):
         english_name: 
         bone_index:
         collision_group:
-        no_collision_flag:
+        no_collision_group:
         shape:
         param:
         mode:
@@ -355,7 +355,7 @@ class RigidBody(object):
             'english_name',
             'bone_index',
             'collision_group',
-            'no_collision_flag',
+            'no_collision_group',
             'shape',
             'param',
             'mode',
@@ -365,7 +365,7 @@ class RigidBody(object):
             english_name,
             bone_index,
             collision_group,
-            no_collision_flag,
+            no_collision_group,
             shape_type,
             shape_size,
             shape_position,
@@ -381,7 +381,7 @@ class RigidBody(object):
         self.english_name=english_name
         self.bone_index=bone_index
         self.collision_group=collision_group
-        self.no_collision_flag=no_collision_flag
+        self.no_collision_group=no_collision_group
         if shape_type==0:
             self.shape=SphereShape(shape_size.x)
         elif shape_type==1:

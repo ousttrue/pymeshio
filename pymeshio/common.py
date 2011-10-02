@@ -273,6 +273,9 @@ class BinaryLoader(object):
     def __init__(self, io):
         self.io=io
 
+    def is_end(self):
+        return not self.io.readable()
+
     def unpack(self, fmt, size):
         result=struct.unpack(fmt, self.io.read(size))
         return result[0]

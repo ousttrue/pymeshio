@@ -6,7 +6,7 @@ import unittest
 PMX_FILE=u'resources/初音ミクVer2.pmx'
 
 
-class TestSequenceFunctions(unittest.TestCase):
+class TestPmx(unittest.TestCase):
     
     def setUp(self):
         pass
