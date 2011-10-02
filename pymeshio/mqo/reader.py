@@ -1,7 +1,6 @@
 # coding: utf-8
 import io
-import pymeshio.common
-import pymeshio.mqo
+from .. import mqo
 """
 #print(sys.version_info[0])
         #if sys.version_info[0]<3:
@@ -44,7 +43,7 @@ class Reader(object):
         print("%s:%s:%d" % (method, msg, self.lines))
 
     def readObject(self, name):
-        obj=pymeshio.mqo.Obj(name)
+        obj=mqo.Obj(name)
         while(True):
             line=self.getline()
             if line==None:
@@ -92,7 +91,7 @@ class Reader(object):
                 # face
                 tokens=line.split(b' ', 1)
                 try:
-                    obj.addFace(pymeshio.mqo.Face(int(tokens[0]), tokens[1]))
+                    obj.addFace(mqo.Face(int(tokens[0]), tokens[1]))
                 except ValueError as ex:
                     self.printError("readFace", ex)
                     #return False
@@ -135,7 +134,7 @@ class Reader(object):
             else:
                 # material
                 secondQuaote=line.find(b'"', 1)                
-                material=pymeshio.mqo.Material(line[1:secondQuaote])
+                material=mqo.Material(line[1:secondQuaote])
                 try:
                     material.parse(line[secondQuaote+2:])
                 except ValueError as ex:
@@ -177,7 +176,7 @@ def read(ios):
     print(type(ios), ios)
     assert(isinstance(ios, io.IOBase))
     reader=Reader(ios)
-    model=pymeshio.mqo.Model()
+    model=mqo.Model()
 
     line=reader.getline()
     if line!=b"Metasequoia Document":

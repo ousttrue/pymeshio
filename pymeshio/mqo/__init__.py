@@ -7,9 +7,8 @@ http://www.metaseq.net/metaseq/format.html
 import os
 import sys
 import math
-import pymeshio.common
-import pymeshio.mqo.reader
 import warnings
+from .. import common
 
 
 """
@@ -37,13 +36,13 @@ class Material(object):
     def __init__(self, name):
         self.name=name
         self.shader=3
-        self.color=pymeshio.common.RGBA(0.5, 0.5, 0.5, 1.0)
+        self.color=common.RGBA(0.5, 0.5, 0.5, 1.0)
         self.diffuse=1.0
         self.ambient=0.0
         self.emit=0.0
         self.specular=0.0
         self.power=5.0
-        self.tex=""
+        self.tex=b""
 
     def getName(self): return self.name
     def getTexture(self): return self.tex
@@ -63,7 +62,7 @@ class Material(object):
             if key==b"shader":
                 self.shader=int(param)
             elif key==b"col":
-                self.color=pymeshio.common.RGBA(*[float(e) for e in param.split()])
+                self.color=common.RGBA(*[float(e) for e in param.split()])
             elif key==b"dif":
                 self.diffuse=float(param)
             elif key==b"amb":
@@ -143,7 +142,7 @@ class Obj(object):
     def getName(self): return self.name
 
     def addVertex(self, x, y, z):
-        self.vertices.append(pymeshio.common.Vector3(x, y, z))
+        self.vertices.append(common.Vector3(x, y, z))
 
     def addFace(self, face):
         if face.index_count==2:
@@ -175,7 +174,7 @@ class Face(object):
             raise ValueError("invalid vertex count: %d" % index_count)
         self.material_index=0
         self.col=[]
-        self.uv=[pymeshio.common.Vector2(0, 0)]*4
+        self.uv=[common.Vector2(0, 0)]*4
         self.index_count=index_count
         offset=0
         while True:
@@ -195,7 +194,7 @@ class Face(object):
                 uv_list=[float(e) for e in params]
                 self.uv=[]
                 for i in range(0, len(uv_list), 2):
-                    self.uv.append(pymeshio.common.Vector2(uv_list[i], uv_list[i+1]))
+                    self.uv.append(common.Vector2(uv_list[i], uv_list[i+1]))
             elif key==b"COL":
                 for n in params:
                     d=int(n)
@@ -217,7 +216,7 @@ class Face(object):
             offset=rightParenthesis+2
 
     def getIndex(self, i): return self.indices[i]
-    def getUV(self, i): return self.uv[i] if i<len(self.uv) else pymeshio.common.Vector2(0, 0)
+    def getUV(self, i): return self.uv[i] if i<len(self.uv) else common.Vector2(0, 0)
 
 
 class Model(object):

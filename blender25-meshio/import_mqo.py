@@ -29,6 +29,7 @@ This script imports a mqo into Blender for editing.
 2.3 20101228: update for Blender2.55.
 2.4 20110429: update for Blender2.57b.
 2.6 20110918: update for Blender2.59.
+2.7 20111002: update for pymeshio-2.1.0
 '''
 
 bl_addon_info = {
@@ -46,14 +47,7 @@ bl_addon_info = {
 
 import os
 import sys
-
-try:
-    # C extension
-    from .meshio import mqo
-    print('use meshio C module')
-except ImportError:
-    # full python
-    from .pymeshio import mqo
+from .pymeshio.mqo import reader
 
 # for 2.5
 import bpy
@@ -62,7 +56,7 @@ import bpy
 from . import bl25 as bl
 
 def createMqoMaterial(m):
-    material = bpy.data.materials.new(m.getName())
+    material = bpy.data.materials.new(m.name.decode("cp932"))
     # shader
     if m.shader==1:
         material.diffuse_shader='FRESNEL'
@@ -81,13 +75,6 @@ def createMqoMaterial(m):
 
 
 def has_mikoto(mqo):
-    #for o in mqo.objects:
-    #    if o.getName().startswith('bone'):
-    #        return True
-    #    if o.getName().startswith('sdef'):
-    #        return True
-    #    if o.getName().startswith('anchor'):
-    #        return True
     return False
 
 
@@ -104,8 +91,8 @@ def __createMaterials(mqo, directory):
             material=createMqoMaterial(m)
             materials.append(material)
             # texture
-            texture_name=m.getTexture()
-            if texture_name!='':
+            texture_name=m.tex.decode("cp932")
+            if texture_name!=b'':
                 if texture_name in textureMap:
                     texture=textureMap[texture_name]
                 else:
@@ -141,7 +128,7 @@ def __createObjects(mqo, root, materials, imageMap, scale):
     stack=[root]    
     objects=[]
     for o in mqo.objects:
-        mesh, mesh_object=bl.mesh.create(o.getName())
+        mesh, mesh_object=bl.mesh.create(o.name.decode("cp932"))
 
         # add hierarchy
         stack_depth=len(stack)-1
@@ -152,11 +139,12 @@ def __createObjects(mqo, root, materials, imageMap, scale):
         bl.object.makeParent(stack[-1], mesh_object)
         stack.append(mesh_object)
 
-        if o.getName().startswith('sdef'):
+        obj_name=o.name.decode("cp932")
+        if obj_name.startswith('sdef'):
             objects.append(mesh_object)
-        elif o.getName().startswith('anchor'):
+        elif obj_name.startswith('anchor'):
             bl.object.setLayerMask(mesh_object, [0, 1])
-        elif o.getName().startswith('bone'):
+        elif obj_name.startswith('bone'):
             bl.object.setLayerMask(mesh_object, [0, 1])
 
         # geometry
@@ -596,28 +584,27 @@ def create_bone_weight(scene, mqo, armature_object, objects):
 
 
 def _execute(filepath='', scale=0.1):
-    # parse file
-    io=mqo.IO()
-    if not io.read(filepath):
+    # read mqo model
+    model=reader.read_from_file(filepath)
+    if not model:
         bl.message("fail to load %s" % filepath)
         return
 
     # create materials
-    materials, imageMap=__createMaterials(io, os.path.dirname(filepath))
+    materials, imageMap=__createMaterials(model, os.path.dirname(filepath))
     if len(materials)==0:
         materials.append(bl.material.create('default'))
 
     # create objects
     root=bl.object.createEmpty(os.path.basename(filepath))
-    objects=__createObjects(io, root, materials, imageMap, scale)
+    objects=__createObjects(model, root, materials, imageMap, scale)
 
-    if has_mikoto(io):
+    if has_mikoto(model):
         # create mikoto bone
-        armature_object=create_armature(io)
+        armature_object=create_armature(model)
         if armature_object:
             root.makeParent([armature_object])
 
             # create bone weight
-            create_bone_weight(io, armature_object, objects)
-
+            create_bone_weight(model, armature_object, objects)
 

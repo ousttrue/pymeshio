@@ -3,7 +3,7 @@
 
 import time
 import os
-import pymeshio.mqo
+import pymeshio.mqo.reader
 import opengl.material
 import opengl.texture
 import opengl.vertexarraymap
