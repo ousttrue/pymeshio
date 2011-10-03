@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.1.0'
+version='2.2.0'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -20,15 +20,15 @@ Requirements
 
 Features
 --------
-* read/write Metasequioa mqo format
+* read       Metasequioa mqo format
 * read/write MikuMikuDance pmd format
-* read-only  MikuMikuDance pmx format
-* read/write MikuMikuDance vmd format
-* read/write MikuMikuDance vpd format
+* read/write MikuMikuDance pmx format
+* read       MikuMikuDance vmd format
+* read       MikuMikuDance vpd format
 
 
-Setup
------
+Install
+-------
 ::
 
    $ easy_install pymeshio
@@ -51,36 +51,17 @@ Usage
 ToDo
 --------
 
-* pmx writer
 * pmd to pmx converter
 * blender importer for pmx
 * blender exporter for pmx
 
 
-History
+New
 -------
-2.1.0 (2011-10-02)
-
-* refactoring api
-
-2.0.2 (2011-10-01)
+2.2.0 (2011-10-03)
 ~~~~~~~~~~~~~~~~~~
-* fix for Python 2.7(remove anotation)
-* fix pymeshio.pmx.Bdef1.bone_index to index0
-* fix pymeshio.pmx.Material.index_count to vertex_count
-* add pmx example
+* implement pmx writer
 
-2.0.0 (2011-9-30)
-~~~~~~~~~~~~~~~~~~
-* add pmx loader
-
-1.9.2 (2011-9-29)
-~~~~~~~~~~~~~~~~~~
-* add tkinter viewer sample
-
-1.9.1 (2011-9-23)
-~~~~~~~~~~~~~~~~~~
-* register pypi
 '''
 
 classifiers=[

@@ -257,7 +257,7 @@ class Writer(common.BinaryWriter):
 
 
 def write(ios, model, text_encoding=1):
-    """pmx‘‚«‚İ
+    """pmxæ›¸ãè¾¼ã¿
     """
     assert(isinstance(ios, io.IOBase))
     assert(isinstance(model, pmx.Model))

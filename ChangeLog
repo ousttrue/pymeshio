@@ -1,0 +1,23 @@
+2.1.0 (2011-10-02)
+~~~~~~~~~~~~~~~~~~
+* refactoring api
+
+2.0.2 (2011-10-01)
+~~~~~~~~~~~~~~~~~~
+* fix for Python 2.7(remove anotation)
+* fix pymeshio.pmx.Bdef1.bone_index to index0
+* fix pymeshio.pmx.Material.index_count to vertex_count
+* add pmx example
+
+2.0.0 (2011-9-30)
+~~~~~~~~~~~~~~~~~~
+* add pmx loader
+
+1.9.2 (2011-9-29)
+~~~~~~~~~~~~~~~~~~
+* add tkinter viewer sample
+
+1.9.1 (2011-9-23)
+~~~~~~~~~~~~~~~~~~
+* register pypi
+
