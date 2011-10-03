@@ -32,14 +32,14 @@ class Writer(common.BinaryWriter):
             self.write_uint(m.toon_index, 1)
             self.write_uint(m.edge_flag, 1)
             self.write_uint(m.vertex_count, 4)
-            self.write_text(m.texture_file, 20)
+            self.write_bytes(m.texture_file, 20)
 
     def write_bones(self, bones):
         self.write_uint(len(bones), 2)
         sBone=struct.Struct("=20sHHBH3f")
         assert(sBone.size==39)
         for b in bones:
-            self.write_text(b.name, 20)
+            self.write_bytes(b.name, 20)
             self.write_uint(b.parent_index, 2)
             self.write_uint(b.tail_index, 2)
             self.write_uint(b.type, 1)
@@ -59,7 +59,7 @@ class Writer(common.BinaryWriter):
     def write_morphs(self, morphs):
         self.write_uint(len(morphs), 2)
         for morph in morphs:
-            self.write_text(morph.name, 20)
+            self.write_bytes(morph.name, 20)
             self.write_uint(len(morph.indices), 4)
             self.write_uint(morph.type, 1)
             for i, v in zip(morph.indices, morph.pos_list):
@@ -73,7 +73,7 @@ class Writer(common.BinaryWriter):
     def write_bone_group_list(self, bone_group_list):
         self.write_uint(len(bone_group_list), 1)
         for g in bone_group_list:
-            self.write_text(g.name, 50)
+            self.write_bytes(g.name, 50)
 
     def write_bone_display_list(self, bone_display_list):
         self.write_uint(len(bone_display_list), 4)
@@ -84,7 +84,7 @@ class Writer(common.BinaryWriter):
     def write_rigidbodies(self, rigidbodies):
         self.write_uint(len(rigidbodies), 4)
         for r in rigidbodies:
-            self.write_text(r.name, 20)
+            self.write_bytes(r.name, 20)
             self.write_uint(r.bone_index, 2)
             self.write_uint(r.collision_group, 1)
             self.write_uint(r.no_collision_group, 2)
@@ -102,7 +102,7 @@ class Writer(common.BinaryWriter):
     def write_joints(self, joints):
         self.write_uint(len(joints), 4)
         for j in joints:
-            self.write_text(j.name, 20)
+            self.write_bytes(j.name, 20)
             self.write_uint(j.rigidbody_index_a, 4)
             self.write_uint(j.rigidbody_index_b, 4)
             self.write_vector3(j.position)
@@ -119,10 +119,10 @@ def write(ios, model):
     assert(isinstance(ios, io.IOBase))
     assert(isinstance(model, pmd.Model))
     writer=Writer(ios)
-    writer.write_text(b"Pmd")
+    writer.write_bytes(b"Pmd")
     writer.write_float(model.version)
-    writer.write_text(model.name, 20)
-    writer.write_text(model.comment, 256)
+    writer.write_bytes(model.name, 20)
+    writer.write_bytes(model.comment, 256)
     writer.write_veritices(model.vertices)
     writer.write_indices(model.indices)
     writer.write_materials(model.materials)
@@ -134,18 +134,18 @@ def write(ios, model):
     writer.write_bone_display_list(model.bone_display_list)
     # extend data
     writer.write_uint(1, 1)
-    writer.write_text(model.english_name, 20)
-    writer.write_text(model.english_comment, 256)
+    writer.write_bytes(model.english_name, 20)
+    writer.write_bytes(model.english_comment, 256)
     for bone in model.bones:
-        writer.write_text(bone.english_name, 20)
+        writer.write_bytes(bone.english_name, 20)
     for skin in model.morphs:
         if skin.name==b'base':
             continue
-        writer.write_text(skin.english_name, 20)
+        writer.write_bytes(skin.english_name, 20)
     for g in model.bone_group_list:
-        writer.write_text(g.english_name, 50)
+        writer.write_bytes(g.english_name, 50)
     for toon_texture in model.toon_textures:
-        writer.write_text(toon_texture, 100)
+        writer.write_bytes(toon_texture, 100)
     writer.write_rigidbodies(model.rigidbodies)
     writer.write_joints(model.joints)
     return True

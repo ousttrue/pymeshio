@@ -243,6 +243,9 @@ class RGBA(object):
         self.b=b
         self.a=a
 
+    def __eq__(self, rhs):
+        return self.r==rhs.r and self.g==rhs.g and self.b==rhs.b and self.a==rhs.a
+
     def __getitem__(self, key):
         if key==0:
             return self.r
@@ -331,11 +334,15 @@ class BinaryReader(object):
                 )
 
 
+class WriteException(Exception):
+    pass
+
+
 class BinaryWriter(object):
     def __init__(self, ios):
         self.ios=ios
 
-    def write_text(self, v, size=None):
+    def write_bytes(self, v, size=None):
         if size:
             self.ios.write(struct.pack("={0}s".format(size), v))
         else:
@@ -362,5 +369,8 @@ class BinaryWriter(object):
 
     def write_rgb(self, v):
         self.ios.write(struct.pack("=3f", v.r, v.g, v.b))
+
+    def write_rgba(self, v):
+        self.ios.write(struct.pack("=4f", v.r, v.g, v.b, v.a))
 
 

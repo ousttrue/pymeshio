@@ -78,7 +78,7 @@ class Reader(pymeshio.common.BinaryReader):
                 name=self.read_text(),
                 english_name=self.read_text(),
                 diffuse_color=self.read_rgb(),
-                diffuse_alpha=self.read_float(),
+                alpha=self.read_float(),
                 specular_color=self.read_rgb(),
                 specular_factor=self.read_float(),
                 ambient_color=self.read_rgb(),
@@ -86,8 +86,8 @@ class Reader(pymeshio.common.BinaryReader):
                 edge_color=self.read_rgba(),
                 edge_size=self.read_float(),
                 texture_index=self.read_texture_index(),
-                sphia_texture_index=self.read_texture_index(),
-                sphia_mode=self.read_uint(1),
+                sphere_texture_index=self.read_texture_index(),
+                sphere_mode=self.read_uint(1),
                 toon_sharing_flag=self.read_uint(1),
                 )
         if material.toon_sharing_flag==0:
@@ -147,6 +147,7 @@ class Reader(pymeshio.common.BinaryReader):
         link_size=self.read_uint(4)
         ik.link=[self.read_ik_link() 
                 for _ in range(link_size)]
+        return ik
 
     def read_ik_link(self):
         link=pymeshio.pmx.IkLink(
@@ -230,6 +231,7 @@ class Reader(pymeshio.common.BinaryReader):
             else:
                 raise pymeshio.common.ParseException(
                         "unknown display_type: {0}".format(display_type))
+        return display_slot
 
     def read_rigidbody(self):
         return pymeshio.pmx.RigidBody(

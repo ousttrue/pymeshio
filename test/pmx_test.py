@@ -1,7 +1,9 @@
 # coding: utf-8
 import unittest
+import io
 import pymeshio.pmd
 import pymeshio.pmx.reader
+import pymeshio.pmx.writer
 
 
 PMX_FILE=pymeshio.unicode('resources/初音ミクVer2.pmx')
@@ -43,4 +45,15 @@ class TestPmx(unittest.TestCase):
         self.assertEqual(9,  len(model.display_slots))
         self.assertEqual(45,  len(model.rigidbodies))
         self.assertEqual(27,  len(model.joints))
+
+    def test_write(self):
+        # read source file
+        buf=pymeshio.common.readall(PMX_FILE)
+        # read and write to out
+        model=pymeshio.pmx.reader.read(io.BytesIO(buf))
+        out=io.BytesIO()
+        pymeshio.pmx.writer.write(out, model)
+        # read out buffer again
+        model2=pymeshio.pmx.reader.read(io.BytesIO(out.getvalue()))
+        self.assertEqual(model, model2)
 
