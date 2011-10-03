@@ -1,4 +1,7 @@
 #coding: utf-8
+"""
+pmd reader
+"""
 import io
 from .. import common
 from .. import pmd

@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+pmx reader
+"""
 import io
 import pymeshio.common
 import pymeshio.pmx

@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+pmx writer
+"""
 import io
 import struct
 from .. import common

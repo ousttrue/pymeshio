@@ -1,7 +1,21 @@
 # coding: utf-8
 """
-PMDの読み込み
-http://blog.goo.ne.jp/torisu_tetosuki/e/209ad341d3ece2b1b4df24abf619d6e4
+========================
+MikuMikuDance PMD format
+========================
+
+file format
+~~~~~~~~~~~
+* http://blog.goo.ne.jp/torisu_tetosuki/e/209ad341d3ece2b1b4df24abf619d6e4 
+
+specs
+~~~~~
+* textencoding: bytes(cp932)
+* coordinate: left handed y-up(DirectX)
+* uv origin: 
+* face: only triangle
+* backculling: 
+
 """
 import os
 import sys

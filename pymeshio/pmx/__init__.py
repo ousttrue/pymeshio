@@ -1,10 +1,22 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-pmx file io library.
+========================
+MikuMikuDance PMX format
+========================
 
-pmx file format:
-    PMDEditor's Lib/PMX仕様/PMX仕様.txt
+file format
+~~~~~~~~~~~
+* PMDEditor's Lib/PMX仕様/PMX仕様.txt
+
+specs
+~~~~~
+* textencoding: unicode
+* coordinate: left handed y-up(DirectX)
+* uv origin: 
+* face: only triangle
+* backculling: 
+
 """
 __author__="ousttrue"
 __license__="zlib"

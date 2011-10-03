@@ -1,7 +1,21 @@
 # coding: utf-8
 """ 
-MQOの読み込み
-http://www.metaseq.net/metaseq/format.html
+======================
+Metasequioa MQO format
+======================
+
+file format
+~~~~~~~~~~~
+* http://www.metaseq.net/metaseq/format.html
+
+specs
+~~~~~
+* textencoding: bytes(cp932)
+* coordinate: right handed y-up
+* uv origin: 
+* face: edge(2), triangle(3), quadrangle(4)
+* backculling: enable
+
 """
 
 import os

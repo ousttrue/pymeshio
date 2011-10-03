@@ -1,18 +1,9 @@
 # coding: utf-8
+"""
+mqo reader
+"""
 import io
 from .. import mqo
-"""
-#print(sys.version_info[0])
-        #if sys.version_info[0]<3:
-        #    io=open(path, )
-        #else:
-        #    io=open(path, encoding='cp932')
-        #result=method(self)
-        #self.io.close()
-        #self.io=None
-        #return result
-"""
-
 
 class Reader(object):
     """mqo reader
