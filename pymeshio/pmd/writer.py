@@ -129,7 +129,7 @@ def write(ios, model):
             pmd model
 
     >>> import pymeshio.pmd.writer
-    >>> pymeshio.pmd.writer.write(io.open('out.pmd', 'wb'))
+    >>> pymeshio.pmd.writer.write(io.open('out.pmd', 'wb'), pmd)
 
     """
     assert(isinstance(ios, io.IOBase))

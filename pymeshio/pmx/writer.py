@@ -272,7 +272,7 @@ def write(ios, model, text_encoding=0):
             text field encoding (0: UTF16, 1:UTF-8).
 
     >>> import pymeshio.pmx.writer
-    >>> pymeshio.pmx.writer.write(io.open('out.pmx', 'wb'))
+    >>> pymeshio.pmx.writer.write(io.open('out.pmx', 'wb'), pmx)
 
     """
     assert(isinstance(ios, io.IOBase))

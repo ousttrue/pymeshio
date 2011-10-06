@@ -58,9 +58,9 @@ ToDo
 
 New
 -------
-2.2.1 (1011-10-07)
+2.2.1 (2011-10-07)
 ~~~~~~~~~~~~~~~~~~
-* importer pmd to pmx converter
+* implement pmd to pmx converter
 
 2.2.0 (2011-10-03)
 ~~~~~~~~~~~~~~~~~~
