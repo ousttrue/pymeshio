@@ -119,6 +119,19 @@ class Writer(common.BinaryWriter):
 
 
 def write(ios, model):
+    """
+    write model to ios.
+
+    :Parameters:
+        ios
+            output stream (in io.IOBase)
+        model
+            pmd model
+
+    >>> import pymeshio.pmd.writer
+    >>> pymeshio.pmd.writer.write(io.open('out.pmd', 'wb'))
+
+    """
     assert(isinstance(ios, io.IOBase))
     assert(isinstance(model, pmd.Model))
     writer=Writer(ios)

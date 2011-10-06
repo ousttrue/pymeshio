@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.2.0'
+version='2.2.1'
 short_description='pure python 3d model io library'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -42,7 +42,7 @@ Usage
 ::
 
     >>> import pymeshio.pmx.reader
-    >>> m=pymeshio.pmx.reader.read('resources/初音ミクVer2.pmx')
+    >>> m=pymeshio.pmx.reader.read_from_file('resources/初音ミクVer2.pmx')
     >>> print(m)
     <pmx-2.0 "Miku Hatsune" 12354vertices>
     >>> print(dir(m))
@@ -58,6 +58,10 @@ ToDo
 
 New
 -------
+2.2.1 (1011-10-07)
+~~~~~~~~~~~~~~~~~~
+* importer pmd to pmx converter
+
 2.2.0 (2011-10-03)
 ~~~~~~~~~~~~~~~~~~
 * implement pmx writer

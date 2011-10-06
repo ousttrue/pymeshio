@@ -273,10 +273,36 @@ class Reader(pymeshio.common.BinaryReader):
 
 
 def read_from_file(path):
+    """
+    read from file path, then return the pymeshio.pmx.Model.
+
+    :Parameters:
+      path
+        file path
+
+    >>> import pymeshio.pmx.reader
+    >>> m=pymeshio.pmx.reader.read_from_file('resources/初音ミクVer2.pmx')
+    >>> print(m)
+    <pmx-2.0 "Miku Hatsune" 12354vertices>
+
+    """
     return read(io.BytesIO(pymeshio.common.readall(path)))
 
 
 def read(ios):
+    """
+    read from ios, then return the pmx pymeshio.pmx.Model.
+
+    :Parameters:
+      ios
+        input stream (in io.IOBase)
+
+    >>> import pymeshio.pmx.reader
+    >>> m=pymeshio.pmx.reader.read(io.open('resources/初音ミクVer2.pmx', 'rb'))
+    >>> print(m)
+    <pmx-2.0 "Miku Hatsune" 12354vertices>
+
+    """
     assert(isinstance(ios, io.IOBase))
     reader=pymeshio.common.BinaryReader(ios)
 

@@ -181,10 +181,36 @@ def __read(reader, model):
 
 
 def read_from_file(path):
+    """
+    read from file path, then return the pymeshio.pmd.Model.
+
+    :Parameters:
+      path
+        file path
+
+    >>> import pymeshio.pmd.reader
+    >>> m=pymeshio.pmd.reader.read_from_file('resources/初音ミクVer2.pmd')
+    >>> print(m)
+    <pmd-2.0 "Miku Hatsune" 12354vertices>
+
+    """
     return read(io.BytesIO(common.readall(path)))
 
 
 def read(ios):
+    """
+    read from ios, then return the pymeshio.pmd.Model.
+
+    :Parameters:
+      ios
+        input stream (in io.IOBase)
+
+    >>> import pymeshio.pmd.reader
+    >>> m=pymeshio.pmd.reader.read(io.open('resources/初音ミクVer2.pmd', 'rb'))
+    >>> print(m)
+    <pmd-2.0 "Miku Hatsune" 12354vertices>
+
+    """
     assert(isinstance(ios, io.IOBase))
     reader=common.BinaryReader(ios)
 

@@ -14,9 +14,14 @@ class ConvertException(Exception):
     """
     pass
 
+
 def pmd_to_pmx(src):
     """
-    convert pmd model to pmx model.
+    return pymeshio.pmx.Model.
+
+    :Parameters:
+        src
+            pymeshio.pmd.Model
     """
     dst=pmx.Model()
     dst.name=src.name.decode("cp932")
