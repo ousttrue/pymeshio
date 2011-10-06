@@ -2,12 +2,13 @@
 import sys
 import io
 import unittest
+import pymeshio.common
 import pymeshio.pmd
 import pymeshio.pmd.reader
 import pymeshio.pmd.writer
 
 
-PMD_FILE=pymeshio.unicode('resources/初音ミクVer2.pmd')
+PMD_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmd')
 
 
 class TestPmd(unittest.TestCase):
@@ -18,9 +19,9 @@ class TestPmd(unittest.TestCase):
     def test_read(self):
         model=pymeshio.pmd.reader.read_from_file(PMD_FILE)
         self.assertEqual(pymeshio.pmd.Model,  model.__class__)
-        self.assertEqual(pymeshio.unicode('初音ミク').encode('cp932'),  model.name)
-        self.assertEqual(pymeshio.unicode('Miku Hatsune').encode('cp932'),  model.english_name)
-        self.assertEqual(pymeshio.unicode(
+        self.assertEqual(pymeshio.common.unicode('初音ミク').encode('cp932'),  model.name)
+        self.assertEqual(pymeshio.common.unicode('Miku Hatsune').encode('cp932'),  model.english_name)
+        self.assertEqual(pymeshio.common.unicode(
             "PolyMo用モデルデータ：初音ミク ver.2.3\n"+
             "(物理演算対応モデル)\n"+
             "\n"+
@@ -28,7 +29,7 @@ class TestPmd(unittest.TestCase):
             "データ変換	：あにまさ氏\n"+
             "Copyright	：CRYPTON FUTURE MEDIA, INC").encode('cp932'),
             model.comment)
-        self.assertEqual(pymeshio.unicode(
+        self.assertEqual(pymeshio.common.unicode(
             "MMD Model: Miku Hatsune ver.2.3\n"+
             "(Physical Model)\n"+
             "\n"+
@@ -56,5 +57,4 @@ class TestPmd(unittest.TestCase):
         model2=pymeshio.pmd.reader.read(io.BytesIO(out.getvalue()))
         model.diff(model2)
         self.assertEqual(model, model2)
-
 

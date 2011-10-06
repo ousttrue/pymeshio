@@ -4,7 +4,20 @@ common utilities.
 """
 import math
 import struct
+import sys
 
+
+def unicode(src):
+    """
+    literal to unicode for python2 and python3 compatiblity.
+
+    in python2 str to unicode.
+    in python3 str(as unicode) to str.
+    """
+    if sys.version_info[0]<3:
+        return src.decode('utf-8')
+    else:
+        return src
 
 """
 common structures.
@@ -23,6 +36,9 @@ class Vector2(object):
 
     def __eq__(self, rhs):
         return self.x==rhs.x and self.y==rhs.y
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
     def __getitem__(self, key):
         if key==0:
@@ -55,6 +71,9 @@ class Vector3(object):
 
     def __eq__(self, rhs):
         return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
     def __getitem__(self, key):
         if key==0:
@@ -221,6 +240,9 @@ class RGB(object):
     def __eq__(self, rhs):
         return self.r==rhs.r and self.g==rhs.g and self.b==rhs.b
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
     def __getitem__(self, key):
         if key==0:
             return self.r
@@ -246,6 +268,9 @@ class RGBA(object):
     def __eq__(self, rhs):
         return self.r==rhs.r and self.g==rhs.g and self.b==rhs.b and self.a==rhs.a
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
     def __getitem__(self, key):
         if key==0:
             return self.r
@@ -269,6 +294,9 @@ def radian_to_degree(x):
 
 
 class ParseException(Exception):
+    """
+    Exception in reader
+    """
     pass
 
 
@@ -291,6 +319,16 @@ class BinaryReader(object):
     def unpack(self, fmt, size):
         result=struct.unpack(fmt, self.ios.read(size))
         return result[0]
+
+    def read_int(self, size):
+        if size==1:
+            return self.unpack("b", size)
+        if size==2:
+            return self.unpack("h", size)
+        if size==4:
+            return self.unpack("i", size)
+        print("not reach here")
+        raise ParseException("invalid int size: "+size)
 
     def read_uint(self, size):
         if size==1:
@@ -335,6 +373,9 @@ class BinaryReader(object):
 
 
 class WriteException(Exception):
+    """
+    Exception in writer
+    """
     pass
 
 
@@ -350,6 +391,16 @@ class BinaryWriter(object):
 
     def write_float(self, v):
         self.ios.write(struct.pack("f", v))
+
+    def write_int(self, v, size):
+        if size==1:
+            self.ios.write(struct.pack("b", v))
+        elif size==2:
+            self.ios.write(struct.pack("h", v))
+        elif size==4:
+            self.ios.write(struct.pack("i", v))
+        else:
+            raise WriteError("invalid int uint size")
 
     def write_uint(self, v, size):
         if size==1:

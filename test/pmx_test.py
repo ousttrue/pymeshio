@@ -1,12 +1,15 @@
 # coding: utf-8
 import unittest
 import io
-import pymeshio.pmd
+import pymeshio.common
+import pymeshio.pmd.reader
 import pymeshio.pmx.reader
 import pymeshio.pmx.writer
+import pymeshio.converter
 
 
-PMX_FILE=pymeshio.unicode('resources/初音ミクVer2.pmx')
+PMD_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmd')
+PMX_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmx')
 
 
 class TestPmx(unittest.TestCase):
@@ -17,9 +20,9 @@ class TestPmx(unittest.TestCase):
     def test_read(self):
         model=pymeshio.pmx.reader.read_from_file(PMX_FILE)
         self.assertEqual(pymeshio.pmx.Model,  model.__class__)
-        self.assertEqual(pymeshio.unicode('初音ミク'),  model.name)
-        self.assertEqual(pymeshio.unicode('Miku Hatsune'),  model.english_name)
-        self.assertEqual(pymeshio.unicode(
+        self.assertEqual(pymeshio.common.unicode('初音ミク'),  model.name)
+        self.assertEqual(pymeshio.common.unicode('Miku Hatsune'),  model.english_name)
+        self.assertEqual(pymeshio.common.unicode(
                 "PolyMo用モデルデータ：初音ミク ver.2.3\r\n"+
                 "(物理演算対応モデル)\r\n"+
                 "\r\n"+
@@ -27,7 +30,7 @@ class TestPmx(unittest.TestCase):
                 "データ変換	：あにまさ氏\r\n"+
                 "Copyright	：CRYPTON FUTURE MEDIA, INC"),
                 model.comment)
-        self.assertEqual(pymeshio.unicode(
+        self.assertEqual(pymeshio.common.unicode(
                 "MMD Model: Miku Hatsune ver.2.3\r\n"+
                 "(Physical Model)\r\n"+
                 "\r\n"+
@@ -56,4 +59,15 @@ class TestPmx(unittest.TestCase):
         # read out buffer again
         model2=pymeshio.pmx.reader.read(io.BytesIO(out.getvalue()))
         self.assertEqual(model, model2)
+
+    def test_convert(self):
+        # convert
+        pmd=pymeshio.pmd.reader.read_from_file(PMD_FILE)
+        converted=pymeshio.converter.pmd_to_pmx(pmd)
+        # validate
+        pmx=pymeshio.pmx.reader.read_from_file(PMX_FILE)
+        # check diffference
+        pmx.diff(converted)
+        #self.assertEqual(pmx, converted)
+        pymeshio.pmx.writer.write(io.open("tmp.pmx", "wb"), converted)
 

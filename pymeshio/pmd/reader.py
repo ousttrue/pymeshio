@@ -205,6 +205,7 @@ def read(ios):
 
         # build bone tree
         for i, child in enumerate(model.bones):
+            child.index=i
             if child.parent_index==0xFFFF:
                 # no parent
                 model.no_parent_bones.append(child)

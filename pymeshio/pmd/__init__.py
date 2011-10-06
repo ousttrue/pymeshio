@@ -25,16 +25,31 @@ from .. import common
 
 
 class Vertex(object):
-    """pmd vertex struct.
+    """
+    ==========
+    pmd vertex
+    ==========
+    two bone weighted vertex with normal and uv.
 
-    Attributes:
-        pos: Vector3
-        normal: Vector3
-        uv: Vector2
-        bone0: bone index
-        bone1: bone index
-        weight0: bone0 influence
-        edge_flag: int flag
+    format
+    ~~~~~~
+    * http://blog.goo.ne.jp/torisu_tetosuki/e/5a1b16e2f61067838dfc66d010389707
+
+    :IVariables:
+        pos
+            Vector3
+        normal 
+            Vector3
+        uv 
+            Vector2
+        bone0 
+            bone index
+        bone1 
+            bone index
+        weight0 
+            bone0 influence.  min: 0, max: 100
+        edge_flag 
+            int flag.  0: edge on, 1: edge off
     """
     __slots__=['pos', 'normal', 'uv', 'bone0', 'bone1', 'weight0', 'edge_flag']
     def __init__(self, pos, normal, uv, 
@@ -77,18 +92,34 @@ class Vertex(object):
 
 
 class Material(object):
-    """pmd material struct.
+    """
+    ============
+    pmd material
+    ============
 
-    Attributes:
-        diffuse_color: RGB
-        alpha: float
-        specular_factor: float
-        specular_color: RGB
-        ambient_color: RGB
-        toon_index: int
-        edge_flag: int
-        vertex_count: indices length
-        texture_file: texture file path
+    format
+    ~~~~~~
+    * http://blog.goo.ne.jp/torisu_tetosuki/e/ea0bb1b1d4c6ad98a93edbfe359dac32
+
+    :IVariables:
+        diffuse_color
+            RGB
+        alpha
+            float
+        specular_factor
+            float
+        specular_color
+            RGB
+        ambient_color
+            RGB
+        toon_index
+            int
+        edge_flag
+            int
+        vertex_count
+            indices length
+        texture_file
+            texture file path
     """
     __slots__=[
             'diffuse_color', 'alpha', 
@@ -130,22 +161,40 @@ class Material(object):
 
 
 class Bone(object):
-    """pmd material struct.
+    """
+    ==========
+    pmd bone
+    ==========
 
-    Attributes:
-        _name: 
-        index:
-        type:
-        ik:
-        pos:
-        _english_name:
-        ik_index:
-        parent_index:
-        tail_index:
+    format
+    ~~~~~~
+    * http://blog.goo.ne.jp/torisu_tetosuki/e/638463f52d0ad6ca1c46fd315a9b17d0
 
-        parent:
-        tail:
-        children:
+    :IVariables:
+        name 
+            bone name
+        english_name
+            bone english_name
+        index
+            boen index(append for internal use)
+        type
+            bone type
+        ik
+            ik(append for internal use)
+        pos
+            bone head position
+        ik_index
+            ik target bone index
+        parent_index
+            parent bone index
+        tail_index
+            tail bone index
+        parent
+            parent bone(append for internal use)
+        tail
+            tail bone(append for internal use)
+        children
+            children bone(append for internal use)
     """
     # kinds
     ROTATE = 0

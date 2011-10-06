@@ -30,7 +30,42 @@ from pymeshio import common
 
 
 
-class Ik(object):
+class DifferenceException(Exception):
+    pass
+
+
+class Diff(object):
+    def _diff(self, rhs, key):
+        l=getattr(self, key)
+        r=getattr(rhs, key)
+        if l!=r:
+            print(l)
+            print(r)
+            raise DifferenceException(key)
+
+    def _diff_array(self, rhs, key):
+        la=getattr(self, key)
+        ra=getattr(rhs, key)
+        if len(la)!=len(la):
+            raise DifferenceException(key)
+        for i, (l, r) in enumerate(zip(la, ra)):
+            if isinstance(l, Diff):
+                try:
+                    l.diff(r)
+                except DifferenceException as e:
+                    print(i)
+                    print(l)
+                    print(r)
+                    raise DifferenceException("{0}: {1}".format(key, e.message))
+            else:
+                if l!=r:
+                    print(i)
+                    print(l)
+                    print(r)
+                    raise DifferenceException("{0}".format(key))
+
+
+class Ik(Diff):
     """ik info
     """
     __slots__=[
@@ -39,14 +74,28 @@ class Ik(object):
             'limit_radian',
             'link',
             ]
-    def __init__(self, target_index, loop, limit_radian):
+    def __init__(self, target_index, loop, limit_radian, link=[]):
         self.target_index=target_index
         self.loop=loop
         self.limit_radian=limit_radian
-        self.link=[]
+        self.link=link
+
+    def __eq__(self, rhs):
+        return (
+                self.target_index==rhs.target_index
+                and self.loop==rhs.loop
+                and self.limit_radian==rhs.limit_radian
+                and self.link==rhs.link
+                )
+
+    def diff(self, rhs):
+        self._diff(rhs, 'target_index')
+        self._diff(rhs, 'loop')
+        self._diff(rhs, 'limit_radian')
+        self._diff_array(rhs, 'link')
 
 
-class IkLink(object):
+class IkLink(Diff):
     """ik link info
     """
     __slots__=[
@@ -55,14 +104,28 @@ class IkLink(object):
             'limit_min',
             'limit_max',
             ]
-    def __init__(self, bone_index, limit_angle):
+    def __init__(self, bone_index, limit_angle, limit_min=common.Vector3(), limit_max=common.Vector3()):
         self.bone_index=bone_index
         self.limit_angle=limit_angle
-        self.limit_min=None
-        self.limit_max=None
+        self.limit_min=limit_min
+        self.limit_max=limit_max
+
+    def __eq__(self, rhs):
+        return (
+                self.bone_index==rhs.bone_index
+                and self.limit_angle==rhs.limit_angle
+                and self.limit_min==rhs.limit_min
+                and self.limit_max==rhs.limit_max
+                )
+
+    def diff(self, rhs):
+        self._diff(rhs, 'bone_index')
+        self._diff(rhs, 'limit_angle')
+        self._diff(rhs, 'limit_min')
+        self._diff(rhs, 'limit_max')
 
 
-class Bone(object):
+class Bone(Diff):
     """material
 
     Bone: see __init__
@@ -75,7 +138,7 @@ class Bone(object):
             'layer',
             'flag',
 
-            'tail_positoin',
+            'tail_position',
             'tail_index',
             'effect_index',
             'effect_factor',
@@ -91,7 +154,16 @@ class Bone(object):
             position,
             parent_index,
             layer,
-            flag
+            flag,
+            tail_position=common.Vector3(),
+            tail_index=-1,
+            effect_index=-1,
+            effect_factor=0.0,
+            fixed_axis=common.Vector3(),
+            local_x_vector=common.Vector3(),
+            local_z_vector=common.Vector3(),
+            external_key=-1,
+            ik=None
             ):
         self.name=name
         self.english_name=english_name
@@ -99,6 +171,15 @@ class Bone(object):
         self.parent_index=parent_index
         self.layer=layer
         self.flag=flag
+        self.tail_position=tail_position
+        self.tail_index=tail_index
+        self.effect_index=effect_index
+        self.effect_factor=effect_factor
+        self.fixed_axis=fixed_axis
+        self.local_x_vector=local_x_vector
+        self.local_z_vector=local_z_vector
+        self.external_key=external_key
+        self.ik=ik
 
     def __eq__(self, rhs):
         return (
@@ -109,6 +190,29 @@ class Bone(object):
                 and self.layer==rhs.layer
                 and self.flag==rhs.flag
                 )
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'english_name')
+        self._diff(rhs, 'position')
+        self._diff(rhs, 'parent_index')
+        #self._diff(rhs, 'layer')
+        self._diff(rhs, 'flag')
+        self._diff(rhs, 'tail_position')
+        self._diff(rhs, 'tail_index')
+        #self._diff(rhs, 'effect_index')
+        #self._diff(rhs, 'effect_factor')
+        #self._diff(rhs, 'fixed_axis')
+        self._diff(rhs, 'local_x_vector')
+        self._diff(rhs, 'local_z_vector')
+        self._diff(rhs, 'external_key')
+        if self.ik and rhs.ik:
+            self.ik.diff(rhs.ik)
+        else:
+            self._diff(rhs, 'ik')
 
     def getConnectionFlag(self):
         return self.flag & 0x0001
@@ -132,7 +236,7 @@ class Bone(object):
         return (self.flag &  0x2000) >> 13
 
  
-class Material(object):
+class Material(Diff):
     """material
 
     Attributes: see __init__
@@ -161,8 +265,8 @@ class Material(object):
             english_name,
             diffuse_color,
             alpha,
-            specular_color,
             specular_factor,
+            specular_color,
             ambient_color,
             flag,
             edge_color,
@@ -170,7 +274,10 @@ class Material(object):
             texture_index,
             sphere_texture_index,
             sphere_mode,
-            toon_sharing_flag
+            toon_sharing_flag,
+            toon_texture_index=0,
+            comment=common.unicode(""),
+            vertex_count=0,
             ):
         self.name=name
         self.english_name=english_name
@@ -186,10 +293,9 @@ class Material(object):
         self.sphere_texture_index=sphere_texture_index
         self.sphere_mode=sphere_mode
         self.toon_sharing_flag=toon_sharing_flag
-        #
-        self.toon_texture_index=None
-        self.comment=name.__class__() # unicode
-        self.vertex_count=0
+        self.toon_texture_index=toon_texture_index
+        self.comment=comment
+        self.vertex_count=vertex_count
 
     def __eq__(self, rhs):
         return (
@@ -212,17 +318,35 @@ class Material(object):
                 and self.vertex_count==rhs.vertex_count
                 )
 
+    def diff(self, rhs):
+        #self._diff(rhs, "name")
+        self._diff(rhs, "english_name")
+        self._diff(rhs, "diffuse_color")
+        self._diff(rhs, "alpha")
+        self._diff(rhs, "specular_color")
+        self._diff(rhs, "specular_factor")
+        self._diff(rhs, "ambient_color")
+        self._diff(rhs, "flag")
+        self._diff(rhs, "edge_color")
+        self._diff(rhs, "edge_size")
+        self._diff(rhs, "texture_index")
+        self._diff(rhs, "sphere_texture_index")
+        self._diff(rhs, "sphere_mode")
+        self._diff(rhs, "toon_sharing_flag")
+        self._diff(rhs, "toon_texture_index")
+        self._diff(rhs, "comment")
+        self._diff(rhs, "vertex_count")
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
     def __str__(self):
         return ("<pmx.Material {name}>".format(
             name=self.english_name
             ))
 
 
-class Deform(object):
-    pass
-
-
-class Bdef1(object):
+class Bdef1(Diff):
     """bone deform. use a weight
 
     Attributes: see __init__
@@ -231,11 +355,17 @@ class Bdef1(object):
     def __init__(self, index0):
         self.index0=index0
 
+    def __str__(self):
+        return "<Bdef1 {0}>".format(self.index0)
+
     def __eq__(self, rhs):
         return self.index0==rhs.index0
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class Bdef2(object):
+
+class Bdef2(Diff):
     """bone deform. use two weights
 
     Attributes: see __init__
@@ -249,18 +379,38 @@ class Bdef2(object):
         self.index1=index1
         self.weight0=weight0
 
+    def __str__(self):
+        return "<Bdef2 {0}, {1}, {2}>".format(self.index0, self.index1, self.weight0)
+
     def __eq__(self, rhs):
         return (
                 self.index0==rhs.index0
                 and self.index1==rhs.index1
-                and self.weight0==rhs.weight0
+                #and self.weight0==rhs.weight0
+                and abs(self.weight0-rhs.weight0)<1e-5
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class Vertex(object):
-    """pmx vertex
 
-    Attributes: see __init__
+class Vertex(Diff):
+    """
+    ==========
+    pmx vertex
+    ==========
+
+    :IVariables:
+        position
+            Vector3
+        normal 
+            Vector3
+        uv 
+            Vector2
+        deform
+            Bdef1, Bdef2 or Bdef4
+        edge_factor
+            float
     """
     __slots__=[ 'position', 'normal', 'uv', 'deform', 'edge_factor' ]
     def __init__(self, 
@@ -275,6 +425,11 @@ class Vertex(object):
         self.deform=deform
         self.edge_factor=edge_factor
 
+    def __str__(self):
+        return "<Vertex position:{0}, normal:{1}, uv:{2}, deform:{3}, edge:{4}".format(
+                self.position, self.normal, self.uv, self.deform, self.edge_factor
+                )
+
     def __eq__(self, rhs):
         return (
                 self.position==rhs.position
@@ -284,8 +439,18 @@ class Vertex(object):
                 and self.edge_factor==rhs.edge_factor
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class Morph(object):
+    def diff(self, rhs):
+        self._diff(rhs, "position")
+        self._diff(rhs, "normal")
+        self._diff(rhs, "uv")
+        self._diff(rhs, "deform")
+        self._diff(rhs, "edge_factor")
+
+
+class Morph(Diff):
     """pmx morph
 
     Attributes:
@@ -318,8 +483,18 @@ class Morph(object):
                 and self.offsets==rhs.offsets
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class VerexMorphOffset(object):
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'english_name')
+        self._diff(rhs, 'panel')
+        self._diff(rhs, 'morph_type')
+        self._diff_array(rhs, 'offsets')
+
+
+class VerexMorphOffset(Diff):
     """pmx vertex morph offset
 
     Attributes:
@@ -340,8 +515,15 @@ class VerexMorphOffset(object):
                 and self.position_offset==rhs.position_offset
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class DisplaySlot(object):
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'english_name')
+
+
+class DisplaySlot(Diff):
     """pmx display slot
 
     Attributes:
@@ -370,8 +552,17 @@ class DisplaySlot(object):
                 and self.refrences==rhs.refrences
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class RigidBodyParam(object):
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'english_name')
+        self._diff(rhs, 'special_flag')
+        self._diff_array(rhs, 'refrences')
+
+
+class RigidBodyParam(Diff):
     """pmx rigidbody param(for bullet)
 
     Attributes:
@@ -405,8 +596,18 @@ class RigidBodyParam(object):
                 and self.friction==rhs.friction
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class RigidBody(object):
+    def diff(self, rhs):
+        self._diff(rhs, 'mass')
+        self._diff(rhs, 'linear_damping')
+        self._diff(rhs, 'angular_damping')
+        self._diff_array(rhs, 'restitution')
+        self._diff_array(rhs, 'friction')
+
+
+class RigidBody(Diff):
     """pmx rigidbody
 
     Attributes:
@@ -476,8 +677,24 @@ class RigidBody(object):
                 and self.mode==rhs.mode
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class Joint(object):
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'english_name')
+        self._diff(rhs, 'bone_index')
+        self._diff(rhs, 'collision_group')
+        self._diff(rhs, 'no_collision_group')
+        self._diff(rhs, 'shape_type')
+        self._diff(rhs, 'shape_size')
+        self._diff(rhs, 'shape_position')
+        self._diff(rhs, 'shape_rotation')
+        self._diff(rhs, 'param')
+        self._diff(rhs, 'mode')
+
+
+class Joint(Diff):
     """pmx joint
 
     Attributes:
@@ -554,31 +771,64 @@ class Joint(object):
                 and self.spring_constant_rotation==rhs.spring_constant_rotation
                 )
 
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 
-class Model(object):
-    """pmx data representation
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'joint_type')
+        self._diff(rhs, 'rigidbody_index_a')
+        self._diff(rhs, 'rigidbody_index_b')
+        self._diff(rhs, 'position')
+        self._diff(rhs, 'rotation')
+        self._diff(rhs, 'translation_limit_min')
+        self._diff(rhs, 'translation_limit_max')
+        self._diff(rhs, 'rotation_limit_min')
+        self._diff(rhs, 'rotation_limit_max')
+        self._diff(rhs, 'spring_constant_translation')
+        self._diff(rhs, 'spring_constant_rotation')
 
-    Attributes:
-        version: pmx version(expected 2.0)
-        name: 
-        english_name: 
-        comment: 
-        english_comment: 
-        vertices:
-        textures:
-        materials:
-        bones:
-        morph:
-        display_slots:
-        rigidbodies:
-        joints:
+
+class Model(Diff):
+    """
+    ==========
+    pmx model
+    ==========
+
+    :IVariables:
+        version
+            pmx version(expected 2.0)
+        name 
+            model name
+        english_name 
+            model name
+        comment 
+            comment
+        english_comment 
+            comment
+        vertices
+            vertex list
+        textures
+            texture list
+        materials
+            material list
+        bones
+            bone list
+        morph
+            morph list
+        display_slots
+            display list for bone/morph grouping
+        rigidbodies
+            bullet physics rigidbody list
+        joints
+            bullet physics joint list
     """
     __slots__=[
-            'version', # pmx version
-            'name', # model name
-            'english_name', # model name in english
-            'comment', # model comment
-            'english_comment', # model comment in english
+            'version',
+            'name',
+            'english_name',
+            'comment',
+            'english_comment',
             'vertices',
             'indices',
             'textures',
@@ -589,7 +839,7 @@ class Model(object):
             'rigidbodies',
             'joints',
             ]
-    def __init__(self, version):
+    def __init__(self, version=2.0):
         self.version=version
         self.name=''
         self.english_name=''
@@ -629,4 +879,23 @@ class Model(object):
                 and self.rigidbodies==rhs.rigidbodies
                 and self.joints==rhs.joints
                 )
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
+    def diff(self, rhs):
+        self._diff(rhs, "version")
+        self._diff(rhs, "name")
+        self._diff(rhs, "english_name")
+        self._diff(rhs, "comment")
+        self._diff(rhs, "english_comment")
+        self._diff_array(rhs, "vertices")
+        self._diff_array(rhs, "indices")
+        self._diff_array(rhs, "textures")
+        self._diff_array(rhs, "materials")
+        self._diff_array(rhs, "bones")
+        self._diff_array(rhs, "morphs")
+        self._diff_array(rhs, "display_slots")
+        self._diff_array(rhs, "rigidbodies")
+        self._diff_array(rhs, "joints")
 

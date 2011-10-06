@@ -51,7 +51,7 @@ def build(path):
                 m.diffuse_color[0], 
                 m.diffuse_color[1], 
                 m.diffuse_color[2], 
-                m.diffuse_alpha)
+                m.alpha)
         if m.texture_index!=255:
             texturepath=os.path.join(basedir, model.textures[m.texture_index])
             if os.path.isfile(texturepath):

@@ -25,12 +25,12 @@ class Reader(pymeshio.common.BinaryReader):
         if extended_uv>0:
             raise pymeshio.common.ParseException(
                     "extended uv is not supported", extended_uv)
-        self.read_vertex_index=lambda : self.read_uint(vertex_index_size)
-        self.read_texture_index=lambda : self.read_uint(texture_index_size)
-        self.read_material_index=lambda : self.read_uint(material_index_size)
-        self.read_bone_index=lambda : self.read_uint(bone_index_size)
-        self.read_morph_index=lambda : self.read_uint(morph_index_size)
-        self.read_rigidbody_index=lambda : self.read_uint(rigidbody_index_size)
+        self.read_vertex_index=lambda : self.read_int(vertex_index_size)
+        self.read_texture_index=lambda : self.read_int(texture_index_size)
+        self.read_material_index=lambda : self.read_int(material_index_size)
+        self.read_bone_index=lambda : self.read_int(bone_index_size)
+        self.read_morph_index=lambda : self.read_int(morph_index_size)
+        self.read_rigidbody_index=lambda : self.read_int(rigidbody_index_size)
 
     def __str__(self):
         return '<pymeshio.pmx.Reader>'
@@ -38,12 +38,12 @@ class Reader(pymeshio.common.BinaryReader):
     def get_read_text(self, text_encoding):
         if text_encoding==0:
             def read_text():
-                size=self.read_uint(4)
+                size=self.read_int(4)
                 return self.unpack("{0}s".format(size), size).decode("UTF16")
             return read_text
         elif text_encoding==1:
             def read_text():
-                size=self.read_uint(4)
+                size=self.read_int(4)
                 return self.unpack("{0}s".format(size), size).decode("UTF8")
             return read_text
         else:
@@ -59,7 +59,7 @@ class Reader(pymeshio.common.BinaryReader):
                 )
 
     def read_deform(self):
-        deform_type=self.read_uint(1)
+        deform_type=self.read_int(1)
         if deform_type==0:
             return pymeshio.pmx.Bdef1(self.read_bone_index())
         elif deform_type==1:
@@ -85,24 +85,24 @@ class Reader(pymeshio.common.BinaryReader):
                 specular_color=self.read_rgb(),
                 specular_factor=self.read_float(),
                 ambient_color=self.read_rgb(),
-                flag=self.read_uint(1),
+                flag=self.read_int(1),
                 edge_color=self.read_rgba(),
                 edge_size=self.read_float(),
                 texture_index=self.read_texture_index(),
                 sphere_texture_index=self.read_texture_index(),
-                sphere_mode=self.read_uint(1),
-                toon_sharing_flag=self.read_uint(1),
+                sphere_mode=self.read_int(1),
+                toon_sharing_flag=self.read_int(1),
                 )
         if material.toon_sharing_flag==0:
             material.toon_texture_index=self.read_texture_index()
         elif material.toon_sharing_flag==1:
-            material.toon_texture_index=self.read_uint(1)
+            material.toon_texture_index=self.read_int(1)
         else:
             raise pymeshio.common.ParseException(
                     "unknown toon_sharing_flag {0}".format(
                         material.toon_sharing_flag))
         material.comment=self.read_text()
-        material.vertex_count=self.read_uint(4)
+        material.vertex_count=self.read_int(4)
         return material
 
     def read_bone(self):
@@ -111,11 +111,11 @@ class Reader(pymeshio.common.BinaryReader):
                 english_name=self.read_text(),
                 position=self.read_vector3(),
                 parent_index=self.read_bone_index(),
-                layer=self.read_uint(4),
-                flag=self.read_uint(2)                
+                layer=self.read_int(4),
+                flag=self.read_int(2)                
                 )
         if bone.getConnectionFlag()==0:
-            bone.tail_positoin=self.read_vector3()
+            bone.tail_position=self.read_vector3()
         elif bone.getConnectionFlag()==1:
             bone.tail_index=self.read_bone_index()
         else:
@@ -135,7 +135,7 @@ class Reader(pymeshio.common.BinaryReader):
             bone.local_z_vector=self.read_vector3()
 
         if bone.getExternalParentDeformFlag()==1:
-            bone.external_key=self.read_uint(4)
+            bone.external_key=self.read_int(4)
 
         if bone.getIkFlag()==1:
             bone.ik=self.read_ik()
@@ -145,9 +145,9 @@ class Reader(pymeshio.common.BinaryReader):
     def read_ik(self):
         ik=pymeshio.pmx.Ik(
                 target_index=self.read_bone_index(),
-                loop=self.read_uint(4),
+                loop=self.read_int(4),
                 limit_radian=self.read_float())
-        link_size=self.read_uint(4)
+        link_size=self.read_int(4)
         ik.link=[self.read_ik_link() 
                 for _ in range(link_size)]
         return ik
@@ -155,7 +155,7 @@ class Reader(pymeshio.common.BinaryReader):
     def read_ik_link(self):
         link=pymeshio.pmx.IkLink(
                 self.read_bone_index(),
-                self.read_uint(1))
+                self.read_int(1))
         if link.limit_angle==0:
             pass
         elif link.limit_angle==1:
@@ -170,9 +170,9 @@ class Reader(pymeshio.common.BinaryReader):
     def read_morgh(self):
         name=self.read_text()
         english_name=self.read_text()
-        panel=self.read_uint(1)
-        morph_type=self.read_uint(1)
-        offset_size=self.read_uint(4)
+        panel=self.read_int(1)
+        morph_type=self.read_int(1)
+        offset_size=self.read_int(4)
         if morph_type==0:
             # todo
             raise pymeshio.common.ParseException(
@@ -221,10 +221,10 @@ class Reader(pymeshio.common.BinaryReader):
 
     def read_display_slot(self):
         display_slot=pymeshio.pmx.DisplaySlot(self.read_text(), self.read_text(), 
-                self.read_uint(1))
-        display_count=self.read_uint(4)
+                self.read_int(1))
+        display_count=self.read_int(4)
         for _ in range(display_count):
-            display_type=self.read_uint(1)
+            display_type=self.read_int(1)
             if display_type==0:
                 display_slot.refrences.append(
                         (display_type, self.read_bone_index()))
@@ -241,9 +241,9 @@ class Reader(pymeshio.common.BinaryReader):
                 name=self.read_text(), 
                 english_name=self.read_text(),
                 bone_index=self.read_bone_index(),
-                collision_group=self.read_uint(1),
-                no_collision_group=self.read_uint(2),
-                shape_type=self.read_uint(1),
+                collision_group=self.read_int(1),
+                no_collision_group=self.read_int(2),
+                shape_type=self.read_int(1),
                 shape_size=self.read_vector3(),
                 shape_position=self.read_vector3(),
                 shape_rotation=self.read_vector3(),
@@ -252,14 +252,14 @@ class Reader(pymeshio.common.BinaryReader):
                 angular_damping=self.read_float(),
                 restitution=self.read_float(),
                 friction=self.read_float(),
-                mode=self.read_uint(1)
+                mode=self.read_int(1)
                 )
 
     def read_joint(self):
         return pymeshio.pmx.Joint(
                 name=self.read_text(),
                 english_name=self.read_text(),
-                joint_type=self.read_uint(1),
+                joint_type=self.read_int(1),
                 rigidbody_index_a=self.read_rigidbody_index(),
                 rigidbody_index_b=self.read_rigidbody_index(),
                 position=self.read_vector3(),
@@ -292,18 +292,18 @@ def read(ios):
     model=pymeshio.pmx.Model(version)
 
     # flags
-    flag_bytes=reader.read_uint(1)
+    flag_bytes=reader.read_int(1)
     if flag_bytes!=8:
         raise pymeshio.common.ParseException(
                 "invalid flag length", reader.flag_bytes)
-    text_encoding=reader.read_uint(1)
-    extended_uv=reader.read_uint(1)
-    vertex_index_size=reader.read_uint(1)
-    texture_index_size=reader.read_uint(1)
-    material_index_size=reader.read_uint(1)
-    bone_index_size=reader.read_uint(1)
-    morph_index_size=reader.read_uint(1)
-    rigidbody_index_size=reader.read_uint(1)
+    text_encoding=reader.read_int(1)
+    extended_uv=reader.read_int(1)
+    vertex_index_size=reader.read_int(1)
+    texture_index_size=reader.read_int(1)
+    material_index_size=reader.read_int(1)
+    bone_index_size=reader.read_int(1)
+    morph_index_size=reader.read_int(1)
+    rigidbody_index_size=reader.read_int(1)
     
     # pmx custom reader
     reader=Reader(reader.ios,
@@ -325,23 +325,23 @@ def read(ios):
 
     # model data
     model.vertices=[reader.read_vertex() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.indices=[reader.read_vertex_index() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.textures=[reader.read_text() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.materials=[reader.read_material() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.bones=[reader.read_bone() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.morphs=[reader.read_morgh() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.display_slots=[reader.read_display_slot() 
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.rigidbodies=[reader.read_rigidbody()
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
     model.joints=[reader.read_joint()
-            for _ in range(reader.read_uint(4))]
+            for _ in range(reader.read_int(4))]
 
     return model
 
