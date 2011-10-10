@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.2.1'
+version='2.2.2'
 short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -25,7 +25,7 @@ Features
 * read/write MikuMikuDance pmx format
 * read       MikuMikuDance vmd format
 * read       MikuMikuDance vpd format
-
+* convert    MikuMikuDance pmd format to MikuMikuDance pmx format
 
 Install
 -------
@@ -41,17 +41,23 @@ Usage
 -----
 ::
 
-    >>> import pymeshio.pmx.reader
-    >>> m=pymeshio.pmx.reader.read_from_file('resources/初音ミクVer2.pmx')
+    >>> import pymeshio.pmd.reader
+    >>> m=pymeshio.pmd.reader.read_from_file('resources/初音ミクVer2.pmd')
     >>> print(m)
+    <pmd-1, "初音ミク" vertex: 12354, face: 68883, material: 17, bone: 140 ik: 7, skin: 31>
+    >>> import pymeshio.converter
+    >>> pmx_model=pymeshio.converter.pmd_to_pmx(m)
+    >>> print(pmx_model)
     <pmx-2.0 "Miku Hatsune" 12354vertices>
-    >>> print(dir(m))
-    ['__class__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', 'bones', 'comment', 'display_slots', 'english_comment', 'english_name', 'indices', 'joints', 'materials', 'morphs', 'name', 'rigidbodies', 'textures', 'version', 'vertices']
+    >>> import pymeshio.pmx.writer
+    >>> import io
+    >>> pymeshio.pmx.writer.write(io.open("out.pmx", "wb"), pmx_model)
+    True
+
 
 ToDo
 --------
 
-* pmd to pmx converter
 * update blender25 plugin to blender26
 * blender26 importer for pmx
 * blender26 exporter for pmx
@@ -59,6 +65,10 @@ ToDo
 
 New
 -------
+2.2.2 (2011-10-10)
+~~~~~~~~~~~~~~~~~~
+* add pmd2pmx script
+
 2.2.1 (2011-10-07)
 ~~~~~~~~~~~~~~~~~~
 * implement pmd to pmx converter

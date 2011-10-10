@@ -273,7 +273,7 @@ def write(ios, model, text_encoding=1):
             0: UTF16 has bug. it write BOM(FFFE).
 
     >>> import pymeshio.pmx.writer
-    >>> pymeshio.pmx.writer.write(io.open('out.pmx', 'wb'), pmx)
+    >>> pymeshio.pmx.writer.write(io.open('out.pmx', 'wb'), pmx_model)
 
     """
     assert(isinstance(ios, io.IOBase))

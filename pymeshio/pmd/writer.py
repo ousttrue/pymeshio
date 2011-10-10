@@ -88,9 +88,9 @@ class Writer(common.BinaryWriter):
         self.write_uint(len(rigidbodies), 4)
         for r in rigidbodies:
             self.write_bytes(r.name, 20)
-            self.write_uint(r.bone_index, 2)
+            self.write_int(r.bone_index, 2)
             self.write_uint(r.collision_group, 1)
-            self.write_uint(r.no_collision_group, 2)
+            self.write_int(r.no_collision_group, 2)
             self.write_uint(r.shape_type, 1)
             self.write_vector3(r.shape_size)
             self.write_vector3(r.shape_position)
@@ -129,7 +129,7 @@ def write(ios, model):
             pmd model
 
     >>> import pymeshio.pmd.writer
-    >>> pymeshio.pmd.writer.write(io.open('out.pmd', 'wb'), pmd)
+    >>> pymeshio.pmd.writer.write(io.open('out.pmd', 'wb'), pmd_model)
 
     """
     assert(isinstance(ios, io.IOBase))
