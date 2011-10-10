@@ -67,7 +67,7 @@ class Vector3(object):
         self.z=z
 
     def __str__(self):
-        return "<%f %f %f>" % (self.x, self.y, self.z)
+        return "<%f %.32f %f>" % (self.x, self.y, self.z)
 
     def __eq__(self, rhs):
         return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z

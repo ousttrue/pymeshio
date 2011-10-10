@@ -46,8 +46,8 @@ class Diff(object):
     def _diff_array(self, rhs, key):
         la=getattr(self, key)
         ra=getattr(rhs, key)
-        if len(la)!=len(la):
-            raise DifferenceException(key)
+        if len(la)!=len(ra):
+            raise DifferenceException("%s diffrence %d with %d" % (key, len(la), len(ra)))
         for i, (l, r) in enumerate(zip(la, ra)):
             if isinstance(l, Diff):
                 try:
@@ -467,12 +467,12 @@ class Morph(Diff):
             'morph_type',
             'offsets',
             ]
-    def __init__(self, name, english_name, panel, morph_type):
+    def __init__(self, name, english_name, panel, morph_type, offsets=[]):
         self.name=name
         self.english_name=english_name
         self.panel=panel
         self.morph_type=morph_type
-        self.offsets=[]
+        self.offsets=offsets
 
     def __eq__(self, rhs):
         return (
@@ -489,7 +489,7 @@ class Morph(Diff):
     def diff(self, rhs):
         self._diff(rhs, 'name')
         self._diff(rhs, 'english_name')
-        self._diff(rhs, 'panel')
+        #self._diff(rhs, 'panel')
         self._diff(rhs, 'morph_type')
         self._diff_array(rhs, 'offsets')
 
@@ -519,8 +519,8 @@ class VerexMorphOffset(Diff):
         return not self.__eq__(rhs)
 
     def diff(self, rhs):
-        self._diff(rhs, 'name')
-        self._diff(rhs, 'english_name')
+        self._diff(rhs, 'vertex_index')
+        self._diff(rhs, 'position_offset')
 
 
 class DisplaySlot(Diff):
@@ -538,11 +538,11 @@ class DisplaySlot(Diff):
             'special_flag',
             'refrences',
             ]
-    def __init__(self, name, english_name, special_flag):
+    def __init__(self, name, english_name, special_flag, refrences=[]):
         self.name=name
         self.english_name=english_name
         self.special_flag=special_flag
-        self.refrences=[]
+        self.refrences=refrences
 
     def __eq__(self, rhs):
         return (
@@ -559,7 +559,7 @@ class DisplaySlot(Diff):
         self._diff(rhs, 'name')
         self._diff(rhs, 'english_name')
         self._diff(rhs, 'special_flag')
-        self._diff_array(rhs, 'refrences')
+        #self._diff_array(rhs, 'refrences')
 
 
 class RigidBodyParam(Diff):
@@ -688,7 +688,7 @@ class RigidBody(Diff):
         self._diff(rhs, 'no_collision_group')
         self._diff(rhs, 'shape_type')
         self._diff(rhs, 'shape_size')
-        self._diff(rhs, 'shape_position')
+        #self._diff(rhs, 'shape_position')
         self._diff(rhs, 'shape_rotation')
         self._diff(rhs, 'param')
         self._diff(rhs, 'mode')
@@ -824,6 +824,7 @@ class Model(Diff):
             bullet physics joint list
     """
     __slots__=[
+            'path',
             'version',
             'name',
             'english_name',
@@ -840,6 +841,7 @@ class Model(Diff):
             'joints',
             ]
     def __init__(self, version=2.0):
+        self.path=''
         self.version=version
         self.name=''
         self.english_name=''

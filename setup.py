@@ -8,7 +8,7 @@ import shutil
 
 name='pymeshio'
 version='2.2.1'
-short_description='pure python 3d model io library'
+short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description='''\
 `pymeshio` is a package for 3d model io.
 create for blender import/expoert plugin backend.
@@ -52,8 +52,9 @@ ToDo
 --------
 
 * pmd to pmx converter
-* blender importer for pmx
-* blender exporter for pmx
+* update blender25 plugin to blender26
+* blender26 importer for pmx
+* blender26 exporter for pmx
 
 
 New
@@ -99,5 +100,10 @@ setup(
         test_suite='nose.collector',
         tests_require=['Nose'],
         zip_safe = (sys.version>="2.5"),   # <2.5 needs unzipped for -m to work
+        entry_points = {
+            'console_scripts': [
+                'pmd2pmx = pymeshio.main:pmd_to_pmx',
+                ]
+            }
         )
 

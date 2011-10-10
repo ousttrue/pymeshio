@@ -42,7 +42,7 @@ class Reader(common.BinaryReader):
                 specular_factor=self.read_float(),
                 specular_color=self.read_rgb(),
                 ambient_color=self.read_rgb(),
-                toon_index=self.read_uint(1),
+                toon_index=self.read_int(1),
                 edge_flag=self.read_uint(1),
                 vertex_count=self.read_uint(4),
                 texture_file=self.read_text(20)
@@ -79,9 +79,9 @@ class Reader(common.BinaryReader):
     def read_rigidbody(self):
         return pmd.RigidBody(
                 name=self.read_text(20), 
-                bone_index=self.read_uint(2),
-                collision_group=self.read_uint(1),
-                no_collision_group=self.read_uint(2),
+                bone_index=self.read_int(2),
+                collision_group=self.read_int(1),
+                no_collision_group=self.read_int(2),
                 shape_type=self.read_uint(1),
                 shape_size=self.read_vector3(),
                 shape_position=self.read_vector3(),
@@ -143,7 +143,7 @@ def __read(reader, model):
     # extend1: english name
     ############################################################
     if reader.read_uint(1)==0:
-        print("no extend flag")
+        #print("no extend flag")
         return True
     model.english_name=reader.read_text(20)
     model.english_comment=reader.read_text(256)
@@ -172,6 +172,7 @@ def __read(reader, model):
     if reader.is_end():
         # EOF
         return True
+
     model.rigidbodies=[reader.read_rigidbody()
             for _ in range(reader.read_uint(4))]
     model.joints=[reader.read_joint()
@@ -194,7 +195,9 @@ def read_from_file(path):
     <pmd-2.0 "Miku Hatsune" 12354vertices>
 
     """
-    return read(io.BytesIO(common.readall(path)))
+    pmd=read(io.BytesIO(common.readall(path)))
+    pmd.path=path
+    return pmd
 
 
 def read(ios):

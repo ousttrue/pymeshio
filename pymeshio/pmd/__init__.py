@@ -448,16 +448,16 @@ class RigidBody(object):
             bone_index, 
             collision_group, 
             no_collision_group, 
+            shape_type,
+            shape_size,
+            shape_position, 
+            shape_rotation,
             mass,
             linear_damping, 
             angular_damping, 
             restitution, 
             friction, 
             mode,
-            shape_type=0,
-            shape_size=common.Vector3(),
-            shape_position=common.Vector3(), 
-            shape_rotation=common.Vector3() 
             ):
         self.name=name
         self.bone_index=bone_index
@@ -547,6 +547,7 @@ class Model(object):
         _name: internal
     """
     __slots__=[
+            'path',
             'version', 'name', 'comment',
             'english_name', 'english_comment',
             'vertices', 'indices', 'materials', 'bones', 
@@ -557,7 +558,8 @@ class Model(object):
 
             'no_parent_bones',
             ]
-    def __init__(self, version):
+    def __init__(self, version=1.0):
+        self.path=''
         self.version=version
         self.name=b''
         self.comment=b''
@@ -585,7 +587,7 @@ class Model(object):
     def __str__(self):
         return '<pmd-%g, "%s" vertex: %d, face: %d, material: %d, bone: %d ik: %d, skin: %d>' % (
             self.version, self.name, len(self.vertices), len(self.indices),
-            len(self.materials), len(self.bones), len(self.ik_list), len(self.morph_list))
+            len(self.materials), len(self.bones), len(self.ik_list), len(self.morphs))
 
     def __eq__(self, rhs):
         return (

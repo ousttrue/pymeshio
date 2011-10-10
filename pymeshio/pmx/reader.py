@@ -286,7 +286,9 @@ def read_from_file(path):
     <pmx-2.0 "Miku Hatsune" 12354vertices>
 
     """
-    return read(io.BytesIO(pymeshio.common.readall(path)))
+    pmx=read(io.BytesIO(pymeshio.common.readall(path)))
+    pmx.path=path
+    return pmx
 
 
 def read(ios):
