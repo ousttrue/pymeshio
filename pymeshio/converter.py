@@ -266,18 +266,19 @@ def pmd_to_pmx(src):
     # bones
     def get_panel(m):
         return 1
-    base=src.morphs[0]
-    assert(base.name==b"base")
-    dst.morphs=[
-            pmx.Morph(
-                name=m.name.decode('cp932'),
-                english_name=m.english_name.decode('cp932'),
-                panel=get_panel(m),
-                morph_type=1,
-                offsets=[pmx.VerexMorphOffset(base.indices[i], pos)
-                    for i, pos in zip(m.indices, m.pos_list)]
-                )
-            for i, m in enumerate(src.morphs) if m.name!=b"base"]
+    if len(src.morphs)>0:
+        base=src.morphs[0]
+        assert(base.name==b"base")
+        dst.morphs=[
+                pmx.Morph(
+                    name=m.name.decode('cp932'),
+                    english_name=m.english_name.decode('cp932'),
+                    panel=get_panel(m),
+                    morph_type=1,
+                    offsets=[pmx.VerexMorphOffset(base.indices[i], pos)
+                        for i, pos in zip(m.indices, m.pos_list)]
+                    )
+                for i, m in enumerate(src.morphs) if m.name!=b"base"]
     # display_slots
     dst.display_slots=[
             pmx.DisplaySlot(u('Root'), u('Root'), 1),

@@ -142,19 +142,19 @@ def __read(reader, model):
     ############################################################
     # extend1: english name
     ############################################################
-    if reader.read_uint(1)==0:
-        #print("no extend flag")
-        return True
-    model.english_name=reader.read_text(20)
-    model.english_comment=reader.read_text(256)
-    for bone in model.bones:
-        bone.english_name=reader.read_text(20)
-    for morph in model.morphs:
-        if morph.name==b'base':
-            continue
-        morph.english_name=reader.read_text(20)
-    for g in model.bone_group_list:
-        g.english_name=reader.read_text(50)
+    if reader.read_uint(1)==1:
+        print("no extend flag")
+        #return True
+        model.english_name=reader.read_text(20)
+        model.english_comment=reader.read_text(256)
+        for bone in model.bones:
+            bone.english_name=reader.read_text(20)
+        for morph in model.morphs:
+            if morph.name==b'base':
+                continue
+            morph.english_name=reader.read_text(20)
+        for g in model.bone_group_list:
+            g.english_name=reader.read_text(50)
 
 
     ############################################################

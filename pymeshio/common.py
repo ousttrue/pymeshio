@@ -5,6 +5,7 @@ common utilities.
 import math
 import struct
 import sys
+import io
 
 
 def unicode(src):
@@ -311,10 +312,16 @@ class BinaryReader(object):
     """general BinaryReader
     """
     def __init__(self, ios):
+        current=ios.tell()
+        ios.seek(0, io.SEEK_END)
+        self.end=ios.tell()
+        ios.seek(current)
         self.ios=ios
 
     def is_end(self):
-        return not self.ios.readable()
+        #print(self.ios.tell(), self.end)
+        return self.ios.tell()>=self.end
+        #return not self.ios.readable()
 
     def unpack(self, fmt, size):
         result=struct.unpack(fmt, self.ios.read(size))
