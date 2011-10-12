@@ -211,8 +211,8 @@ class Writer(common.BinaryWriter):
             self.write_text(s.name)
             self.write_text(s.english_name)
             self.write_int(s.special_flag, 1)
-            self.write_int(len(s.refrences), 4)
-            for r in s.refrences:
+            self.write_int(len(s.references), 4)
+            for r in s.references:
                 self.write_int(r[0], 1)
                 if r[0]==0:
                     self.write_bone_index(r[1])

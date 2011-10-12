@@ -303,7 +303,8 @@ def __importArmature(l):
             effector_name=l.bones[ik.index].name.decode('cp932')
 
         constraint=bl.armature.createIkConstraint(armature_object,
-                p_bone, effector_name, ik)
+                p_bone, effector_name, 
+                ik.children, ik.weight, ik.iterations)
 
     bl.armature.makeEditable(armature_object)
     bl.armature.update(armature)

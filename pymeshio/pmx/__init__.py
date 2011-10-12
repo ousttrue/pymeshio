@@ -74,11 +74,11 @@ class Ik(Diff):
             'limit_radian',
             'link',
             ]
-    def __init__(self, target_index, loop, limit_radian, link=[]):
+    def __init__(self, target_index, loop, limit_radian, link=None):
         self.target_index=target_index
         self.loop=loop
         self.limit_radian=limit_radian
-        self.link=link
+        self.link=link or []
 
     def __eq__(self, rhs):
         return (
@@ -470,12 +470,12 @@ class Morph(Diff):
             'morph_type',
             'offsets',
             ]
-    def __init__(self, name, english_name, panel, morph_type, offsets=[]):
+    def __init__(self, name, english_name, panel, morph_type, offsets=None):
         self.name=name
         self.english_name=english_name
         self.panel=panel
         self.morph_type=morph_type
-        self.offsets=offsets
+        self.offsets=offsets or []
 
     def __eq__(self, rhs):
         return (
@@ -533,26 +533,29 @@ class DisplaySlot(Diff):
         name: 
         english_name: 
         special_flag:
-        refrences: list of (ref_type, ref_index)
+        references: list of (ref_type, ref_index)
     """
     __slots__=[
             'name',
             'english_name',
             'special_flag',
-            'refrences',
+            'references',
             ]
-    def __init__(self, name, english_name, special_flag, refrences=[]):
+    def __init__(self, name, english_name, special_flag, references=None):
         self.name=name
         self.english_name=english_name
         self.special_flag=special_flag
-        self.refrences=refrences
+        self.references=references or []
+
+    def __str__(self):
+        return "<DisplaySlots %s(%d)>" % (self.name, len(self.references))
 
     def __eq__(self, rhs):
         return (
                 self.name==rhs.name
                 and self.english_name==rhs.english_name
                 and self.special_flag==rhs.special_flag
-                and self.refrences==rhs.refrences
+                and self.references==rhs.references
                 )
 
     def __ne__(self, rhs):
@@ -562,7 +565,7 @@ class DisplaySlot(Diff):
         self._diff(rhs, 'name')
         self._diff(rhs, 'english_name')
         self._diff(rhs, 'special_flag')
-        #self._diff_array(rhs, 'refrences')
+        #self._diff_array(rhs, 'references')
 
 
 class RigidBodyParam(Diff):

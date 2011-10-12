@@ -226,10 +226,10 @@ class Reader(common.BinaryReader):
         for _ in range(display_count):
             display_type=self.read_int(1)
             if display_type==0:
-                display_slot.refrences.append(
+                display_slot.references.append(
                         (display_type, self.read_bone_index()))
             elif display_type==1:
-                display_slot.refrences.append(
+                display_slot.references.append(
                         (display_type, self.read_morph_index()))
             else:
                 raise common.ParseException(

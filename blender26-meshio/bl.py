@@ -255,6 +255,7 @@ class object:
         g=pose.bone_groups.active
         g.name=name
         g.color_set=color_set
+        return g
 
     @staticmethod
     def boneGroups(o):
@@ -595,15 +596,17 @@ class armature:
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
     @staticmethod
-    def createIkConstraint(armature_object, p_bone, effector_name, ik):
+    def createIkConstraint(armature_object, p_bone, effector_name, 
+            chain, weight, iterations):
         constraint = p_bone.constraints.new('IK')
-        constraint.chain_count=len(ik.children)
+        constraint.chain_count=len(chain)
         constraint.target=armature_object
         constraint.subtarget=effector_name
         constraint.use_tail=False
+        # ToDo
         # not used. place folder when export.
-        constraint.weight=ik.weight
-        constraint.iterations=ik.iterations * 10
+        #constraint.weight=weight
+        #constraint.iterations=iterations * 10
         return constraint
 
     @staticmethod

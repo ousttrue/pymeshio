@@ -48,7 +48,7 @@ def __create_a_material(m, name, textures_and_images):
     texture_index=bl.material.addTexture(material, textures_and_images[m.texture_index][0])
     return material
 
-def __create_armature(bones):
+def __create_armature(bones, display_slots):
     """
     armatureを作成する
 
@@ -58,8 +58,8 @@ def __create_armature(bones):
     """
     armature, armature_object=bl.armature.create()
 
-    bl.armature.makeEditable(armature_object)
     # create bones
+    bl.armature.makeEditable(armature_object)
     def create_bone(b):
         bone=bl.armature.createBone(armature, b.name)
         # bone position
@@ -74,6 +74,7 @@ def __create_armature(bones):
 
     # build skeleton
     for b, bone in zip(bones, bl_bones):
+        assert(b.name==bone.name)
         if b.parent_index!=-1:
             print("%s -> %s" % (bones[b.parent_index].name, b.name))
             parent_bone=bl_bones[b.parent_index]
@@ -85,11 +86,38 @@ def __create_armature(bones):
                 bl.bone.setConnected(tail_bone)
         else:
             print("no parent %s" % b.name)
-
-    # fix
     bl.armature.update(armature)
-    bl.enterObjectMode()
 
+    # create ik constraint
+    bl.enterObjectMode()
+    pose = bl.object.getPose(armature_object)
+    for b, bone in zip(bones, bl_bones):
+        if b.getIkFlag():
+            ik=b.ik
+            assert(len(ik.link)<16)
+            p_bone=pose.bones[bones[ik.target_index].name]
+            assert(p_bone)
+            constraint=bl.armature.createIkConstraint(
+                    armature_object, p_bone, bone.name,
+                    ik.link, ik.limit_radian, ik.loop)
+    bl.armature.makeEditable(armature_object)
+    bl.armature.update(armature)
+
+    # create bone group
+    bl.enterObjectMode()
+    pose = bl.object.getPose(armature_object)
+    for i, ds in enumerate(display_slots):
+        print(ds)
+        g=bl.object.createBoneGroup(armature_object, ds.name, "THEME%02d" % (i+1))
+        for t, index in ds.references:
+            if t==0:
+                name=bones[index].name
+                try:
+                    pose.bones[name].bone_group=g
+                except KeyError as e:
+                    print("pose %s is not found" % name)
+
+    bl.enterObjectMode()
     return armature_object
 
 def _execute(filepath):
@@ -117,7 +145,7 @@ def _execute(filepath):
     root_object[bl.MMD_COMMENT]=model.english_comment
 
     # armatureを作る
-    armature_object=__create_armature(model.bones)
+    armature_object=__create_armature(model.bones, model.display_slots)
     if armature_object:
         bl.object.makeParent(root_object, armature_object)
 
