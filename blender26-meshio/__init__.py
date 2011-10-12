@@ -7,7 +7,7 @@ bl_info={
         'blender': (2, 6, 0),
         'location': 'File > Import-Export',
         'description': 'Import-Export PMD/PMX/MQO meshes',
-        'warning': '', # used for warning icon and text in addons panel
+        'warning': 'pmx importer/exporter is under development', 
         'wiki_url': 'http://meshio.sourceforge.jp/',
         'support': 'COMMUNITY',
         }

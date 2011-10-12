@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.2.3'
+version='2.3.0'
 short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -26,6 +26,7 @@ Features
 * read       MikuMikuDance vmd format
 * read       MikuMikuDance vpd format
 * convert    MikuMikuDance pmd format to MikuMikuDance pmx format
+* blender-2.6 import/export plugin
 
 Install
 -------
@@ -58,28 +59,16 @@ Usage
 ToDo
 --------
 
-* update blender25 plugin to blender26
-* blender26 importer for pmx
-* blender26 exporter for pmx
+* importer for pmx
+* exporter for pmx
 
 
 New
 -------
-2.2.3 (2011-10-12)
+2.3.0 (2011-10-13)
 ~~~~~~~~~~~~~~~~~~
-* fix for pmxmca
-
-2.2.2 (2011-10-10)
-~~~~~~~~~~~~~~~~~~
-* add pmd2pmx script
-
-2.2.1 (2011-10-07)
-~~~~~~~~~~~~~~~~~~
-* implement pmd to pmx converter
-
-2.2.0 (2011-10-03)
-~~~~~~~~~~~~~~~~~~
-* implement pmx writer
+* fix blender-2.5 plugin for blender-2.6
+* add pmx importer
 
 '''
 

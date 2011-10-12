@@ -215,25 +215,28 @@ class Bone(Diff):
             self._diff(rhs, 'ik')
 
     def getConnectionFlag(self):
-        return self.flag & 0x0001
+        return (self.flag & 0x0001)!=0
+
+    def getVisibleFlag(self):
+        return (self.flag & 0x0008)!=0
 
     def getIkFlag(self):
-        return (self.flag & 0x0020) >> 5
+        return (self.flag & 0x0020)!=0
 
     def getRotationFlag(self):
-        return (self.flag & 0x0100) >> 8
+        return (self.flag & 0x0100)!=0
 
     def getTranslationFlag(self):
-        return (self.flag & 0x0200) >> 9
+        return (self.flag & 0x0200)!=0
 
     def getFixedAxisFlag(self):
-        return (self.flag & 0x0400) >> 10
+        return (self.flag & 0x0400)!=0
 
     def getLocalCoordinateFlag(self):
-        return (self.flag &  0x0800) >> 11
+        return (self.flag &  0x0800)!=0
     
     def getExternalParentDeformFlag(self):
-        return (self.flag &  0x2000) >> 13
+        return (self.flag &  0x2000)!=0
 
  
 class Material(Diff):
