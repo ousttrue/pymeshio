@@ -104,11 +104,11 @@ class IkLink(Diff):
             'limit_min',
             'limit_max',
             ]
-    def __init__(self, bone_index, limit_angle, limit_min=common.Vector3(), limit_max=common.Vector3()):
+    def __init__(self, bone_index, limit_angle, limit_min=None, limit_max=None):
         self.bone_index=bone_index
         self.limit_angle=limit_angle
-        self.limit_min=limit_min
-        self.limit_max=limit_max
+        self.limit_min=limit_min or common.Vector3
+        self.limit_max=limit_max or common.Vector3
 
     def __eq__(self, rhs):
         return (
@@ -155,13 +155,13 @@ class Bone(Diff):
             parent_index,
             layer,
             flag,
-            tail_position=common.Vector3(),
+            tail_position=None,
             tail_index=-1,
             effect_index=-1,
             effect_factor=0.0,
-            fixed_axis=common.Vector3(),
-            local_x_vector=common.Vector3(),
-            local_z_vector=common.Vector3(),
+            fixed_axis=None,
+            local_x_vector=None,
+            local_z_vector=None,
             external_key=-1,
             ik=None
             ):
@@ -171,13 +171,13 @@ class Bone(Diff):
         self.parent_index=parent_index
         self.layer=layer
         self.flag=flag
-        self.tail_position=tail_position
+        self.tail_position=tail_position or common.Vector3
         self.tail_index=tail_index
         self.effect_index=effect_index
         self.effect_factor=effect_factor
-        self.fixed_axis=fixed_axis
-        self.local_x_vector=local_x_vector
-        self.local_z_vector=local_z_vector
+        self.fixed_axis=fixed_axis or common.Vector3
+        self.local_x_vector=local_x_vector or common.Vector3
+        self.local_z_vector=local_z_vector or common.Vector3
         self.external_key=external_key
         self.ik=ik
 
