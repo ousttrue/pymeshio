@@ -72,7 +72,7 @@ class MQOMaterial(object):
 import bpy
 
 # wrapper
-from . import bl25 as bl
+from . import bl
 
 def materialToMqo(m):
     material=MQOMaterial(m.name, 3)

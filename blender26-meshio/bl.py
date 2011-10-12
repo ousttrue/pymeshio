@@ -473,7 +473,7 @@ class mesh:
         uv_face.uv=uv_array
         if image:
             uv_face.image=image
-            uv_face.use_image=True
+            #uv_face.use_image=True
 
     @staticmethod
     def vertsDelete(m, remove_vertices):

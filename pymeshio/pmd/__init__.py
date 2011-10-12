@@ -222,7 +222,7 @@ class Bone(object):
         self.ik_index=0xFFFF
         self.pos=common.Vector3(0, 0, 0)
         self.children=[]
-        self.english_name=''
+        self.english_name=b''
 
     def __eq__(self, rhs):
         return (
@@ -387,7 +387,7 @@ class Morph(object):
         self.type=None
         self.indices=[]
         self.pos_list=[]
-        self.english_name=''
+        self.english_name=b''
         self.vertex_count=0
 
     def append(self, index, x, y, z):
@@ -559,7 +559,7 @@ class Model(object):
             'no_parent_bones',
             ]
     def __init__(self, version=1.0):
-        self.path=''
+        self.path=b''
         self.version=version
         self.name=b''
         self.comment=b''

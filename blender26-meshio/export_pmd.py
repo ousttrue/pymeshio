@@ -66,7 +66,7 @@ import bpy
 import mathutils
 
 # wrapper
-from . import bl25 as bl
+from . import bl
 
 xrange=range
 

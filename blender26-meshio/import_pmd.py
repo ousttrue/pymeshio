@@ -70,7 +70,7 @@ import bpy
 import mathutils
 
 # wrapper
-from . import bl25 as bl
+from . import bl
 
 xrange=range
 
@@ -216,10 +216,14 @@ def __importShape(obj, l, vertex_map):
                 print(msg)
                 print("invalid index %d/%d" % (index, len(base.indices)))
                 continue
-            vertex_index=vertex_map[base_index]
-            bl.shapekey.assign(new_shape_key, vertex_index,
-                    mesh.vertices[vertex_index].co+
-                    bl.createVector(*convert_coord(offset)))
+            try:
+                vertex_index=vertex_map[base_index]
+                bl.shapekey.assign(new_shape_key, vertex_index,
+                        mesh.vertices[vertex_index].co+
+                        bl.createVector(*convert_coord(offset)))
+            except KeyError as e:
+                print('base_index: %d' % base_index)
+                print(e)
 
     # select base shape
     bl.object.setActivateShapeKey(obj, 0)
