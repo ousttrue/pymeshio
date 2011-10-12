@@ -244,7 +244,8 @@ class Bone(object):
     def hasChild(self):
         return self.tail_index!=0
 
-    def display(self, indent=[]):
+    def display(self, indent=None):
+        indent=indent or []
         if len(indent)>0:
             prefix=''
             for i, is_end in enumerate(indent):
