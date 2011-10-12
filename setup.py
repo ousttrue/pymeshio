@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.3.0'
+version='2.2.4'
 short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -65,10 +65,10 @@ ToDo
 
 New
 -------
-2.3.0 (2011-10-13)
+2.2.4 (2011-10-13)
 ~~~~~~~~~~~~~~~~~~
+* bug fix(__init__ param)
 * fix blender-2.5 plugin for blender-2.6
-* add pmx importer
 
 '''
 
