@@ -3,11 +3,11 @@
 pmx reader
 """
 import io
-import pymeshio.common
-import pymeshio.pmx
+from .. import common
+from .. import pmx
 
 
-class Reader(pymeshio.common.BinaryReader):
+class Reader(common.BinaryReader):
     """pmx reader
     """
     def __init__(self, ios,
@@ -23,7 +23,7 @@ class Reader(pymeshio.common.BinaryReader):
         super(Reader, self).__init__(ios)
         self.read_text=self.get_read_text(text_encoding)
         if extended_uv>0:
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "extended uv is not supported", extended_uv)
         self.read_vertex_index=lambda : self.read_int(vertex_index_size)
         self.read_texture_index=lambda : self.read_int(texture_index_size)
@@ -33,7 +33,7 @@ class Reader(pymeshio.common.BinaryReader):
         self.read_rigidbody_index=lambda : self.read_int(rigidbody_index_size)
 
     def __str__(self):
-        return '<pymeshio.pmx.Reader>'
+        return '<pmx.Reader>'
 
     def get_read_text(self, text_encoding):
         if text_encoding==0:
@@ -50,7 +50,7 @@ class Reader(pymeshio.common.BinaryReader):
             print("unknown text encoding", text_encoding)
 
     def read_vertex(self):
-        return pymeshio.pmx.Vertex(
+        return pmx.Vertex(
                 self.read_vector3(), # pos
                 self.read_vector3(), # normal
                 self.read_vector2(), # uv
@@ -61,23 +61,23 @@ class Reader(pymeshio.common.BinaryReader):
     def read_deform(self):
         deform_type=self.read_int(1)
         if deform_type==0:
-            return pymeshio.pmx.Bdef1(self.read_bone_index())
+            return pmx.Bdef1(self.read_bone_index())
         elif deform_type==1:
-            return pymeshio.pmx.Bdef2(
+            return pmx.Bdef2(
                     self.read_bone_index(),
                     self.read_bone_index(),
                     self.read_float()
                     )
         elif deform_type==2:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented Bdef4")
         else:
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "unknown deform type: {0}".format(deform_type))
 
     def read_material(self):
-        material=pymeshio.pmx.Material(
+        material=pmx.Material(
                 name=self.read_text(),
                 english_name=self.read_text(),
                 diffuse_color=self.read_rgb(),
@@ -98,7 +98,7 @@ class Reader(pymeshio.common.BinaryReader):
         elif material.toon_sharing_flag==1:
             material.toon_texture_index=self.read_int(1)
         else:
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "unknown toon_sharing_flag {0}".format(
                         material.toon_sharing_flag))
         material.comment=self.read_text()
@@ -106,7 +106,7 @@ class Reader(pymeshio.common.BinaryReader):
         return material
 
     def read_bone(self):
-        bone=pymeshio.pmx.Bone(
+        bone=pmx.Bone(
                 name=self.read_text(),
                 english_name=self.read_text(),
                 position=self.read_vector3(),
@@ -119,7 +119,7 @@ class Reader(pymeshio.common.BinaryReader):
         elif bone.getConnectionFlag()==1:
             bone.tail_index=self.read_bone_index()
         else:
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "unknown bone conenction flag: {0}".format(
                 bone.getConnectionFlag()))
 
@@ -143,7 +143,7 @@ class Reader(pymeshio.common.BinaryReader):
         return bone
 
     def read_ik(self):
-        ik=pymeshio.pmx.Ik(
+        ik=pmx.Ik(
                 target_index=self.read_bone_index(),
                 loop=self.read_int(4),
                 limit_radian=self.read_float())
@@ -153,7 +153,7 @@ class Reader(pymeshio.common.BinaryReader):
         return ik
 
     def read_ik_link(self):
-        link=pymeshio.pmx.IkLink(
+        link=pmx.IkLink(
                 self.read_bone_index(),
                 self.read_int(1))
         if link.limit_angle==0:
@@ -162,7 +162,7 @@ class Reader(pymeshio.common.BinaryReader):
             link.limit_min=self.read_vector3()
             link.limit_max=self.read_vector3()
         else:
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "invalid ik link limit_angle: {0}".format(
                 link.limit_angle))
         return link
@@ -175,52 +175,52 @@ class Reader(pymeshio.common.BinaryReader):
         offset_size=self.read_int(4)
         if morph_type==0:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented GroupMorph")
         elif morph_type==1:
-            morph=pymeshio.pmx.Morph(name, english_name, 
+            morph=pmx.Morph(name, english_name, 
                     panel, morph_type)
             morph.offsets=[self.read_vertex_morph_offset() 
                     for _ in range(offset_size)]
             return morph
         elif morph_type==2:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented BoneMorph")
         elif morph_type==3:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented UvMorph")
         elif morph_type==4:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented extended UvMorph1")
         elif morph_type==5:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented extended UvMorph2")
         elif morph_type==6:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented extended UvMorph3")
         elif morph_type==7:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented extended UvMorph4")
         elif morph_type==8:
             # todo
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "not implemented extended MaterialMorph")
         else:
-            raise pymeshio.common.ParseException(
+            raise common.ParseException(
                     "unknown morph type: {0}".format(morph_type))
 
     def read_vertex_morph_offset(self):
-        return pymeshio.pmx.VerexMorphOffset(
+        return pmx.VerexMorphOffset(
                 self.read_vertex_index(), self.read_vector3())
 
     def read_display_slot(self):
-        display_slot=pymeshio.pmx.DisplaySlot(self.read_text(), self.read_text(), 
+        display_slot=pmx.DisplaySlot(self.read_text(), self.read_text(), 
                 self.read_int(1))
         display_count=self.read_int(4)
         for _ in range(display_count):
@@ -232,12 +232,12 @@ class Reader(pymeshio.common.BinaryReader):
                 display_slot.refrences.append(
                         (display_type, self.read_morph_index()))
             else:
-                raise pymeshio.common.ParseException(
+                raise common.ParseException(
                         "unknown display_type: {0}".format(display_type))
         return display_slot
 
     def read_rigidbody(self):
-        return pymeshio.pmx.RigidBody(
+        return pmx.RigidBody(
                 name=self.read_text(), 
                 english_name=self.read_text(),
                 bone_index=self.read_bone_index(),
@@ -256,7 +256,7 @@ class Reader(pymeshio.common.BinaryReader):
                 )
 
     def read_joint(self):
-        return pymeshio.pmx.Joint(
+        return pmx.Joint(
                 name=self.read_text(),
                 english_name=self.read_text(),
                 joint_type=self.read_int(1),
@@ -274,55 +274,55 @@ class Reader(pymeshio.common.BinaryReader):
 
 def read_from_file(path):
     """
-    read from file path, then return the pymeshio.pmx.Model.
+    read from file path, then return the pmx.Model.
 
     :Parameters:
       path
         file path
 
-    >>> import pymeshio.pmx.reader
-    >>> m=pymeshio.pmx.reader.read_from_file('resources/初音ミクVer2.pmx')
+    >>> import pmx.reader
+    >>> m=pmx.reader.read_from_file('resources/初音ミクVer2.pmx')
     >>> print(m)
     <pmx-2.0 "Miku Hatsune" 12354vertices>
 
     """
-    pmx=read(io.BytesIO(pymeshio.common.readall(path)))
+    pmx=read(io.BytesIO(common.readall(path)))
     pmx.path=path
     return pmx
 
 
 def read(ios):
     """
-    read from ios, then return the pmx pymeshio.pmx.Model.
+    read from ios, then return the pmx pmx.Model.
 
     :Parameters:
       ios
         input stream (in io.IOBase)
 
-    >>> import pymeshio.pmx.reader
-    >>> m=pymeshio.pmx.reader.read(io.open('resources/初音ミクVer2.pmx', 'rb'))
+    >>> import pmx.reader
+    >>> m=pmx.reader.read(io.open('resources/初音ミクVer2.pmx', 'rb'))
     >>> print(m)
     <pmx-2.0 "Miku Hatsune" 12354vertices>
 
     """
     assert(isinstance(ios, io.IOBase))
-    reader=pymeshio.common.BinaryReader(ios)
+    reader=common.BinaryReader(ios)
 
     # header
     signature=reader.unpack("4s", 4)
     if signature!=b"PMX ":
-        raise pymeshio.common.ParseException(
+        raise common.ParseException(
                 "invalid signature", signature)
 
     version=reader.read_float()
     if version!=2.0:
         print("unknown version", version)
-    model=pymeshio.pmx.Model(version)
+    model=pmx.Model(version)
 
     # flags
     flag_bytes=reader.read_int(1)
     if flag_bytes!=8:
-        raise pymeshio.common.ParseException(
+        raise common.ParseException(
                 "invalid flag length", reader.flag_bytes)
     text_encoding=reader.read_int(1)
     extended_uv=reader.read_int(1)

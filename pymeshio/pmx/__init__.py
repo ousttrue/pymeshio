@@ -26,7 +26,7 @@ __versioon__="1.0.0"
 import io
 import os
 import struct
-from pymeshio import common
+from .. import common
 
 
 
