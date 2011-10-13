@@ -47,7 +47,8 @@ def __create_a_material(m, name, textures_and_images):
     material.preview_render_type='FLAT'
     material.use_transparency=True
     # texture
-    texture_index=bl.material.addTexture(material, textures_and_images[m.texture_index][0])
+    if m.texture_index!=-1:
+        bl.material.addTexture(material, textures_and_images[m.texture_index][0])
     return material
 
 def __create_armature(bones, display_slots):
@@ -156,20 +157,17 @@ def _execute(filepath):
             for t in model.textures]
     print(textures_and_images)
 
-    def get_name(name, fmt, *args):
-        if len(name.encode("utf-8"))<16:
-            return name
-        else:
-            return fmt.format(*args)
     index_generator=(i for i in model.indices)
     # 頂点配列。(Left handed y-up) to (Right handed z-up)
     vertices=[convert_coord(pos)
             for pos in (v.position for v in model.vertices)]
+
+    # マテリアル毎にメッシュを作成する
     for i, m in enumerate(model.materials):
-        # マテリアル毎にメッシュを作成する
         print(m.name)
-        #material=__create_a_material(m, get_name(m.name, "material:{0:02}", i), textures_and_images)
+        # material作成
         material=__create_a_material(m, m.name, textures_and_images)
+        # object名はutf-8で21byteまで
         mesh, mesh_object=bl.mesh.create("object:{0:02}".format(i))
         bl.mesh.addMaterial(mesh, material)
         # activate object
@@ -183,28 +181,45 @@ def _execute(filepath):
                 [(indices[i], indices[i+1], indices[i+2])
                     for i in range(0, len(indices), 3)])
         assert(len(model.vertices), len(mesh.vertices))
-        # set vertex attributes(normal, bone weights)
-        bl.mesh.useVertexUV(mesh)
-        for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
-            bl.vertex.setNormal(mvert, convert_coord(v.normal))
-            if isinstance(v.deform, pmx.Bdef1):
-                bl.object.assignVertexGroup(mesh_object,
-                        model.bones[v.deform.index0].name, i, 1.0)
-            elif isinstance(v.deform, pmx.Bdef2):
-                bl.object.assignVertexGroup(mesh_object,
-                        model.bones[v.deform.index0].name, i, v.deform.weight0)
-                bl.object.assignVertexGroup(mesh_object,
-                        model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
-            else:
-                raise Exception("unknown deform: %s" % v.deform)
 
+        # assign material
+        bl.mesh.addUV(mesh)
+        hasTexture=bl.material.hasTexture(material)
+        if hasTexture:
+            index_gen=(i for i in indices)
+            image=(textures_and_images.get[m.texture_index] 
+                    if m.texture_index in textures_and_images
+                    else None)
+        for i, face in enumerate(mesh.faces):
+            bl.face.setMaterial(face, 0)
+            if hasTexture:
+                uv0=model.vertices[next(index_gen)].uv
+                uv1=model.vertices[next(index_gen)].uv
+                uv2=model.vertices[next(index_gen)].uv
+                bl.mesh.setFaceUV(mesh, i, face, [# fix uv
+                    (uv0.x, 1.0-uv0.y),
+                    (uv1.x, 1.0-uv1.y),
+                    (uv2.x, 1.0-uv2.y)
+                    ],
+                    image)
 
         if armature_object:
             # armature modifirer
             bl.modifier.addArmature(mesh_object, armature_object)
-
-        # shape
-
+            # set vertex attributes(normal, bone weights)
+            bl.mesh.useVertexUV(mesh)
+            for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
+                bl.vertex.setNormal(mvert, convert_coord(v.normal))
+                if isinstance(v.deform, pmx.Bdef1):
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, 1.0)
+                elif isinstance(v.deform, pmx.Bdef2):
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, v.deform.weight0)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
+                else:
+                    raise Exception("unknown deform: %s" % v.deform)
 
     return {'FINISHED'}
 

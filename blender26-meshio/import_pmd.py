@@ -133,7 +133,7 @@ def to_radian(degree):
 
 
 def get_bone_name(l, index):
-    if index==0xFFFF:
+    if index==-1:
         return l.bones[0].name.decode('cp932')
 
     if index < len(l.bones):
@@ -380,7 +380,7 @@ def __import16MaerialAndMesh(meshObject, l,
                 material,
                 bl.material.getTexture(
                     toon_material,
-                    0 if m.toon_index==0xFF else m.toon_index
+                    0 if m.toon_index==-1 else m.toon_index
                     ),
                 False)
 
@@ -644,7 +644,7 @@ def __importRigidBodies(io):
     material=bl.material.create('rigidBody')
     rigidMeshes=[]
     for i, rigid in enumerate(io.rigidbodies):
-        if rigid.bone_index==0xFFFF:
+        if rigid.bone_index==-1:
             # no reference bone
             bone=io.bones[0]
         else:
