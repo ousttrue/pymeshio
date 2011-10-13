@@ -6,6 +6,8 @@ PMXモデルをインポートする。
 """
 import os
 from . import bl
+from .pymeshio import pmx
+from .pymeshio.pmx import reader
 
 
 def convert_coord(pos):
@@ -127,7 +129,6 @@ def _execute(filepath):
     bl.progress_set('load %s' % filepath, 0.0)
     print(filepath)
 
-    from .pymeshio.pmx import reader
     model=reader.read_from_file(filepath)
     if not model:
         print("fail to load %s" % filepath)
@@ -181,6 +182,23 @@ def _execute(filepath):
         bl.mesh.addGeometry(mesh, vertices,
                 [(indices[i], indices[i+1], indices[i+2])
                     for i in range(0, len(indices), 3)])
+        assert(len(model.vertices), len(mesh.vertices))
+        # set vertex attributes(normal, bone weights)
+        bl.mesh.useVertexUV(mesh)
+        for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
+            bl.vertex.setNormal(mvert, convert_coord(v.normal))
+            if isinstance(v.deform, pmx.Bdef1):
+                bl.object.assignVertexGroup(mesh_object,
+                        model.bones[v.deform.index0].name, i, 1.0)
+            elif isinstance(v.deform, pmx.Bdef2):
+                bl.object.assignVertexGroup(mesh_object,
+                        model.bones[v.deform.index0].name, i, v.deform.weight0)
+                bl.object.assignVertexGroup(mesh_object,
+                        model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
+            else:
+                raise Exception("unknown deform: %s" % v.deform)
+
+
         if armature_object:
             # armature modifirer
             bl.modifier.addArmature(mesh_object, armature_object)

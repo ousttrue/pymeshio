@@ -242,6 +242,8 @@ class object:
 
     @staticmethod
     def assignVertexGroup(o, name, index, weight):
+        if name not in o.vertex_groups:
+            o.vertex_groups.new(name)
         o.vertex_groups[name].add([index], weight, 'ADD')
 
     @staticmethod
