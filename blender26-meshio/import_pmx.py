@@ -163,12 +163,26 @@ def _execute(filepath):
             for pos in (v.position for v in model.vertices)]
 
     # マテリアル毎にメッシュを作成する
+    def get_object_name(index, name):
+        """
+        object名を作る。最大21バイト
+        """
+        len_list=[len(name[:i].encode('utf-8')) for i in range(1, len(name)+1, 1)]
+        letter_count=0
+        for str_len in len_list:
+            if str_len<18: # 21-3
+                letter_count+=1
+            else:
+                break
+        name="{0:02}:{1}".format(index, name[:letter_count])
+        print("%s(%d)" % (name, letter_count))
+        return name
     for i, m in enumerate(model.materials):
         print(m.name)
         # material作成
         material=__create_a_material(m, m.name, textures_and_images)
         # object名はutf-8で21byteまで
-        mesh, mesh_object=bl.mesh.create("object:{0:02}".format(i))
+        mesh, mesh_object=bl.mesh.create(get_object_name(i, m.name))
         bl.mesh.addMaterial(mesh, material)
         # activate object
         bl.object.deselectAll()
