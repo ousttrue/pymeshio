@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.3'
+version='2.3.1'
 short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description='''\
 `pymeshio` is a package for 3d model io.
@@ -64,8 +64,8 @@ ToDo
 
 New
 -------
-2.3.0 (2011-10-15)
-~~~~~~~~~~~~~~~~
+2.3.1 (2011-10-15)
+~~~~~~~~~~~~~~~~~~
 * bug fix(pmd_to_pmx RigidBody.shape_position)
 * implement pmx_importer
 
