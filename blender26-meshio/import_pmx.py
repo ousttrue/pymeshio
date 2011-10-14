@@ -5,6 +5,7 @@ PMXモデルをインポートする。
 1マテリアル、1オブジェクトで作成する。
 """
 import os
+import bpy
 from . import bl
 from .pymeshio import pmx
 from .pymeshio.pmx import reader
@@ -15,6 +16,141 @@ def convert_coord(pos):
     Left handed y-up to Right handed z-up
     """
     return (pos.x, pos.z, pos.y)
+
+def VtoV(v):
+    return bl.createVector(v.x, v.y, v.z)
+
+# マテリアル毎にメッシュを作成する
+def get_object_name(fmt, index, name):
+    """
+    object名を作る。最大21バイト
+    """
+    len_list=[len(name[:i].encode('utf-8')) for i in range(1, len(name)+1, 1)]
+    letter_count=0
+    prefix=fmt.format(index)
+    max_length=21-len(prefix)
+    for str_len in len_list:
+        if str_len>max_length:
+            break
+        letter_count+=1
+    name=prefix+name[:letter_count]
+    print("%s(%d)" % (name, letter_count))
+    return name
+
+def __import_joints(joints, rigidbodies):
+    print("create joints")
+    container=bl.object.createEmpty('Joints')
+    layers=[
+        True, False, False, False, False, False, False, False, False, False,
+        False, False, False, False, False, False, False, False, False, False,
+            ]
+    material=bl.material.create('joint')
+    material.diffuse_color=(1, 0, 0)
+    constraintMeshes=[]
+    for i, c in enumerate(joints):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+                segments=8,
+                ring_count=4,
+                size=0.1,
+                location=(c.position.x, c.position.z, c.position.y),
+                layers=layers
+                )
+        meshObject=bl.object.getActive()
+        constraintMeshes.append(meshObject)
+        mesh=bl.object.getData(meshObject)
+        bl.mesh.addMaterial(mesh, material)
+        meshObject.name=get_object_name("j{0:02}:", i, c.name)
+        #meshObject.draw_transparent=True
+        #meshObject.draw_wire=True
+        meshObject.draw_type='SOLID'
+        rot=c.rotation
+        meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
+
+        meshObject[bl.CONSTRAINT_NAME]=c.name
+        meshObject[bl.CONSTRAINT_A]=rigidbodies[c.rigidbody_index_a].name
+        meshObject[bl.CONSTRAINT_B]=rigidbodies[c.rigidbody_index_b].name
+        meshObject[bl.CONSTRAINT_POS_MIN]=VtoV(c.translation_limit_min)
+        meshObject[bl.CONSTRAINT_POS_MAX]=VtoV(c.translation_limit_max)
+        meshObject[bl.CONSTRAINT_ROT_MIN]=VtoV(c.rotation_limit_min)
+        meshObject[bl.CONSTRAINT_ROT_MAX]=VtoV(c.rotation_limit_max)
+        meshObject[bl.CONSTRAINT_SPRING_POS]=VtoV(c.spring_constant_translation)
+        meshObject[bl.CONSTRAINT_SPRING_ROT]=VtoV(c.spring_constant_rotation)
+
+    for meshObject in reversed(constraintMeshes):
+        bl.object.makeParent(container, meshObject)
+
+    return container
+
+def __importRigidBodies(rigidbodies, bones):
+    print("create rigid bodies")
+
+    container=bl.object.createEmpty('RigidBodies')
+    layers=[
+        True, False, False, False, False, False, False, False, False, False,
+        False, False, False, False, False, False, False, False, False, False,
+            ]
+    material=bl.material.create('rigidBody')
+    rigidMeshes=[]
+    for i, rigid in enumerate(rigidbodies):
+        if rigid.bone_index==-1:
+            # no reference bone
+            bone=bones[0]
+        else:
+            bone=bones[rigid.bone_index]
+        pos=rigid.shape_position
+        size=rigid.shape_size
+
+        if rigid.shape_type==0:
+            bpy.ops.mesh.primitive_ico_sphere_add(
+                    location=(pos.x, pos.z, pos.y),
+                    layers=layers
+                    )
+            bpy.ops.transform.resize(
+                    value=(size.x, size.x, size.x))
+        elif rigid.shape_type==1:
+            bpy.ops.mesh.primitive_cube_add(
+                    location=(pos.x, pos.z, pos.y),
+                    layers=layers
+                    )
+            bpy.ops.transform.resize(
+                    value=(size.x, size.z, size.y))
+        elif rigid.shape_type==2:
+            bpy.ops.mesh.primitive_cylinder_add(
+                    location=(pos.x, pos.z, pos.y),
+                    layers=layers
+                    )
+            bpy.ops.transform.resize(
+                    value=(size.x, size.x, size.y))
+        else:
+            assert(False)
+
+        meshObject=bl.object.getActive()
+        mesh=bl.object.getData(meshObject)
+        rigidMeshes.append(meshObject)
+        bl.mesh.addMaterial(mesh, material)
+        meshObject.name=get_object_name("r{0:02}:", i, rigid.name)
+        #meshObject.draw_transparent=True
+        #meshObject.draw_wire=True
+        meshObject.draw_type='WIRE'
+        rot=rigid.shape_rotation
+        meshObject.rotation_euler=(-rot.x, -rot.z, -rot.y)
+
+        meshObject[bl.RIGID_NAME]=rigid.name
+        meshObject[bl.RIGID_SHAPE_TYPE]=rigid.shape_type
+        meshObject[bl.RIGID_PROCESS_TYPE]=rigid.mode
+        meshObject[bl.RIGID_BONE_NAME]=bone.name
+        meshObject[bl.RIGID_GROUP]=rigid.collision_group
+        meshObject[bl.RIGID_INTERSECTION_GROUP]=rigid.no_collision_group
+        meshObject[bl.RIGID_WEIGHT]=rigid.param.mass
+        meshObject[bl.RIGID_LINEAR_DAMPING]=rigid.param.linear_damping
+        meshObject[bl.RIGID_ANGULAR_DAMPING]=rigid.param.angular_damping
+        meshObject[bl.RIGID_RESTITUTION]=rigid.param.restitution
+        meshObject[bl.RIGID_FRICTION]=rigid.param.friction
+
+    for meshObject in reversed(rigidMeshes):
+        bl.object.makeParent(container, meshObject)
+
+    return container
 
 def __create_a_material(m, name, textures_and_images):
     """
@@ -79,7 +215,7 @@ def __create_armature(bones, display_slots):
     for b, bone in zip(bones, bl_bones):
         assert(b.name==bone.name)
         if b.parent_index!=-1:
-            print("%s -> %s" % (bones[b.parent_index].name, b.name))
+            #print("%s -> %s" % (bones[b.parent_index].name, b.name))
             parent_bone=bl_bones[b.parent_index]
             bone.parent=parent_bone
             if b.getConnectionFlag() and b.tail_index!=-1:
@@ -127,7 +263,6 @@ def _execute(filepath):
     """
     importerr 本体
     """
-    bl.progress_set('load %s' % filepath, 0.0)
     print(filepath)
 
     model=reader.read_from_file(filepath)
@@ -135,7 +270,6 @@ def _execute(filepath):
         print("fail to load %s" % filepath)
         return
     print(model)
-    bl.progress_set('loaded', 0.1)
 
     # メッシュをまとめるエンプティオブジェクト
     model_name=model.english_name
@@ -162,21 +296,6 @@ def _execute(filepath):
     vertices=[convert_coord(pos)
             for pos in (v.position for v in model.vertices)]
 
-    # マテリアル毎にメッシュを作成する
-    def get_object_name(index, name):
-        """
-        object名を作る。最大21バイト
-        """
-        len_list=[len(name[:i].encode('utf-8')) for i in range(1, len(name)+1, 1)]
-        letter_count=0
-        for str_len in len_list:
-            if str_len<18: # 21-3
-                letter_count+=1
-            else:
-                break
-        name="{0:02}:{1}".format(index, name[:letter_count])
-        print("%s(%d)" % (name, letter_count))
-        return name
     for i, m in enumerate(model.materials):
         ####################
         # material
@@ -187,7 +306,7 @@ def _execute(filepath):
         # mesh object
         ####################
         # object名はutf-8で21byteまで
-        mesh, mesh_object=bl.mesh.create(get_object_name(i, m.name))
+        mesh, mesh_object=bl.mesh.create(get_object_name("{0:02}:", i, m.name))
         bl.mesh.addMaterial(mesh, material)
         # activate object
         bl.object.deselectAll()
@@ -274,6 +393,16 @@ def _execute(filepath):
         #############################
         bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
             if i not in used_indices])
+
+    # import rigid bodies
+    rigidbody_object=__importRigidBodies(model.rigidbodies, model.bones)
+    if rigidbody_object:
+        bl.object.makeParent(root_object, rigidbody_object)
+
+    # import joints
+    joint_object=__import_joints(model.joints, model.rigidbodies)
+    if joint_object:
+        bl.object.makeParent(root_object, joint_object)
 
     return {'FINISHED'}
 
