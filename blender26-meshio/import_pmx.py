@@ -178,7 +178,7 @@ def _execute(filepath):
         print("%s(%d)" % (name, letter_count))
         return name
     for i, m in enumerate(model.materials):
-        print(m.name)
+        #print(m.name)
         # material作成
         material=__create_a_material(m, m.name, textures_and_images)
         # object名はutf-8で21byteまで
@@ -234,6 +234,24 @@ def _execute(filepath):
                             model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
                 else:
                     raise Exception("unknown deform: %s" % v.deform)
+
+        # set shape_key pin
+        bl.object.pinShape(mesh_object, True)
+        # create base key
+        baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
+        mesh.update()
+        for m in model.morphs:
+            new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
+            for o in m.offsets:
+                if isinstance(o, pmx.VertexMorphOffset):
+                    bl.shapekey.assign(new_shape_key, 
+                            o.vertex_index, 
+                            mesh.vertices[o.vertex_index].co+
+                            bl.createVector(*convert_coord(o.position_offset)))
+                else:
+                    raise Exception("unknown morph type: %s" % o)
+        # select base shape
+        bl.object.setActivateShapeKey(mesh_object, 0)
 
     return {'FINISHED'}
 

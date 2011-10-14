@@ -216,7 +216,7 @@ class Reader(common.BinaryReader):
                     "unknown morph type: {0}".format(morph_type))
 
     def read_vertex_morph_offset(self):
-        return pmx.VerexMorphOffset(
+        return pmx.VertexMorphOffset(
                 self.read_vertex_index(), self.read_vector3())
 
     def read_display_slot(self):

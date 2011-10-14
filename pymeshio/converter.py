@@ -275,7 +275,7 @@ def pmd_to_pmx(src):
                     english_name=m.english_name.decode('cp932'),
                     panel=get_panel(m),
                     morph_type=1,
-                    offsets=[pmx.VerexMorphOffset(base.indices[i], pos)
+                    offsets=[pmx.VertexMorphOffset(base.indices[i], pos)
                         for i, pos in zip(m.indices, m.pos_list)]
                     )
                 for i, m in enumerate(src.morphs) if m.name!=b"base"]
