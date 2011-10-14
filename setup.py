@@ -82,12 +82,6 @@ classifiers=[
         'Topic :: Multimedia :: Graphics :: 3D Modeling',
         ]
 
-# copy pymeshio dir for blender25 plugin
-PYMESHIO_DIR_IN_BLENDER25='blender25-meshio/pymeshio'
-if os.path.exists(PYMESHIO_DIR_IN_BLENDER25):
-    shutil.rmtree(PYMESHIO_DIR_IN_BLENDER25)    
-print("copy pymeshio to %s" % PYMESHIO_DIR_IN_BLENDER25)
-shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER25)
 # copy pymeshio dir for blender26 plugin
 PYMESHIO_DIR_IN_BLENDER26='blender26-meshio/pymeshio'
 if os.path.exists(PYMESHIO_DIR_IN_BLENDER26):
