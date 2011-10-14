@@ -21,6 +21,12 @@ find "meshio. (.pmd)(.mqo)" and check.
 
 history
 ========
+20111015 2.3.0
+--------------
+update for blender2.6
+implement pmx_importer
+
+
 20110918 1.9.0
 --------------
 update for blender2.59
