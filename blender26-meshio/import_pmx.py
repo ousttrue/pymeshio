@@ -178,9 +178,14 @@ def _execute(filepath):
         print("%s(%d)" % (name, letter_count))
         return name
     for i, m in enumerate(model.materials):
-        #print(m.name)
-        # material作成
+        ####################
+        # material
+        ####################
         material=__create_a_material(m, m.name, textures_and_images)
+
+        ####################
+        # mesh object
+        ####################
         # object名はutf-8で21byteまで
         mesh, mesh_object=bl.mesh.create(get_object_name(i, m.name))
         bl.mesh.addMaterial(mesh, material)
@@ -188,9 +193,13 @@ def _execute(filepath):
         bl.object.deselectAll()
         bl.object.activate(mesh_object)
         bl.object.makeParent(root_object, mesh_object)
+
+        ####################
         # vertices & faces
+        ####################
         indices=[next(index_generator)
                     for _ in range(m.vertex_count)]
+        used_indices=set(indices)
         bl.mesh.addGeometry(mesh, vertices,
                 [(indices[i], indices[i+1], indices[i+2])
                     for i in range(0, len(indices), 3)])
@@ -217,6 +226,9 @@ def _execute(filepath):
                     ],
                     image)
 
+        ####################
+        # armature
+        ####################
         if armature_object:
             # armature modifirer
             bl.modifier.addArmature(mesh_object, armature_object)
@@ -235,6 +247,9 @@ def _execute(filepath):
                 else:
                     raise Exception("unknown deform: %s" % v.deform)
 
+        ####################
+        # shape keys
+        ####################
         # set shape_key pin
         bl.object.pinShape(mesh_object, True)
         # create base key
@@ -252,6 +267,13 @@ def _execute(filepath):
                     raise Exception("unknown morph type: %s" % o)
         # select base shape
         bl.object.setActivateShapeKey(mesh_object, 0)
+
+        #############################
+        # clean up not used vertices
+        # in the material.
+        #############################
+        bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
+            if i not in used_indices])
 
     return {'FINISHED'}
 
