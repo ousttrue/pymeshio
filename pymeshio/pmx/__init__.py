@@ -694,7 +694,7 @@ class RigidBody(Diff):
         self._diff(rhs, 'no_collision_group')
         self._diff(rhs, 'shape_type')
         self._diff(rhs, 'shape_size')
-        #self._diff(rhs, 'shape_position')
+        self._diff(rhs, 'shape_position')
         self._diff(rhs, 'shape_rotation')
         self._diff(rhs, 'param')
         self._diff(rhs, 'mode')

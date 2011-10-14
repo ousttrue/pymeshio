@@ -298,7 +298,8 @@ def pmd_to_pmx(src):
                 no_collision_group=r.no_collision_group,
                 shape_type=r.shape_type,
                 shape_size=r.shape_size,
-                shape_position=r.shape_position,
+                shape_position=(r.shape_position+src.bones[0].pos if r.bone_index==-1 
+                    else r.shape_position+src.bones[r.bone_index].pos),
                 shape_rotation=r.shape_rotation,
                 mass=r.mass,
                 linear_damping=r.linear_damping,
