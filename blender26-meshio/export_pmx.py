@@ -1,5 +1,6 @@
 # coding: utf-8
 
-def write(self, path):
-    pass
+def _execute(filepath):
+    print(filepath)
+    return {'FINISHED'}
 
