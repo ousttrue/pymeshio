@@ -20,7 +20,6 @@ def convert_coord(pos):
 def VtoV(v):
     return bl.createVector(v.x, v.y, v.z)
 
-# マテリアル毎にメッシュを作成する
 def get_object_name(fmt, index, name):
     """
     object名を作る。最大21バイト
@@ -297,16 +296,17 @@ def _execute(filepath):
             for pos in (v.position for v in model.vertices)]
 
     for i, m in enumerate(model.materials):
+        name=get_object_name("{0:02}:", i, m.name)
         ####################
         # material
         ####################
-        material=__create_a_material(m, m.name, textures_and_images)
+        material=__create_a_material(m, name, textures_and_images)
 
         ####################
         # mesh object
         ####################
         # object名はutf-8で21byteまで
-        mesh, mesh_object=bl.mesh.create(get_object_name("{0:02}:", i, m.name))
+        mesh, mesh_object=bl.mesh.create(name)
         bl.mesh.addMaterial(mesh, material)
         # activate object
         bl.object.deselectAll()

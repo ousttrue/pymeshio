@@ -43,6 +43,21 @@ def create_pmx(ex):
         )
         for pos, attribute, b0, b1, weight in ex.oneSkinMesh.vertexArray.zip()]
 
+    '''
+    # IK
+    for ik in self.skeleton.ik_list:
+        solver=pmd.IK()
+        solver.index=self.skeleton.getIndex(ik.target)
+        solver.target=self.skeleton.getIndex(ik.effector)
+        solver.length=ik.length
+        b=self.skeleton.bones[ik.effector.parent_index]
+        for i in range(solver.length):
+            solver.children.append(self.skeleton.getIndex(b))
+            b=self.skeleton.bones[b.parent_index]
+        solver.iterations=ik.iterations
+        solver.weight=ik.weight
+        model.ik_list.append(solver)
+    '''
     def create_bone(b):
         return pmx.Bone(
             name=b.name,
@@ -69,171 +84,105 @@ def create_pmx(ex):
     model.bones=[create_bone(b)
             for b in ex.skeleton.bones]
 
-    return model
-
-    # IK
-    for ik in self.skeleton.ik_list:
-        solver=pmd.IK()
-        solver.index=self.skeleton.getIndex(ik.target)
-        solver.target=self.skeleton.getIndex(ik.effector)
-        solver.length=ik.length
-        b=self.skeleton.bones[ik.effector.parent_index]
-        for i in range(solver.length):
-            solver.children.append(self.skeleton.getIndex(b))
-            b=self.skeleton.bones[b.parent_index]
-        solver.iterations=ik.iterations
-        solver.weight=ik.weight
-        model.ik_list.append(solver)
+    textures=set()
+    def get_texture_name(texture):
+        pos=texture.replace("\\", "/").rfind("/")
+        if pos==-1:
+            return texture
+        else:
+            return texture[pos+1:]
+    for m in ex.oneSkinMesh.vertexArray.indexArrays.keys():
+        for path in bl.material.eachEnalbeTexturePath(bl.material.get(m)):
+            textures.add(get_texture_name(path))
+    model.textures=list(textures)
 
     # 面とマテリアル
-    vertexCount=self.oneSkinMesh.getVertexCount()
-    for material_name, indices in self.oneSkinMesh.vertexArray.each():
+    vertexCount=ex.oneSkinMesh.getVertexCount()
+    for material_name, indices in ex.oneSkinMesh.vertexArray.each():
         #print('material:', material_name)
         try:
             m=bl.material.get(material_name)
         except KeyError as e:
             m=DefaultMatrial()
-        def get_texture_name(texture):
-            pos=texture.replace("\\", "/").rfind("/")
-            if pos==-1:
-                return texture
-            else:
-                return texture[pos+1:]
-        textures=[get_texture_name(path)
-            for path in bl.material.eachEnalbeTexturePath(m)]
-        print(textures)
         # マテリアル
-        model.materials.append(pmd.Material(
-                # diffuse_color
-                common.RGB(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2]),
-                m.alpha,
-                # specular_factor
-                0 if m.specular_toon_size<1e-5 else m.specular_hardness*10,
-                # specular_color
-                common.RGB(m.specular_color[0], m.specular_color[1], m.specular_color[2]),
-                # ambient_color
-                common.RGB(m.mirror_color[0], m.mirror_color[1], m.mirror_color[2]),
-                # flag
-                1 if m.subsurface_scattering.use else 0,
-                # toon
-                0,
-                # vertex_count
-                len(indices),
-                # texture
-                ('*'.join(textures) if len(textures)>0 else "").encode('cp932')
+        model.materials.append(pmx.Material(
+                name=m.name,
+                english_name='',
+                diffuse_color=common.RGB(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2]),
+                alpha=m.alpha,
+                specular_factor=0 if m.specular_toon_size<1e-5 else m.specular_hardness*10,
+                specular_color=common.RGB(m.specular_color[0], m.specular_color[1], m.specular_color[2]),
+                ambient_color=common.RGB(m.mirror_color[0], m.mirror_color[1], m.mirror_color[2]),
+                flag=1 if m.subsurface_scattering.use else 0,
+                edge_color=common.RGBA(0, 0, 0, 1),
+                edge_size=1.0,
+                texture_index=0,
+                sphere_texture_index=0,
+                sphere_mode=0,
+                toon_sharing_flag=0,
+                toon_texture_index=0,
+                comment='',
+                vertex_count=len(indices)
                 ))
         # 面
         for i in indices:
             assert(i<vertexCount)
         for i in range(0, len(indices), 3):
             # reverse triangle
-            model.indices.append(indices[i])
-            model.indices.append(indices[i+1])
             model.indices.append(indices[i+2])
+            model.indices.append(indices[i+1])
+            model.indices.append(indices[i])
 
     # 表情
-    for i, m in enumerate(self.oneSkinMesh.morphList):
-        v=englishmap.getUnicodeSkinName(m.name)
-        if not v:
-            v=[m.name, m.name, 0]
-        assert(v)
-        # morph
-        morph=pmd.Morph(v[1].encode("cp932"))
-        morph.english_name=m.name.encode("cp932")
-        m.type=v[2]
-        morph.type=v[2]
-        for index, offset in m.offsets:
-            # convert right-handed z-up to left-handed y-up
-            morph.append(index, offset[0], offset[2], offset[1])
-        morph.vertex_count=len(m.offsets)
+    for i, m in enumerate(ex.oneSkinMesh.morphList):
+        morph=pmx.Morph(
+                name=m.name,
+                english_name='',
+                panel=0,
+                morph_type=1,
+                )
+        morph.offsets=[pmx.VertexMorphOffset(
+            index, 
+            common.Vector3(offset[0], offset[2], offset[1])
+            )
+            for index, offset in m.offsets]
 
-    # 表情枠
-    # type==0はbase
-    for i, m in enumerate(self.oneSkinMesh.morphList):
-        if m.type==3:
-            model.morph_indices.append(i)
-    for i, m in enumerate(self.oneSkinMesh.morphList):
-        if m.type==2:
-            model.morph_indices.append(i)
-    for i, m in enumerate(self.oneSkinMesh.morphList):
-        if m.type==1:
-            model.morph_indices.append(i)
-    for i, m in enumerate(self.oneSkinMesh.morphList):
-        if m.type==4:
-            model.morph_indices.append(i)
 
     # ボーングループ
-    for g in self.skeleton.bone_groups:
-        name=englishmap.getUnicodeBoneGroupName(g[0])
-        if not name:
-            name=g[0]
-        englishName=g[0]
-
-        model.bone_group_list.append(pmd.BoneGroup(
-                (name+'\n').encode('cp932'),
-                (englishName+'\n').encode('cp932')
-                ))
-
-    # ボーングループメンバー
-    for i, b in enumerate(self.skeleton.bones):
-        if i==0:
-           continue
-        if b.type in [6, 7]:
-           continue
-        model.bone_display_list.append((i, self.skeleton.getBoneGroup(b)))
-
-    # English
-    model.english_name=self.englishName.encode('cp932')
-    model.english_comment=self.englishComment.encode('cp932')
-
-    # toon
-    toonMeshObject=None
-    for o in bl.object.each():
-        try:
-            if o.name.startswith(bl.TOON_TEXTURE_OBJECT):
-                toonMeshObject=o
-        except:
-            p(o.name)
-        break
-    if toonMeshObject:
-        toonMesh=bl.object.getData(toonMeshObject)
-        toonMaterial=bl.mesh.getMaterial(toonMesh, 0)
-        for i in range(10):
-            t=bl.material.getTexture(toonMaterial, i)
-            if t:
-                model.toon_textures[i]=("%s" % t.name).encode('cp932')
-            else:
-                model.toon_textures[i]=("toon%02d.bmp" % (i+1)).encode('cp932')
-    else:
-        for i in range(10):
-            model.toon_textures[i]=("toon%02d.bmp" % (i+1)).encode('cp932')
+    model.display_slots=[pmx.DisplaySlot(
+        name=name,
+        english_name='',
+        special_flag=0,
+        )
+        for name, members in ex.skeleton.bone_groups]
 
     # rigid body
     boneNameMap={}
-    for i, b in enumerate(self.skeleton.bones):
-        boneNameMap[b.name]=b
+    for i, b in enumerate(ex.skeleton.bones):
+        boneNameMap[b.name]=i
     rigidNameMap={}
-    for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
+    for i, obj in enumerate(ex.oneSkinMesh.rigidbodies):
         name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
         print(name)
         rigidNameMap[name]=i
         boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
         if boneIndex==0:
             boneIndex=-1
-            bone=self.skeleton.bones[0]
+            bone=ex.skeleton.bones[0]
         else:
-            bone=self.skeleton.bones[boneIndex]
+            bone=ex.skeleton.bones[boneIndex]
         if obj[bl.RIGID_SHAPE_TYPE]==0:
-            shape_type=pmd.SHAPE_SPHERE
+            shape_type=0
             shape_size=common.Vector3(obj.scale[0], 0, 0)
         elif obj[bl.RIGID_SHAPE_TYPE]==1:
-            shape_type=pmd.SHAPE_BOX
+            shape_type=1
             shape_size=common.Vector3(obj.scale[0], obj.scale[1], obj.scale[2])
         elif obj[bl.RIGID_SHAPE_TYPE]==2:
-            shape_type=pmd.SHAPE_CAPSULE
+            shape_type=2
             shape_size=common.Vector3(obj.scale[0], obj.scale[2], 0)
-        rigidBody=pmd.RigidBody(
-                name.encode('cp932'), 
+        rigidBody=pmx.RigidBody(
+                name=name, 
+                english_name='',
                 collision_group=obj[bl.RIGID_GROUP],
                 no_collision_group=obj[bl.RIGID_INTERSECTION_GROUP],
                 bone_index=boneIndex,
@@ -256,9 +205,11 @@ def create_pmx(ex):
                 )
         model.rigidbodies.append(rigidBody)
 
-    # constraint
-    model.joints=[pmd.Joint(
-        name=obj[bl.CONSTRAINT_NAME].encode('cp932'),
+    # joint
+    model.joints=[pmx.Joint(
+        name=obj[bl.CONSTRAINT_NAME],
+        english_name='',
+        joint_type=0,
         rigidbody_index_a=rigidNameMap[obj[bl.CONSTRAINT_A]],
         rigidbody_index_b=rigidNameMap[obj[bl.CONSTRAINT_B]],
         position=common.Vector3(
@@ -296,11 +247,9 @@ def create_pmx(ex):
             obj[bl.CONSTRAINT_SPRING_ROT][1],
             obj[bl.CONSTRAINT_SPRING_ROT][2])
         )
-        for obj in self.oneSkinMesh.constraints]
+        for obj in ex.oneSkinMesh.constraints]
 
-    # 書き込み
-    bl.message('write: %s' % path)
-    return writer.write(io.open(path, 'wb'), model)
+    return model
 
 
 def _execute(filepath):

@@ -239,26 +239,9 @@ class OneSkinMesh(object):
 
         # メッシュのコピーを生成してオブジェクトの行列を適用する
         copyMesh, copyObj=bl.object.duplicate(obj)
+        copyObj.name="tmp_object"
         if len(copyMesh.vertices)>0:
             # apply transform
-            """
-            try:
-                # svn 36722
-                copyObj.scale=obj.scale
-                bpy.ops.object.transform_apply(scale=True)
-                copyObj.rotation_euler=obj.rotation_euler
-                bpy.ops.object.transform_apply(rotation=True)
-                copyObj.location=obj.location
-                bpy.ops.object.transform_apply(location=True)
-            except AttributeError as e:
-                # 2.57b
-                copyObj.scale=obj.scale
-                bpy.ops.object.scale_apply()
-                copyObj.rotation_euler=obj.rotation_euler
-                bpy.ops.object.rotation_apply()
-                copyObj.location=obj.location
-                bpy.ops.object.location_apply()
-            """
             copyMesh.transform(obj.matrix_world)
 
             # apply modifier
