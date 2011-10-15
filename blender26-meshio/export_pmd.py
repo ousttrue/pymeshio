@@ -35,7 +35,7 @@ This script exports a pmd model.
 import io
 
 from . import bl
-from . import oneskinmesh
+from . import exporter
 from .pymeshio import common
 from .pymeshio import pmd
 from .pymeshio import englishmap
@@ -52,9 +52,18 @@ def toCP932(s):
 
 
 def write(self, path):
-    model=pmd.Model(1.0)
-    model.name=self.name.encode('cp932')
-    model.comment=self.comment.encode('cp932')
+    model=pmd.Model()
+
+    o=self.root.o
+    englishName=o.name
+    name=o[bl.MMD_MB_NAME] if bl.MMD_MB_NAME in o else 'Blenderエクスポート'
+    comment=o[bl.MMD_MB_COMMENT] if bl.MMD_MB_COMMENT in o else 'Blnderエクスポート\n'
+    englishComment=o[bl.MMD_COMMENT] if bl.MMD_COMMENT in o else 'blender export\n'
+
+    model.name=name.encode('cp932')
+    model.english_name=englishName.encode('cp932')
+    model.comment=comment.encode('cp932')
+    model.english_comment=englishComment.encode('cp932')
 
     # 頂点
     model.vertices=[pmd.Vertex(
@@ -221,10 +230,6 @@ def write(self, path):
            continue
         model.bone_display_list.append((i, self.skeleton.getBoneGroup(b)))
 
-    # English
-    model.english_name=self.englishName.encode('cp932')
-    model.english_comment=self.englishComment.encode('cp932')
-
     # toon
     toonMeshObject=None
     for o in bl.object.each():
@@ -334,9 +339,9 @@ def write(self, path):
         )
         for obj in self.oneSkinMesh.constraints]
 
-    # 書き込み
     bl.message('write: %s' % path)
-    return writer.write(io.open(path, 'wb'), model)
+    with io.open(path, 'wb') as f:
+        return writer.write(f, model)
 
 
 def _execute(filepath=''):
@@ -345,10 +350,11 @@ def _execute(filepath=''):
         print("abort. no active object.")
         return
 
-    exporter=oneskinmesh.Exporter()
-    exporter.setup()
-    print(exporter)
+    ex=exporter.Exporter()
+    ex.setup()
+    print(ex)
 
-    write(exporter, filepath)
+    write(ex, filepath)
     bl.object.activate(active)
+    return {'FINISHED'}
 
