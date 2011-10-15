@@ -2,19 +2,27 @@
 
 import io
 from . import bl
-from . import oneskinmesh
+from . import exporter
 from .pymeshio import pmx
 from .pymeshio import common
 from .pymeshio.pmx import writer
 
 
+def near(x, y, EPSILON=1e-5):
+    d=x-y
+    return d>=-EPSILON and d<=EPSILON
+
+
 def create_pmx(ex):
     model=pmx.Model()
-    model.name=ex.name
-    model.comment=ex.comment
+
+    o=ex.root.o
+    model.english_name=o.name
+    model.name=o[bl.MMD_MB_NAME] if bl.MMD_MB_NAME in o else 'Blenderエクスポート'
+    model.comment=o[bl.MMD_MB_COMMENT] if bl.MMD_MB_COMMENT in o else 'Blnderエクスポート\n'
+    model.english_comment=o[bl.MMD_COMMENT] if bl.MMD_COMMENT in o else 'blender export\n'
 
     def get_deform(b0, b1, weight):
-        print(b0, b1, weight)
         if b0==-1:
             return pmx.Bdef1(b1, weight)
         elif b1==-1:
@@ -35,37 +43,32 @@ def create_pmx(ex):
         )
         for pos, attribute, b0, b1, weight in ex.oneSkinMesh.vertexArray.zip()]
 
-    # bones
-    boneNameMap={}
-    for i, b in enumerate(self.skeleton.bones):
+    def create_bone(b):
+        return pmx.Bone(
+            name=b.name,
+            english_name=b.name,
+            # convert right-handed z-up to left-handed y-up
+            position=common.Vector3(
+                b.pos[0] if not near(b.pos[0], 0) else 0,
+                b.pos[2] if not near(b.pos[2], 0) else 0,
+                b.pos[1] if not near(b.pos[1], 0) else 0
+                ),
+            parent_index=b.parent_index,
+            layer=0,
+            flag=0,
+            tail_position=None,
+            tail_index=b.tail_index,
+            effect_index=-1,
+            effect_factor=0.0,
+            fixed_axis=None,
+            local_x_vector=None,
+            local_z_vector=None,
+            external_key=-1,
+            ik=None
+                )
+    model.bones=[create_bone(b)
+            for b in ex.skeleton.bones]
 
-        # name
-        boneNameMap[b.name]=i
-        v=englishmap.getUnicodeBoneName(b.name)
-        if not v:
-            v=[b.name, b.name]
-        assert(v)
-        bone=pmx.Bone(v[1])
-        bone.english_name=b.name
-
-        if len(v)>=3:
-            # has type
-            if v[2]==5:
-                b.ik_index=self.skeleton.indexByName('eyes')
-            bone.type=v[2]
-        else:
-            bone.type=b.type
-
-        bone.parent_index=b.parent_index
-        bone.tail_index=b.tail_index
-        bone.ik_index=b.ik_index
-
-        # convert right-handed z-up to left-handed y-up
-        bone.pos.x=b.pos[0] if not near(b.pos[0], 0) else 0
-        bone.pos.y=b.pos[2] if not near(b.pos[2], 0) else 0
-        bone.pos.z=b.pos[1] if not near(b.pos[1], 0) else 0
-        
-        model.bones.append(bone)
     return model
 
     # IK
@@ -206,6 +209,9 @@ def create_pmx(ex):
             model.toon_textures[i]=("toon%02d.bmp" % (i+1)).encode('cp932')
 
     # rigid body
+    boneNameMap={}
+    for i, b in enumerate(self.skeleton.bones):
+        boneNameMap[b.name]=b
     rigidNameMap={}
     for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
         name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
@@ -303,10 +309,10 @@ def _execute(filepath):
         print("abort. no active object.")
         return
 
-    exporter=oneskinmesh.Exporter()
-    exporter.setup()
+    ex=exporter.Exporter()
+    ex.setup()
 
-    model=create_pmx(exporter)
+    model=create_pmx(ex)
     bl.object.activate(active)
     with io.open(filepath, 'wb') as f:
         writer.write(f, model)

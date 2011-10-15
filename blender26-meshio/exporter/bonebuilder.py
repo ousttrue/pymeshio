@@ -181,7 +181,7 @@ class BoneBuilder(object):
         for b in self.bones:
             # parent index
             if b.parent_index==None:
-                b.parent_index=0xFFFF
+                b.parent_index=-1
             else:
                 if b.type==6 or b.type==7:
                     # fix tail bone
