@@ -458,7 +458,7 @@ class RigidBody(object):
             angular_damping, 
             restitution, 
             friction, 
-            mode,
+            mode
             ):
         self.name=name
         self.bone_index=bone_index

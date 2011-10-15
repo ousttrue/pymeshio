@@ -315,6 +315,7 @@ class texture:
         try:
             image=bpy.data.images.load(path)
         except RuntimeError:
+            print('fail to create:', path)
             image=bpy.data.images.new('Image', width=16, height=16)
         texture.image=image
         return texture, image
