@@ -64,6 +64,10 @@ ToDo
 
 New
 -------
+2.3.3 (2011-12-02)
+~~~~~~~~~~~~~~~~~~
+* update pymeshio.vmd
+
 2.3.2 (2011-11-07)
 ~~~~~~~~~~~~~~~~~~
 * fix for blender-2.6
@@ -113,6 +117,7 @@ setup(
             'pymeshio.mqo',
             'pymeshio.pmd',
             'pymeshio.pmx',
+            'pymeshio.vmd',
             ],
         test_suite='nose.collector',
         tests_require=['Nose'],
