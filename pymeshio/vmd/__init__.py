@@ -15,7 +15,7 @@ import struct
 from .. import common
 
 
-class ShapeData(object):
+class MorphFrame(object):
     """
     morphing animation data.
     """
@@ -28,7 +28,8 @@ class ShapeData(object):
     def __cmp__(self, other):
         return cmp(self.frame, other.frame)
 
-class MotionData(object):
+
+class BoneFrame(object):
     """
     bone animation data.
     """
@@ -36,12 +37,35 @@ class MotionData(object):
     def __init__(self, name):
         self.name=name
         self.frame=-1
-        self.pos=Vector3()
-        self.q=Quaternion()
+        self.pos=common.Vector3()
+        self.q=common.Quaternion()
 
     def __cmp__(self, other):
         return cmp(self.frame, other.frame)
 
     def __str__(self):
-        return '<MotionData "%s" %d %s%s>' % (self.name, self.frame, self.pos, self.q)
+        return '<BoneFrame "%s" %d %s%s>' % (self.name, self.frame, self.pos, self.q)
+
+
+class Motion(object):
+    __slots__=[
+            'model_name',
+            'motions',
+            'shapes',
+            'cameras',
+            'lights',
+            'last_frame',
+            ]
+    def __init__(self):
+        self.model_name=''
+        self.motions=[]
+        self.shapes=[]
+        self.cameras=[]
+        self.lights=[]
+        self.last_frame=0
+
+    def __str__(self):
+        return '<VMDLoader model: "%s", motion: %d, shape: %d, camera: %d, light: %d>' % (
+            self.model_name, len(self.motions), len(self.shapes),
+            len(self.cameras), len(self.lights))
 

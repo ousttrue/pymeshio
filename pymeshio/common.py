@@ -313,7 +313,8 @@ class BinaryReader(object):
     """
     def __init__(self, ios):
         current=ios.tell()
-        ios.seek(0, io.SEEK_END)
+        #ios.seek(0, io.SEEK_END)
+        ios.seek(0, 2)
         self.end=ios.tell()
         ios.seek(current)
         self.ios=ios
