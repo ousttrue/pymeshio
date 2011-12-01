@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from setuptools import setup
+from distutils.core import setup
 import sys
 import os
 import shutil
@@ -65,6 +65,7 @@ ToDo
 New
 -------
 2.3.2 (2011-11-07)
+~~~~~~~~~~~~~~~~~~
 * fix for blender-2.6
 
 2.3.1 (2011-10-15)
@@ -107,7 +108,12 @@ setup(
         #package_dir={
         #    'pymeshio': 'blender25-meshio/pymeshio'
         #    },
-        packages=['pymeshio'],
+        packages=[
+            'pymeshio',
+            'pymeshio.mqo',
+            'pymeshio.pmd',
+            'pymeshio.pmx',
+            ],
         test_suite='nose.collector',
         tests_require=['Nose'],
         zip_safe = (sys.version>="2.5"),   # <2.5 needs unzipped for -m to work
