@@ -17,26 +17,30 @@ Features
 * blender-2.6 import/export plugin
 
 
-Install
--------
+Install as python module
+------------------------
+from internet
+~~~~~~~~~~~~~
 ::
 
    $ easy_install pymeshio
-   or
+
+from archive
+~~~~~~~~~~~~
+::
    $ unzip pymeshio-x.x.x.zip
    $ cd pymeshio-x.x.x
    $ python setup.py install
 
-install blender-2.6x addon
+Install as blender-2.6x addon
 -------------------------------
-copy
+Copy
 ~~~~
 unzip archive, then exist blender26-meshio directory.
 copy `blender26-meshio` directory to ${blender directory}/2.6x/scripts/addons.
 
-directory layout
+Directory layout
 ~~~~~~~~~~~~~~~~
-
 ::
 
     ${blender directory}/2.6x/scripts/addons/
@@ -44,21 +48,21 @@ directory layout
            +- exporter
            +- pymeshio
 
-blender user preference
+Blender user preference
 ~~~~~~~~~~~~~~~~~~~~~~~
 launch blender, then menu (File)-(User Preferences).
 select (Add-Ons) tab.
 
 find "meshio. (.pmd)(.mqo)" and check.
 
-packaging
+Packaging
 ---------
 ::
 
    $ python setup.py sdist
 
-Usage
------
+Usage as python module
+----------------------
 ::
 
     >>> import pymeshio.pmd.reader
@@ -98,10 +102,16 @@ New
 * bug fix(__init__ param)
 * fix blender-2.5 plugin for blender-2.6
 
-
 URL
 ---
 * http://meshio.sourceforge.jp/
-* git://git.sourceforge.jp/gitroot/meshio/pymeshio.git
 * http://pypi.python.org/pypi/pymeshio/
+
+Source
+~~~~~~
+* git://git.sourceforge.jp/gitroot/meshio/pymeshio.git
+
+API
+~~~
+* http://packages.python.org/pymeshio/
 
