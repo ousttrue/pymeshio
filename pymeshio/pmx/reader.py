@@ -189,16 +189,15 @@ class Reader(common.BinaryReader):
         panel=self.read_int(1)
         morph_type=self.read_int(1)
         offset_size=self.read_int(4)
+        morph=pmx.Morph(name, english_name, 
+                panel, morph_type)
         if morph_type==0:
             # todo
             raise common.ParseException(
                     "not implemented GroupMorph")
         elif morph_type==1:
-            morph=pmx.Morph(name, english_name, 
-                    panel, morph_type)
-            morph.offsets=[self.read_vertex_morph_offset() 
+            morph.offsets=[self.read_vertex_position_morph_offset() 
                     for _ in range(offset_size)]
-            return morph
         elif morph_type==2:
             # todo
             raise common.ParseException(
@@ -224,16 +223,30 @@ class Reader(common.BinaryReader):
             raise common.ParseException(
                     "not implemented extended UvMorph4")
         elif morph_type==8:
-            # todo
-            raise common.ParseException(
-                    "not implemented extended MaterialMorph")
+            morph.data=[self.read_material_morph_data()
+                    for _ in range(offset_size)]
         else:
             raise common.ParseException(
                     "unknown morph type: {0}".format(morph_type))
+        return morph
 
-    def read_vertex_morph_offset(self):
+    def read_vertex_position_morph_offset(self):
         return pmx.VertexMorphOffset(
                 self.read_vertex_index(), self.read_vector3())
+
+    def read_material_morph_data(self):
+        return pmx.MaterialMorphData(
+                self.read_material_index(),
+                self.read_int(1),
+                self.read_rgba(),
+                self.read_rgb(), self.read_float(),
+                self.read_rgb(),
+                self.read_rgba(),
+                self.read_float(),
+                self.read_rgba(),
+                self.read_rgba(),
+                self.read_rgba()
+                )
 
     def read_display_slot(self):
         display_slot=pmx.DisplaySlot(self.read_text(), self.read_text(), 

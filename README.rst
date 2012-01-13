@@ -100,6 +100,7 @@ New
 2.4.0 (2012-01-13)
 ~~~~~~~~~~~~~~~~~~
 * implement BDEF4 and SDEF for pmx
+* implement MaterialMorph for pmx
 
 2.3.3 (2011-12-02)
 ~~~~~~~~~~~~~~~~~~
