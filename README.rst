@@ -1,6 +1,19 @@
 `pymeshio` is a package for 3d model io.
 create for blender import/expoert plugin backend.
 
+URL
+---
+* http://meshio.sourceforge.jp/
+* http://pypi.python.org/pypi/pymeshio/
+
+API
+~~~
+* http://packages.python.org/pymeshio/
+
+Source
+~~~~~~
+* git://git.sourceforge.jp/gitroot/meshio/pymeshio.git
+
 Requirements
 ------------
 * Python 3
@@ -84,6 +97,10 @@ Usage as python module
 
 New
 ---
+2.4.0 (2012-01-13)
+~~~~~~~~~~~~~~~~~~
+* implement BDEF4 and SDEF for pmx
+
 2.3.3 (2011-12-02)
 ~~~~~~~~~~~~~~~~~~
 * fix pymeshio.vmd
@@ -101,17 +118,4 @@ New
 ~~~~~~~~~~~~~~~~~~
 * bug fix(__init__ param)
 * fix blender-2.5 plugin for blender-2.6
-
-URL
----
-* http://meshio.sourceforge.jp/
-* http://pypi.python.org/pypi/pymeshio/
-
-Source
-~~~~~~
-* git://git.sourceforge.jp/gitroot/meshio/pymeshio.git
-
-API
-~~~
-* http://packages.python.org/pymeshio/
 

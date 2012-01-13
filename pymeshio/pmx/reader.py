@@ -69,9 +69,25 @@ class Reader(common.BinaryReader):
                     self.read_float()
                     )
         elif deform_type==2:
-            # todo
-            raise common.ParseException(
-                    "not implemented Bdef4")
+            return pmx.Bdef4(
+                    self.read_bone_index(),
+                    self.read_bone_index(),
+                    self.read_bone_index(),
+                    self.read_bone_index(),
+                    self.read_float(),
+                    self.read_float(),
+                    self.read_float(),
+                    self.read_float()
+                    )
+        elif deform_type==3:
+            return pmx.Sdef(
+                    self.read_bone_index(),
+                    self.read_bone_index(),
+                    self.read_float(),
+                    self.read_vector3(),
+                    self.read_vector3(),
+                    self.read_vector3()
+                    )
         else:
             raise common.ParseException(
                     "unknown deform type: {0}".format(deform_type))

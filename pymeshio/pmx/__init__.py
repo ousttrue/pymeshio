@@ -397,6 +397,93 @@ class Bdef2(Diff):
         return not self.__eq__(rhs)
 
 
+class Bdef4(Diff):
+    """bone deform. use four weights
+
+    Attributes: see __init__
+    """
+    __slots__=[ 'index0', 'index1', 'index2', 'index3',
+            'weight0', 'weight1', 'weight2', 'weight3']
+    def __init__(self, 
+            index0,
+            index1,
+            index2,
+            index3,
+            weight0,
+            weight1,
+            weight2,
+            weight3):
+        self.index0=index0
+        self.index1=index1
+        self.index2=index2
+        self.index3=index3
+        self.weight0=weight0
+        self.weight1=weight1
+        self.weight2=weight2
+        self.weight3=weight3
+
+    def __str__(self):
+        return "<Bdef4 {0}:{1}, {2}:{3}, {4}:{5}, {6}:{7}>".format(
+                self.index0, self.index1, self.index2, self.index3,
+                self.weight0, self.weight1, self.weight2, self.weight3)
+
+    def __eq__(self, rhs):
+        return (
+                self.index0==rhs.index0
+                and self.index1==rhs.index1
+                and self.index2==rhs.index2
+                and self.index3==rhs.index3
+                and abs(self.weight0-rhs.weight0)<1e-5
+                and abs(self.weight1-rhs.weight1)<1e-5
+                and abs(self.weight2-rhs.weight2)<1e-5
+                and abs(self.weight3-rhs.weight3)<1e-5
+                )
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
+
+class Sdef(Diff):
+    """bone sphirical deform. use two weights and sphirical params
+
+    Attributes: see __init__
+    """
+    __slots__=[ 'index0', 'index1', 'weight0', 
+            'sdef_c', 'sdef_r0', 'sdef_r1']
+    def __init__(self, 
+            index0,
+            index1,
+            weight0,
+            sdef_c,
+            sdef_r0,
+            sdef_r1):
+        self.index0=index0
+        self.index1=index1
+        self.weight0=weight0
+        self.sdef_c=sdef_c
+        self.sdef_r0=sdef_r0
+        self.sdef_r1=sdef_r1
+
+    def __str__(self):
+        return "<Bdef2 {0}, {1}, {2}, {3} {4} {5}>".format(
+                self.index0, self.index1, self.weight0, 
+                self.sdef_c, self.sdef_r0, self.sdef_r1)
+
+    def __eq__(self, rhs):
+        return (
+                self.index0==rhs.index0
+                and self.index1==rhs.index1
+                #and self.weight0==rhs.weight0
+                and abs(self.weight0-rhs.weight0)<1e-5
+                and self.sdef_c==rhs.sdef_c
+                and self.sdef_r0==rhs.sdef_r0
+                and self.sdef_r1==rhs.sdef_r1
+                )
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
+
 class Vertex(Diff):
     """
     ==========
