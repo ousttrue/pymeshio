@@ -12,7 +12,7 @@ API
 
 Source
 ~~~~~~
-* git://git.sourceforge.jp/gitroot/meshio/pymeshio.git
+* https://github.com/ousttrue/pymeshio
 
 Requirements
 ------------
