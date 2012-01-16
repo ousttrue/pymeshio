@@ -411,14 +411,24 @@ class BinaryWriter(object):
             raise WriteError("invalid int uint size")
 
     def write_uint(self, v, size):
-        if size==1:
-            self.ios.write(struct.pack("B", v))
-        elif size==2:
-            self.ios.write(struct.pack("H", v))
-        elif size==4:
-            self.ios.write(struct.pack("I", v))
+        if v==-1:
+            if size==1:
+                self.ios.write(struct.pack("B", 255))
+            elif size==2:
+                self.ios.write(struct.pack("H", 65535))
+            elif size==4:
+                self.ios.write(struct.pack("I", 4294967295))
+            else:
+                raise WriteError("invalid int uint size")
         else:
-            raise WriteError("invalid int uint size")
+            if size==1:
+                self.ios.write(struct.pack("B", v))
+            elif size==2:
+                self.ios.write(struct.pack("H", v))
+            elif size==4:
+                self.ios.write(struct.pack("I", v))
+            else:
+                raise WriteError("invalid int uint size")
 
     def write_vector2(self, v):
         self.ios.write(struct.pack("=2f", v.x, v.y))

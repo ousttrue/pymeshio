@@ -143,7 +143,6 @@ def __read(reader, model):
     # extend1: english name
     ############################################################
     if reader.read_uint(1)==1:
-        print("no extend flag")
         #return True
         model.english_name=reader.read_text(20)
         model.english_comment=reader.read_text(256)

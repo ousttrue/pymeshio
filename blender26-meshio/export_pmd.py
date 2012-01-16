@@ -97,7 +97,7 @@ def write(self, path):
                 return texture[pos+1:]
         textures=[get_texture_name(path)
             for path in bl.material.eachEnalbeTexturePath(m)]
-        print(textures)
+        #print(textures)
         # マテリアル
         model.materials.append(pmd.Material(
                 # diffuse_color
@@ -142,7 +142,7 @@ def write(self, path):
         # english name
         bone_english_name=toCP932(b.name)
         if len(bone_english_name)>=20:
-            print(bone_english_name)
+            print('bone_english_name', bone_english_name)
             #assert(len(bone_english_name)<20)
         bone.english_name=bone_english_name
 
@@ -256,7 +256,7 @@ def write(self, path):
     rigidNameMap={}
     for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
         name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
-        print(name)
+        #print('rigidbody', name)
         rigidNameMap[name]=i
         boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
         if boneIndex==0:
@@ -344,7 +344,7 @@ def write(self, path):
         return writer.write(f, model)
 
 
-def _execute(filepath=''):
+def _execute(filepath='', **kwargs):
     active=bl.object.getActive()
     if not active:
         print("abort. no active object.")

@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.4.0'
+version='2.4.1'
 short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description=open('README.rst').read()
 

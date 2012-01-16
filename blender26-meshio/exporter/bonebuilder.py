@@ -156,7 +156,7 @@ class BoneBuilder(object):
             for i, k_v in enumerate(boneMap):
                 if k_v[0]==bone.name:
                     return i
-            print(bone)
+            #print(bone)
             return len(boneMap)
 
         self.bones.sort(key=getIndex)

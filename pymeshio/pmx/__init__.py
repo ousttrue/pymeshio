@@ -465,7 +465,7 @@ class Sdef(Diff):
         self.sdef_r1=sdef_r1
 
     def __str__(self):
-        return "<Bdef2 {0}, {1}, {2}, {3} {4} {5}>".format(
+        return "<Sdef {0}, {1}, {2}, {3} {4} {5}>".format(
                 self.index0, self.index1, self.weight0, 
                 self.sdef_c, self.sdef_r0, self.sdef_r1)
 

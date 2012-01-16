@@ -97,6 +97,10 @@ Usage as python module
 
 New
 ---
+2.4.1 (2012-01-16)
+~~~~~~~~~~~~~~~~~~
+* bug fix for unsigend integer write(-1 -> 255/66535/4294967295)
+
 2.4.0 (2012-01-13)
 ~~~~~~~~~~~~~~~~~~
 * implement BDEF4 and SDEF for pmx

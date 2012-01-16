@@ -355,7 +355,7 @@ def createBone(name, type):
     elif type==9:
         return Bone_Tweak(name)
     else:
-        raise Exception("unknown bone type: %d(%s)", type, name)
+        raise Exception("unknown bone type: %d(%s)" % (type, name.decode('cp932')))
 
 
 class IK(object):
