@@ -146,6 +146,7 @@ def create_pmx(ex):
             common.Vector3(offset[0], offset[2], offset[1])
             )
             for index, offset in m.offsets]
+        model.morphs.append(morph)
 
 
     # ボーングループ
