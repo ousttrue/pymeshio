@@ -98,9 +98,13 @@ Usage as python module
 
 New
 ---
+2.4.2 (2012-01-17)
+~~~~~~~~~~~~~~~~~~
+* fix critical bug, no morph data(pmd_export).
+
 2.4.1 (2012-01-16)
 ~~~~~~~~~~~~~~~~~~
-* bug fix for unsigend integer write(-1 -> 255/66535/4294967295)
+* fix bug, unsigend integer write(-1 -> 255/66535/4294967295)
 
 2.4.0 (2012-01-13)
 ~~~~~~~~~~~~~~~~~~

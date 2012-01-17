@@ -7,7 +7,7 @@ import os
 import shutil
 
 name='pymeshio'
-version='2.4.1'
+version='2.4.2'
 short_description='3d model io library for mqo, pmd, pmx, vmd and vpd'
 long_description=open('README.rst').read()
 
@@ -52,6 +52,8 @@ setup(
         entry_points = {
             'console_scripts': [
                 'pmd2pmx = pymeshio.main:pmd_to_pmx',
+                'pmd_diff = pymeshio.main:pmd_diff',
+                'pmd_validator = pymeshio.main:pmd_validator',
                 ]
             }
         )

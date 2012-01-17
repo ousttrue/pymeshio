@@ -31,6 +31,7 @@ This script exports a pmd model.
 20110429: update for Blender2.57b.
 20110522: implement RigidBody and Constraint.
 20111002: update for pymeshio-2.1.0
+20120117: fix empty morph bug(ciritical).
 """
 import io
 

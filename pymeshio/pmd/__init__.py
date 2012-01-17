@@ -611,52 +611,18 @@ class Model(object):
                 )
 
     def diff(self, rhs):
-        if self.name!=rhs.name: 
-            print(self.name, rhs.name)
-            return
-        if self.comment!=rhs.comment: 
-            print(self.comment, rhs.comment)
-            return
-        if self.english_name!=rhs.english_name: 
-            print(self.english_name, rhs.english_name)
-            return
-        if self.english_comment!=rhs.english_comment: 
-            print(self.english_comment, rhs.english_comment)
-            return
-        if self.vertices!=rhs.vertices: 
-            print(self.vertices, rhs.vertices)
-            return
-        if self.indices!=rhs.indices: 
-            print(self.indices, rhs.indices)
-            return
-        if self.materials!=rhs.materials: 
-            print(self.materials, rhs.materials)
-            return
-        if self.bones!=rhs.bones: 
-            print(self.bones, rhs.bones)
-            return
-        if self.ik_list!=rhs.ik_list: 
-            print(self.ik_list, rhs.ik_list)
-            return
-        if self.morphs!=rhs.morphs: 
-            print(self.morphs, rhs.morphs)
-            return
-        if self.morph_indices!=rhs.morph_indices: 
-            print(self.morph_indices, rhs.morph_indices)
-            return
-        if self.bone_group_list!=rhs.bone_group_list: 
-            print(self.bone_group_list, rhs.bone_group_list)
-            return
-        if self.bone_display_list!=rhs.bone_display_list: 
-            print(self.bone_display_list, rhs.bone_display_list)
-            return
-        if self.toon_textures!=rhs.toon_textures: 
-            print(self.toon_textures, rhs.toon_textures)
-            return
-        if self.rigidbodies!=rhs.rigidbodies: 
-            print(self.rigidbodies, rhs.rigidbodies)
-            return
-        if self.joints!=rhs.joints: 
-            print(self.joints, rhs.joints)
-            return
+        diffrence=[]
+        for attr in [
+                'name', 'comment', 'english_name', 'english_comment',
+                'vertices', 'indices', 'materials', 
+                'bones', 'ik_list',
+                'morphs', 
+                'morph_indices', 'bone_group_list', 'bone_display_list', 
+                'toon_textures', 
+                'rigidbodies', 'joints',
+                ]:
+            if getattr(self, attr)!=getattr(rhs, attr):
+                diffrence.append(attr)
+        if len(diffrence)>0:
+            print(diffrence)
 
