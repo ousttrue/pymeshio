@@ -194,6 +194,7 @@ def write(self, path):
             # convert right-handed z-up to left-handed y-up
             morph.append(index, offset[0], offset[2], offset[1])
         morph.vertex_count=len(m.offsets)
+        model.morphs.append(morph)
 
     # 表情枠
     # type==0はbase
