@@ -249,5 +249,3 @@ def read(ios):
 
         return model
 
-
-

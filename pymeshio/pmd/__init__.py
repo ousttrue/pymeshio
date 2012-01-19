@@ -242,7 +242,7 @@ class Bone(object):
         return self.parent_index!=0xFFFF
 
     def hasChild(self):
-        return self.tail_index!=0
+        return self.tail_index!=0 and self.tail_index!=0xFFFF
 
     def display(self, indent=None):
         indent=indent or []

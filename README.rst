@@ -98,6 +98,11 @@ Usage as python module
 
 New
 ---
+2.4.3 (2012-01-19)
+~~~~~~~~~~~~~~~~~~
+* treat a no child bone that tail_index is 0xFFFF
+  (for 2.4.1 export model. tail_index specification ?)
+
 2.4.2 (2012-01-17)
 ~~~~~~~~~~~~~~~~~~
 * fix critical bug, no morph data(pmd_export).
