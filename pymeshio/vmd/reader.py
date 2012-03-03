@@ -22,7 +22,7 @@ class Reader(common.BinaryReader):
 
     def read_bone_frame(self):
         """
-        フレームひとつ分を読み込む
+        フレームひとつ分を読み込む(111 bytes)
         """
         frame=vmd.BoneFrame(self.read_text(15))
         (frame.frame, frame.pos.x, frame.pos.y, frame.pos.z,
@@ -35,10 +35,26 @@ class Reader(common.BinaryReader):
 
     def read_morph_frame(self):
         """
-        モーフデータひとつ分を読み込む
+        モーフデータひとつ分を読み込む(23 bytes)
         """
         frame=vmd.MorphFrame(self.read_text(15))
         (frame.frame, frame.ratio)=struct.unpack('If', self.ios.read(8))
+        return frame
+
+    def read_camera_frame(self):
+        """
+        カメラデータひとつ分を読み込む(61 bytes)
+        """
+        frame=vmd.CameraFrame()
+        (frame.frame, frame.length,
+                frame.pos.x, frame.pos.y, frame.pos.z,
+                frame.euler.x, frame.euler.y, frame.euler.z
+                )=struct.unpack('If3f3f', self.ios.read(32))
+        # complement data
+        frame.complement=''.join(
+                ['%x' % x for x in struct.unpack('24B', self.ios.read(24))])
+        (frame.angle, frame.perspective
+                )=struct.unpack('fB', self.ios.read(5))
         return frame
 
 
@@ -50,8 +66,8 @@ def read_from_file(path):
       path
         file path
 
-    >>> import vmd.reader
-    >>> m=vmd.reader.read_from_file('resources/motion.vmd')
+    >>> import pymeshio.vmd.reader
+    >>> m=pymeshio.vmd.reader.read_from_file('resources/motion.vmd')
     >>> print(m)
 
     """
@@ -79,7 +95,7 @@ def read(ios):
             for _ in range(reader.unpack('I', 4))]
     motion.shapes=[reader.read_morph_frame() 
             for _ in range(reader.unpack('I', 4))]
-    motion.cameras=[reader.read_cameta_frame() 
+    motion.cameras=[reader.read_camera_frame() 
             for _ in range(reader.unpack('I', 4))]
     motion.lights=[reader.read_light_frame() 
             for _ in range(reader.unpack('I', 4))]

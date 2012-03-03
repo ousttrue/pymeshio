@@ -98,6 +98,10 @@ Usage as python module
 
 New
 ---
+2.5.0 (2012-03-03)
+~~~~~~~~~~~~~~~~~~
+* implement camera motion for vmd
+
 2.4.3 (2012-01-19)
 ~~~~~~~~~~~~~~~~~~
 * treat a no child bone that tail_index is 0xFFFF
