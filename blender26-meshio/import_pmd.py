@@ -39,6 +39,7 @@ This script imports a pmd into Blender for editing.
 20110522: implement RigidBody and Constraint.
 20110918: update for Blender2.59.
 20111002: update for pymeshio-2.1.0
+20120306: fix rigid body.
 """
 bl_addon_info = {
         'category': 'Import/Export',
@@ -651,27 +652,31 @@ def __importRigidBodies(io):
             bone=io.bones[rigid.bone_index]
         pos=bone.pos+rigid.shape_position
 
+        # x, y, z -> x, z, y
         if rigid.shape_type==pmd.SHAPE_SPHERE:
             bpy.ops.mesh.primitive_ico_sphere_add(
                     location=(pos.x, pos.z, pos.y),
                     layers=layers
                     )
+            w, h, d=rigid.shape_size.to_a()
             bpy.ops.transform.resize(
-                    value=rigid.shape_size.to_a())
+                    value=[w, w, w])
         elif rigid.shape_type==pmd.SHAPE_BOX:
             bpy.ops.mesh.primitive_cube_add(
                     location=(pos.x, pos.z, pos.y),
                     layers=layers
                     )
+            w, h, d=rigid.shape_size.to_a()
             bpy.ops.transform.resize(
-                    value=rigid.shape_size.to_a())
+                    value=[w, d, h])
         elif rigid.shape_type==pmd.SHAPE_CAPSULE:
             bpy.ops.mesh.primitive_cylinder_add(
                     location=(pos.x, pos.z, pos.y),
                     layers=layers
                     )
+            w, h, d=rigid.shape_size.to_a()
             bpy.ops.transform.resize(
-                    value=rigid.shape_size.to_a())
+                    value=[w, w, h])
         else:
             assert(False)
 

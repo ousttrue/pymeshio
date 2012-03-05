@@ -266,12 +266,13 @@ def write(self, path):
             bone=self.skeleton.bones[0]
         else:
             bone=self.skeleton.bones[boneIndex]
+        # x, z, y -> x, y, z
         if obj[bl.RIGID_SHAPE_TYPE]==0:
             shape_type=pmd.SHAPE_SPHERE
             shape_size=common.Vector3(obj.scale[0], 0, 0)
         elif obj[bl.RIGID_SHAPE_TYPE]==1:
             shape_type=pmd.SHAPE_BOX
-            shape_size=common.Vector3(obj.scale[0], obj.scale[1], obj.scale[2])
+            shape_size=common.Vector3(obj.scale[0], obj.scale[2], obj.scale[1])
         elif obj[bl.RIGID_SHAPE_TYPE]==2:
             shape_type=pmd.SHAPE_CAPSULE
             shape_size=common.Vector3(obj.scale[0], obj.scale[2], 0)

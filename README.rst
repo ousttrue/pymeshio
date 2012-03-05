@@ -98,6 +98,10 @@ Usage as python module
 
 New
 ---
+2.5.1 (2012-03-06)
+~~~~~~~~~~~~~~~~~~
+* fix pmd importer/exporter rigid w h d
+
 2.5.0 (2012-03-03)
 ~~~~~~~~~~~~~~~~~~
 * implement camera motion for vmd
