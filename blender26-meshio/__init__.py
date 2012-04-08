@@ -66,12 +66,16 @@ class ImportPmx(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
     filter_glob=bpy.props.StringProperty(
             default='*.pmx;*.pmd', options={'HIDDEN'})
 
+    use_englishmap=bpy.props.BoolProperty(
+            name='use english map', 
+            description='Convert name to english(not implemented)',
+            default=False)
+
     def execute(self, context):
         from . import import_pmx
-        #bl.initialize('pmd_import', context.scene)
-        import_pmx._execute(**self.as_keywords(
-            ignore=('filter_glob',)))
-        #bl.finalize()
+        bl.initialize('pmx_import', context.scene)
+        import_pmx._execute(**self.as_keywords(ignore=('filter_glob',)))
+        bl.finalize()
         return  {'FINISHED'}
 
     @classmethod

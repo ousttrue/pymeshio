@@ -402,8 +402,8 @@ class mesh:
         SCENE.objects.link(mesh_object)
         return mesh, mesh_object
 
-    @staticmethod
-    def addGeometry(mesh, vertices, faces):
+    @classmethod
+    def addGeometry(cls, mesh, vertices, faces):
         mesh.from_pydata(vertices, [], faces)
         """
         mesh.add_geometry(len(vertices), 0, len(faces))
@@ -429,7 +429,7 @@ class mesh:
         mesh.faces.foreach_set("verts_raw", unpackedFaces)
         """
         assert(len(vertices)==len(mesh.vertices))
-        assert(len(faces)==len(mesh.faces))
+        assert(len(faces)==len(cls.getFaces(mesh)))
 
     @staticmethod
     def hasUV(mesh):
@@ -516,6 +516,13 @@ class mesh:
     @staticmethod
     def getMaterial(m, index):
         return m.materials[index]
+
+    @staticmethod
+    def getFaces(m):
+        try:
+            return m.polygons
+        except AttributeError:
+            return m.faces
 
 
 class vertex:

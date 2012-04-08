@@ -4,11 +4,11 @@ PMXモデルをインポートする。
 
 1マテリアル、1オブジェクトで作成する。
 PMDはPMXに変換してからインポートする。
-
-blの使用を取りやめ
 """
-import os
+from . import bl
+from .pymeshio import pmx
 import bpy
+import os
 
 
 def convert_coord(pos):
@@ -33,7 +33,7 @@ def get_object_name(fmt, index, name):
             break
         letter_count+=1
     name=prefix+name[:letter_count]
-    print("%s(%d)" % (name, letter_count))
+    #print("%s(%d)" % (name, letter_count))
     return name
 
 def __import_joints(joints, rigidbodies):
@@ -259,16 +259,18 @@ def __create_armature(bones, display_slots):
     return armature_object
 
 
-def import_pmx_model(model):
+def import_pmx_model(filepath, use_englishmap, model):
     if not model:
         print("fail to load %s" % filepath)
         return False
     print(model)
+    print('use_englishmap', use_englishmap)
 
     # メッシュをまとめるエンプティオブジェクト
     model_name=model.english_name
     if len(model_name)==0:
         model_name=os.path.basename(filepath)
+
     root_object=bl.object.createEmpty(model_name)
     root_object[bl.MMD_MB_NAME]=model.name
     root_object[bl.MMD_MB_COMMENT]=model.comment
@@ -277,7 +279,7 @@ def import_pmx_model(model):
     # armatureを作る
     armature_object=__create_armature(model.bones, model.display_slots)
     if armature_object:
-        bl.object.makeParent(root_object, armature_object)
+        armature_object.parent=root_object
 
     # テクスチャを作る
     texture_dir=os.path.dirname(filepath)
@@ -327,7 +329,7 @@ def import_pmx_model(model):
             image=(textures_and_images.get[m.texture_index] 
                     if m.texture_index in textures_and_images
                     else None)
-        for i, face in enumerate(mesh.faces):
+        for i, face in enumerate(bl.mesh.getFaces(mesh)):
             bl.face.setMaterial(face, 0)
             if hasTexture:
                 uv0=model.vertices[next(index_gen)].uv
@@ -402,7 +404,7 @@ def import_pmx_model(model):
     return {'FINISHED'}
 
 
-def _execute(filepath):
+def _execute(filepath, use_englishmap, **kwargs):
     """
     importer 本体
     """
@@ -414,11 +416,13 @@ def _execute(filepath):
 
         print("convert pmd to pmx...")
         from .pymeshio import converter
-        import_pmx_model(converter.pmd_to_pmx(pmd_model))
+        import_pmx_model(filepath, use_englishmap, 
+                converter.pmd_to_pmx(pmd_model))
 
     elif filepath.lower().endswith(".pmx"):
         from .pymeshio.pmx import reader
-        import_pmx_model(reader.read_from_file(filepath))
+        import_pmx_model(filepath, use_englishmap, 
+                reader.read_from_file(filepath))
 
     else:
         print("unknown file type: ", filepath)
