@@ -3,12 +3,12 @@
 PMXモデルをインポートする。
 
 1マテリアル、1オブジェクトで作成する。
+PMDはPMXに変換してからインポートする。
+
+blの使用を取りやめ
 """
 import os
 import bpy
-from . import bl
-from .pymeshio import pmx
-from .pymeshio.pmx import reader
 
 
 def convert_coord(pos):
@@ -258,16 +258,11 @@ def __create_armature(bones, display_slots):
     bl.enterObjectMode()
     return armature_object
 
-def _execute(filepath):
-    """
-    importerr 本体
-    """
-    print(filepath)
 
-    model=reader.read_from_file(filepath)
+def import_pmx_model(model):
     if not model:
         print("fail to load %s" % filepath)
-        return
+        return False
     print(model)
 
     # メッシュをまとめるエンプティオブジェクト
@@ -322,7 +317,7 @@ def _execute(filepath):
         bl.mesh.addGeometry(mesh, vertices,
                 [(indices[i], indices[i+1], indices[i+2])
                     for i in range(0, len(indices), 3)])
-        assert(len(model.vertices), len(mesh.vertices))
+        assert(len(model.vertices)==len(mesh.vertices))
 
         # assign material
         bl.mesh.addUV(mesh)
@@ -405,4 +400,26 @@ def _execute(filepath):
         bl.object.makeParent(root_object, joint_object)
 
     return {'FINISHED'}
+
+
+def _execute(filepath):
+    """
+    importer 本体
+    """
+    if filepath.lower().endswith(".pmd"):
+        from .pymeshio.pmd import reader
+        pmd_model=reader.read_from_file(filepath)
+        if not pmd_model:
+            return
+
+        print("convert pmd to pmx...")
+        from .pymeshio import converter
+        import_pmx_model(converter.pmd_to_pmx(pmd_model))
+
+    elif filepath.lower().endswith(".pmx"):
+        from .pymeshio.pmx import reader
+        import_pmx_model(reader.read_from_file(filepath))
+
+    else:
+        print("unknown file type: ", filepath)
 

@@ -58,26 +58,26 @@ class ImportPmd(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
 
 
 class ImportPmx(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
-    '''Import from PMX Format(.pmx)'''
-    bl_idname='import_scene.mmd_pmx'
-    bl_label='Import PMX'
+    '''Import from PMX Format(.pmx)(.pmd)'''
+    bl_idname='import_scene.mmd_pmx_pmd'
+    bl_label='Import PMX/PMD'
     bl_options={'UNDO'}
-    filename_ext='.pmx'
+    filename_ext='.pmx;.pmd'
     filter_glob=bpy.props.StringProperty(
-            default='*.pmx', options={'HIDDEN'})
+            default='*.pmx;*.pmd', options={'HIDDEN'})
 
     def execute(self, context):
         from . import import_pmx
-        bl.initialize('pmd_import', context.scene)
+        #bl.initialize('pmd_import', context.scene)
         import_pmx._execute(**self.as_keywords(
             ignore=('filter_glob',)))
-        bl.finalize()
+        #bl.finalize()
         return  {'FINISHED'}
 
     @classmethod
     def menu_func(klass, self, context):
         self.layout.operator(klass.bl_idname, 
-                text='MikuMikuDance model (.pmx)',
+                text='MikuMikuDance model (.pmx)(.pmd)',
                 icon='PLUGIN'
                 )
 
