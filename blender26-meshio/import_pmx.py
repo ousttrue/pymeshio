@@ -211,8 +211,14 @@ def __create_armature(bones, display_slots):
     bl_bones=[create_bone(b) for b in bones]
 
     # build skeleton
+    used_bone_name=set()
     for b, bone in zip(bones, bl_bones):
-        assert(b.name==bone.name)
+        if b.name!=bone.name:
+            if b.name in used_bone_name:
+                print("duplicated bone name:[%s][%s]" %(b.name, bone.name))
+            else:
+                print("invalid name:[%s][%s]" %(b.name, bone.name))
+        used_bone_name.add(b.name)
         if b.parent_index!=-1:
             #print("%s -> %s" % (bones[b.parent_index].name, b.name))
             parent_bone=bl_bones[b.parent_index]
@@ -223,7 +229,8 @@ def __create_armature(bones, display_slots):
                 bone.tail=tail_bone.head
                 bl.bone.setConnected(tail_bone)
         else:
-            print("no parent %s" % b.name)
+            #print("no parent %s" % b.name)
+            pass
     bl.armature.update(armature)
 
     # create ik constraint
