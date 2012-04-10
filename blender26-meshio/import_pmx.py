@@ -349,6 +349,9 @@ def import_pmx_model(filepath, use_englishmap, model):
                     ],
                     image)
 
+            # set smooth
+            bl.face.setSmooth(face, True)
+
         ####################
         # armature
         ####################
