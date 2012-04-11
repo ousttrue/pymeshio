@@ -251,8 +251,11 @@ def __create_armature(bones, display_slots):
     # create bone group
     bl.enterObjectMode()
     pose = bl.object.getPose(armature_object)
+    bone_groups={}
     for i, ds in enumerate(display_slots):
         print(ds)
+        for target, index in ds.references:
+            print(target, index)
         g=bl.object.createBoneGroup(armature_object, ds.name, "THEME%02d" % (i+1))
         for t, index in ds.references:
             if t==0:

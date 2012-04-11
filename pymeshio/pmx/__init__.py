@@ -579,7 +579,7 @@ class Morph(Diff):
     def diff(self, rhs):
         self._diff(rhs, 'name')
         self._diff(rhs, 'english_name')
-        #self._diff(rhs, 'panel')
+        self._diff(rhs, 'panel')
         self._diff(rhs, 'morph_type')
         self._diff_array(rhs, 'offsets')
 
@@ -670,7 +670,7 @@ class DisplaySlot(Diff):
         self.references=references or []
 
     def __str__(self):
-        return "<DisplaySlots %s(%d)>" % (self.name, len(self.references))
+        return "<DisplaySlots %s(%d)>" % (self.english_name, len(self.references))
 
     def __eq__(self, rhs):
         return (
@@ -687,7 +687,7 @@ class DisplaySlot(Diff):
         self._diff(rhs, 'name')
         self._diff(rhs, 'english_name')
         self._diff(rhs, 'special_flag')
-        #self._diff_array(rhs, 'references')
+        self._diff_array(rhs, 'references')
 
 
 class RigidBodyParam(Diff):

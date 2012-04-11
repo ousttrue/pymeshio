@@ -263,9 +263,10 @@ def pmd_to_pmx(src):
                 ik=get_ik(b),
                 )
             for i, b in enumerate(src.bones)]
+
     # bones
     def get_panel(m):
-        return 1
+        return m.type
     if len(src.morphs)>0:
         base=src.morphs[0]
         assert(base.name==b"base")
@@ -279,15 +280,47 @@ def pmd_to_pmx(src):
                         for i, pos in zip(m.indices, m.pos_list)]
                     )
                 for i, m in enumerate(src.morphs) if m.name!=b"base"]
+
     # display_slots
-    dst.display_slots=[
-            pmx.DisplaySlot(u('Root'), u('Root'), 1),
-            pmx.DisplaySlot(u('表情'), u('Exp'), 1)]+[
-                    pmx.DisplaySlot(
-                        name=g.name.strip().decode('cp932'),
-                        english_name=g.english_name.strip().decode('cp932'),
-                        special_flag=0)
-                    for i, g in enumerate(src.bone_group_list)]
+
+    # bone
+    root_display_slot=pmx.DisplaySlot(u('Root'), u('Root'), 1)
+    root_display_slot.references.append((
+        0, # bone
+        0 # center
+        ))
+    bone_display_slots=[
+            pmx.DisplaySlot(
+                name=g.name.strip().decode('cp932'),
+                english_name=g.english_name.strip().decode('cp932'),
+                special_flag=0)
+            for i, g in enumerate(src.bone_group_list)]
+    for bone_index, group_index in src.bone_display_list:
+        bone_display_slots[group_index-1].references.append(
+                (0, # bone
+                    bone_index))
+
+    # exp
+    exp_display_slot=pmx.DisplaySlot(u('表情'), u('Exp'), 1)
+    def morphOrder(m):
+        if m.type==3:
+            return 0
+        elif m.type==2:
+            return 1
+        elif m.type==1:
+            return 2
+        elif m.type==4:
+            return 3
+    exp_display_slot.references=[
+            (1, # exp
+                i) for i, m in 
+            # drop base
+            sorted(enumerate(src.morphs[1:]),
+                lambda x, y:cmp(morphOrder(x[1]), morphOrder(y[1]))
+                )
+            ]
+    dst.display_slots = [root_display_slot, exp_display_slot] + bone_display_slots
+
     # rigidbodies
     dst.rigidbodies=[
             pmx.RigidBody(
