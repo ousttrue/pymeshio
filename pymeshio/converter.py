@@ -303,21 +303,17 @@ def pmd_to_pmx(src):
     # exp
     exp_display_slot=pmx.DisplaySlot(u('表情'), u('Exp'), 1)
     def morphOrder(m):
-        if m.type==3:
+        if m[1].type==3:
             return 0
-        elif m.type==2:
+        elif m[1].type==2:
             return 1
-        elif m.type==1:
+        elif m[1].type==1:
             return 2
-        elif m.type==4:
+        elif m[1].type==4:
             return 3
     exp_display_slot.references=[
             (1, # exp
-                i) for i, m in 
-            # drop base
-            sorted(enumerate(src.morphs[1:]),
-                lambda x, y:cmp(morphOrder(x[1]), morphOrder(y[1]))
-                )
+                i) for i, m in sorted(enumerate(src.morphs[1:]), key=morphOrder)
             ]
     dst.display_slots = [root_display_slot, exp_display_slot] + bone_display_slots
 
