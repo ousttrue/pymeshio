@@ -98,6 +98,10 @@ Usage as python module
 
 New
 ---
+2.5.2 (2012-04-11)
+~~~~~~~~~~~~~~~~~~
+* update pmd to pmx converter(bone group)
+
 2.5.1 (2012-03-06)
 ~~~~~~~~~~~~~~~~~~
 * fix pmd importer/exporter rigid w h d
