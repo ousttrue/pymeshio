@@ -110,30 +110,30 @@ class Writer(common.BinaryWriter):
             self.write_bone_index(bone.parent_index)
             self.write_int(bone.layer, 4)
             self.write_int(bone.flag, 2)
-            if bone.getConnectionFlag()==0:
+            if not bone.getConnectionFlag():
                 self.write_vector3(bone.tail_position)
-            elif bone.getConnectionFlag()==1:
+            elif bone.getConnectionFlag():
                 self.write_bone_index(bone.tail_index)
             else:
                 raise pymeshio.common.WriteException(
                         "unknown bone conenction flag: {0}".format(
                             bone.getConnectionFlag()))
 
-            if bone.getRotationFlag()==1 or bone.getTranslationFlag()==1:
+            if bone.getExternalRotationFlag() or bone.getExternalTranslationFlag():
                 self.write_bone_index(bone.effect_index)
                 self.write_float(bone.effect_factor)
 
-            if bone.getFixedAxisFlag()==1:
+            if bone.getFixedAxisFlag():
                 self.write_vector3(bone.fixed_axis)
 
-            if bone.getLocalCoordinateFlag()==1:
+            if bone.getLocalCoordinateFlag():
                 self.write_vector3(bone.local_x_vector)
                 self.write_vector3(bone.local_z_vector)
 
-            if bone.getExternalParentDeformFlag()==1:
+            if bone.getExternalParentDeformFlag():
                 self.write_int(bone.external_key, 4)
 
-            if bone.getIkFlag()==1:
+            if bone.getIkFlag():
                 self.write_ik(bone.ik)
 
     def write_ik(self, ik):

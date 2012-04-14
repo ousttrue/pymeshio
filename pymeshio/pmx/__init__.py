@@ -125,6 +125,18 @@ class IkLink(Diff):
         self._diff(rhs, 'limit_max')
 
 
+BONEFLAG_TAILPOS_IS_BONE=0x0001
+BONEFLAG_CAN_ROTATE=0x0002
+BONEFLAG_CAN_TRANSLATE=0x0004
+BONEFLAG_IS_VISIBLE=0x0008
+BONEFLAG_CAN_MANIPULATE=0x0010
+BONEFLAG_IS_IK=0x0020
+BONEFLAG_IS_EXTERNAL_ROTATION=0x0100
+BONEFLAG_IS_EXTERNAL_TRANSLATION=0x0200
+BONEFLAG_HAS_FIXED_AXIS=0x0400
+BONEFLAG_HAS_LOCAL_COORDINATE=0x0800
+BONEFLAG_IS_AFTER_PHYSICS_DEFORM=0x1000
+BONEFLAG_IS_EXTERNAL_PARENT_DEFORM=0x2000
 class Bone(Diff):
     """material
 
@@ -214,29 +226,44 @@ class Bone(Diff):
         else:
             self._diff(rhs, 'ik')
 
+    def hasFlag(self, flag):
+        return (self.flag & flag)!=0
+
     def getConnectionFlag(self):
-        return (self.flag & 0x0001)!=0
+        return self.hasFlag(BONEFLAG_TAILPOS_IS_BONE)
+
+    def getRotatable(self):
+        return self.hasFlag(BONEFLAG_CAN_ROTATE)
+
+    def getTranslatable(self):
+        return self.hasFlag(BONEFLAG_CAN_TRANSLATE)
 
     def getVisibleFlag(self):
-        return (self.flag & 0x0008)!=0
+        return self.hasFlag(BONEFLAG_IS_VISIBLE)
+
+    def getManipulatable(self):
+        return self.hasFlag(BONEFLAG_CAN_MANIPULATE)
 
     def getIkFlag(self):
-        return (self.flag & 0x0020)!=0
+        return self.hasFlag(BONEFLAG_IS_IK)
 
-    def getRotationFlag(self):
-        return (self.flag & 0x0100)!=0
+    def getExternalRotationFlag(self):
+        return self.hasFlag(BONEFLAG_IS_EXTERNAL_ROTATION)
 
-    def getTranslationFlag(self):
-        return (self.flag & 0x0200)!=0
+    def getExternalTranslationFlag(self):
+        return self.hasFlag(BONEFLAG_IS_EXTERNAL_TRANSLATION)
 
     def getFixedAxisFlag(self):
-        return (self.flag & 0x0400)!=0
+        return self.hasFlag(BONEFLAG_HAS_FIXED_AXIS)
 
     def getLocalCoordinateFlag(self):
-        return (self.flag &  0x0800)!=0
+        return self.hasFlag(BONEFLAG_HAS_LOCAL_COORDINATE)
     
+    def getAfterPhysicsDeformFlag(self):
+        return self.hasFlag(BONEFLAG_IS_AFTER_PHYSICS_DEFORM)
+
     def getExternalParentDeformFlag(self):
-        return (self.flag &  0x2000)!=0
+        return self.hasFlag(BONEFLAG_IS_EXTERNAL_PARENT_DEFORM)
 
  
 class Material(Diff):

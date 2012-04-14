@@ -130,30 +130,30 @@ class Reader(common.BinaryReader):
                 layer=self.read_int(4),
                 flag=self.read_int(2)                
                 )
-        if bone.getConnectionFlag()==0:
+        if not bone.getConnectionFlag():
             bone.tail_position=self.read_vector3()
-        elif bone.getConnectionFlag()==1:
+        elif bone.getConnectionFlag():
             bone.tail_index=self.read_bone_index()
         else:
             raise common.ParseException(
                     "unknown bone conenction flag: {0}".format(
                 bone.getConnectionFlag()))
 
-        if bone.getRotationFlag()==1 or bone.getTranslationFlag()==1:
+        if bone.getExternalRotationFlag() or bone.getExternalTranslationFlag():
             bone.effect_index=self.read_bone_index()
             bone.effect_factor=self.read_float()
 
-        if bone.getFixedAxisFlag()==1:
+        if bone.getFixedAxisFlag():
             bone.fixed_axis=self.read_vector3()
 
-        if bone.getLocalCoordinateFlag()==1:
+        if bone.getLocalCoordinateFlag():
             bone.local_x_vector=self.read_vector3()
             bone.local_z_vector=self.read_vector3()
 
-        if bone.getExternalParentDeformFlag()==1:
+        if bone.getExternalParentDeformFlag():
             bone.external_key=self.read_int(4)
 
-        if bone.getIkFlag()==1:
+        if bone.getIkFlag():
             bone.ik=self.read_ik()
 
         return bone

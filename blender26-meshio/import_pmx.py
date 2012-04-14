@@ -245,6 +245,8 @@ def __create_armature(bones, display_slots):
             constraint=bl.armature.createIkConstraint(
                     armature_object, p_bone, bone.name,
                     ik.link, ik.limit_radian, ik.loop)
+
+        if b.get
     bl.armature.makeEditable(armature_object)
     bl.armature.update(armature)
 
