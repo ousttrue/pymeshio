@@ -299,12 +299,11 @@ def __create_armature(bones, display_slots):
     return armature_object
 
 
-def import_pmx_model(filepath, use_englishmap, model):
+def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
     if not model:
         print("fail to load %s" % filepath)
         return False
     print(model)
-    print('use_englishmap', use_englishmap)
 
     # メッシュをまとめるエンプティオブジェクト
     model_name=model.english_name
@@ -321,133 +320,135 @@ def import_pmx_model(filepath, use_englishmap, model):
     if armature_object:
         armature_object.parent=root_object
 
-    # テクスチャを作る
-    texture_dir=os.path.dirname(filepath)
-    textures_and_images=[bl.texture.create(os.path.join(texture_dir, t))
-            for t in model.textures]
-    print(textures_and_images)
+    if import_mesh:
+        # テクスチャを作る
+        texture_dir=os.path.dirname(filepath)
+        textures_and_images=[bl.texture.create(os.path.join(texture_dir, t))
+                for t in model.textures]
+        print(textures_and_images)
 
-    index_generator=(i for i in model.indices)
-    # 頂点配列。(Left handed y-up) to (Right handed z-up)
-    vertices=[convert_coord(pos)
-            for pos in (v.position for v in model.vertices)]
+        index_generator=(i for i in model.indices)
+        # 頂点配列。(Left handed y-up) to (Right handed z-up)
+        vertices=[convert_coord(pos)
+                for pos in (v.position for v in model.vertices)]
 
-    for i, m in enumerate(model.materials):
-        name=get_object_name("{0:02}:", i, m.name)
-        ####################
-        # material
-        ####################
-        material=__create_a_material(m, name, textures_and_images)
+        for i, m in enumerate(model.materials):
+            name=get_object_name("{0:02}:", i, m.name)
+            ####################
+            # material
+            ####################
+            material=__create_a_material(m, name, textures_and_images)
 
-        ####################
-        # mesh object
-        ####################
-        # object名はutf-8で21byteまで
-        mesh, mesh_object=bl.mesh.create(name)
-        bl.mesh.addMaterial(mesh, material)
-        # activate object
-        bl.object.deselectAll()
-        bl.object.activate(mesh_object)
-        bl.object.makeParent(root_object, mesh_object)
+            ####################
+            # mesh object
+            ####################
+            # object名はutf-8で21byteまで
+            mesh, mesh_object=bl.mesh.create(name)
+            bl.mesh.addMaterial(mesh, material)
+            # activate object
+            bl.object.deselectAll()
+            bl.object.activate(mesh_object)
+            bl.object.makeParent(root_object, mesh_object)
 
-        ####################
-        # vertices & faces
-        ####################
-        indices=[next(index_generator)
-                    for _ in range(m.vertex_count)]
-        used_indices=set(indices)
-        bl.mesh.addGeometry(mesh, vertices,
-                [(indices[i], indices[i+1], indices[i+2])
-                    for i in range(0, len(indices), 3)])
-        assert(len(model.vertices)==len(mesh.vertices))
+            ####################
+            # vertices & faces
+            ####################
+            indices=[next(index_generator)
+                        for _ in range(m.vertex_count)]
+            used_indices=set(indices)
+            bl.mesh.addGeometry(mesh, vertices,
+                    [(indices[i], indices[i+1], indices[i+2])
+                        for i in range(0, len(indices), 3)])
+            assert(len(model.vertices)==len(mesh.vertices))
 
-        # assign material
-        bl.mesh.addUV(mesh)
-        hasTexture=bl.material.hasTexture(material)
-        if hasTexture:
-            index_gen=(i for i in indices)
-            image=(textures_and_images.get[m.texture_index] 
-                    if m.texture_index in textures_and_images
-                    else None)
-        for i, face in enumerate(bl.mesh.getFaces(mesh)):
-            bl.face.setMaterial(face, 0)
+            # assign material
+            bl.mesh.addUV(mesh)
+            hasTexture=bl.material.hasTexture(material)
             if hasTexture:
-                uv0=model.vertices[next(index_gen)].uv
-                uv1=model.vertices[next(index_gen)].uv
-                uv2=model.vertices[next(index_gen)].uv
-                bl.mesh.setFaceUV(mesh, i, face, [# fix uv
-                    (uv0.x, 1.0-uv0.y),
-                    (uv1.x, 1.0-uv1.y),
-                    (uv2.x, 1.0-uv2.y)
-                    ],
-                    image)
+                index_gen=(i for i in indices)
+                image=(textures_and_images.get[m.texture_index] 
+                        if m.texture_index in textures_and_images
+                        else None)
+            for i, face in enumerate(bl.mesh.getFaces(mesh)):
+                bl.face.setMaterial(face, 0)
+                if hasTexture:
+                    uv0=model.vertices[next(index_gen)].uv
+                    uv1=model.vertices[next(index_gen)].uv
+                    uv2=model.vertices[next(index_gen)].uv
+                    bl.mesh.setFaceUV(mesh, i, face, [# fix uv
+                        (uv0.x, 1.0-uv0.y),
+                        (uv1.x, 1.0-uv1.y),
+                        (uv2.x, 1.0-uv2.y)
+                        ],
+                        image)
 
-            # set smooth
-            bl.face.setSmooth(face, True)
+                # set smooth
+                bl.face.setSmooth(face, True)
 
-        ####################
-        # armature
-        ####################
-        if armature_object:
-            # armature modifirer
-            bl.modifier.addArmature(mesh_object, armature_object)
-            # set vertex attributes(normal, bone weights)
-            bl.mesh.useVertexUV(mesh)
-            for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
-                bl.vertex.setNormal(mvert, convert_coord(v.normal))
-                if isinstance(v.deform, pmx.Bdef1):
-                    bl.object.assignVertexGroup(mesh_object,
-                            model.bones[v.deform.index0].name, i, 1.0)
-                elif isinstance(v.deform, pmx.Bdef2):
-                    bl.object.assignVertexGroup(mesh_object,
-                            model.bones[v.deform.index0].name, i, v.deform.weight0)
-                    bl.object.assignVertexGroup(mesh_object,
-                            model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
-                else:
-                    raise Exception("unknown deform: %s" % v.deform)
+            ####################
+            # armature
+            ####################
+            if armature_object:
+                # armature modifirer
+                bl.modifier.addArmature(mesh_object, armature_object)
+                # set vertex attributes(normal, bone weights)
+                bl.mesh.useVertexUV(mesh)
+                for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
+                    bl.vertex.setNormal(mvert, convert_coord(v.normal))
+                    if isinstance(v.deform, pmx.Bdef1):
+                        bl.object.assignVertexGroup(mesh_object,
+                                model.bones[v.deform.index0].name, i, 1.0)
+                    elif isinstance(v.deform, pmx.Bdef2):
+                        bl.object.assignVertexGroup(mesh_object,
+                                model.bones[v.deform.index0].name, i, v.deform.weight0)
+                        bl.object.assignVertexGroup(mesh_object,
+                                model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
+                    else:
+                        raise Exception("unknown deform: %s" % v.deform)
 
-        ####################
-        # shape keys
-        ####################
-        # set shape_key pin
-        bl.object.pinShape(mesh_object, True)
-        # create base key
-        baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
-        mesh.update()
-        for m in model.morphs:
-            new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
-            for o in m.offsets:
-                if isinstance(o, pmx.VertexMorphOffset):
-                    bl.shapekey.assign(new_shape_key, 
-                            o.vertex_index, 
-                            mesh.vertices[o.vertex_index].co+
-                            bl.createVector(*convert_coord(o.position_offset)))
-                else:
-                    raise Exception("unknown morph type: %s" % o)
-        # select base shape
-        bl.object.setActivateShapeKey(mesh_object, 0)
+            ####################
+            # shape keys
+            ####################
+            # set shape_key pin
+            bl.object.pinShape(mesh_object, True)
+            # create base key
+            baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
+            mesh.update()
+            for m in model.morphs:
+                new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
+                for o in m.offsets:
+                    if isinstance(o, pmx.VertexMorphOffset):
+                        bl.shapekey.assign(new_shape_key, 
+                                o.vertex_index, 
+                                mesh.vertices[o.vertex_index].co+
+                                bl.createVector(*convert_coord(o.position_offset)))
+                    else:
+                        raise Exception("unknown morph type: %s" % o)
+            # select base shape
+            bl.object.setActivateShapeKey(mesh_object, 0)
 
-        #############################
-        # clean up not used vertices
-        # in the material.
-        #############################
-        bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
-            if i not in used_indices])
+            #############################
+            # clean up not used vertices
+            # in the material.
+            #############################
+            bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
+                if i not in used_indices])
 
-    # import rigid bodies
-    rigidbody_object=__importRigidBodies(model.rigidbodies, model.bones)
-    if rigidbody_object:
-        bl.object.makeParent(root_object, rigidbody_object)
+    if import_physics:
+        # import rigid bodies
+        rigidbody_object=__importRigidBodies(model.rigidbodies, model.bones)
+        if rigidbody_object:
+            bl.object.makeParent(root_object, rigidbody_object)
 
-    # import joints
-    joint_object=__import_joints(model.joints, model.rigidbodies)
-    if joint_object:
-        bl.object.makeParent(root_object, joint_object)
+        # import joints
+        joint_object=__import_joints(model.joints, model.rigidbodies)
+        if joint_object:
+            bl.object.makeParent(root_object, joint_object)
 
     return {'FINISHED'}
 
 
-def _execute(filepath, use_englishmap, **kwargs):
+def _execute(filepath, **kwargs):
     """
     importer 本体
     """
@@ -459,13 +460,11 @@ def _execute(filepath, use_englishmap, **kwargs):
 
         print("convert pmd to pmx...")
         from .pymeshio import converter
-        import_pmx_model(filepath, use_englishmap, 
-                converter.pmd_to_pmx(pmd_model))
+        import_pmx_model(filepath, converter.pmd_to_pmx(pmd_model), **kwargs)
 
     elif filepath.lower().endswith(".pmx"):
         from .pymeshio.pmx import reader
-        import_pmx_model(filepath, use_englishmap, 
-                reader.read_from_file(filepath))
+        import_pmx_model(filepath, reader.read_from_file(filepath), **kwargs)
 
     else:
         print("unknown file type: ", filepath)

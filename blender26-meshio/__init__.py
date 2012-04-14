@@ -66,10 +66,20 @@ class ImportPmx(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
     filter_glob=bpy.props.StringProperty(
             default='*.pmx;*.pmd', options={'HIDDEN'})
 
-    use_englishmap=bpy.props.BoolProperty(
-            name='use english map', 
-            description='Convert name to english(not implemented)',
-            default=False)
+    #use_englishmap=bpy.props.BoolProperty(
+    #        name='use english map', 
+    #        description='Convert name to english(not implemented)',
+    #        default=False)
+
+    import_mesh=bpy.props.BoolProperty(
+            name='import mesh', 
+            description='import polygon mesh',
+            default=True)
+
+    import_physics=bpy.props.BoolProperty(
+            name='import physics objects', 
+            description='import rigid body and constraints',
+            default=True)
 
     def execute(self, context):
         from . import import_pmx
