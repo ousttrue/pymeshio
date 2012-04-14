@@ -14,6 +14,9 @@ def near(x, y, EPSILON=1e-5):
 
 
 def create_pmx(ex):
+    """
+    PMX 出力
+    """
     model=pmx.Model()
 
     o=ex.root.o

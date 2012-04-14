@@ -151,83 +151,191 @@ class OneSkinMesh(object):
             v=[mesh.vertices[index] for index in bl.face.getVertices(face)]
             uv=bl.mesh.getFaceUV(
                     mesh, i, face, bl.face.getVertexCount(face))
-            # flip triangle
-            if faceVertexCount==3:
-                # triangle
-                self.vertexArray.addTriangle(
-                        obj_name, material.name,
-                        v[2].index, 
-                        v[1].index, 
-                        v[0].index,
-                        v[2].co, 
-                        v[1].co, 
-                        v[0].co,
-                        bl.vertex.getNormal(v[2]), 
-                        bl.vertex.getNormal(v[1]), 
-                        bl.vertex.getNormal(v[0]),
-                        uv[2], 
-                        uv[1], 
-                        uv[0],
-                        weightMap[v[2].index][0],
-                        weightMap[v[1].index][0],
-                        weightMap[v[0].index][0],
-                        secondWeightMap[v[2].index][0],
-                        secondWeightMap[v[1].index][0],
-                        secondWeightMap[v[0].index][0],
-                        weightMap[v[2].index][1],
-                        weightMap[v[1].index][1],
-                        weightMap[v[0].index][1]
-                        )
-            elif faceVertexCount==4:
-                # quadrangle
-                self.vertexArray.addTriangle(
-                        obj_name, material.name,
-                        v[2].index, 
-                        v[1].index, 
-                        v[0].index,
-                        v[2].co, 
-                        v[1].co, 
-                        v[0].co,
-                        bl.vertex.getNormal(v[2]), 
-                        bl.vertex.getNormal(v[1]), 
-                        bl.vertex.getNormal(v[0]), 
-                        uv[2], 
-                        uv[1], 
-                        uv[0],
-                        weightMap[v[2].index][0],
-                        weightMap[v[1].index][0],
-                        weightMap[v[0].index][0],
-                        secondWeightMap[v[2].index][0],
-                        secondWeightMap[v[1].index][0],
-                        secondWeightMap[v[0].index][0],
-                        weightMap[v[2].index][1],
-                        weightMap[v[1].index][1],
-                        weightMap[v[0].index][1]
-                        )
-                self.vertexArray.addTriangle(
-                        obj_name, material.name,
-                        v[0].index, 
-                        v[3].index, 
-                        v[2].index,
-                        v[0].co, 
-                        v[3].co, 
-                        v[2].co,
-                        bl.vertex.getNormal(v[0]), 
-                        bl.vertex.getNormal(v[3]), 
-                        bl.vertex.getNormal(v[2]), 
-                        uv[0], 
-                        uv[3], 
-                        uv[2],
-                        weightMap[v[0].index][0],
-                        weightMap[v[3].index][0],
-                        weightMap[v[2].index][0],
-                        secondWeightMap[v[0].index][0],
-                        secondWeightMap[v[3].index][0],
-                        secondWeightMap[v[2].index][0],
-                        weightMap[v[0].index][1],
-                        weightMap[v[3].index][1],
-                        weightMap[v[2].index][1]
-                        )
+
+            if bl.face.isSmooth(face):
+                if faceVertexCount==3:
+                    self.__addFaceTriangleSmooth(
+                            obj_name, material, v, uv, 
+                            weightMap, secondWeightMap
+                            )
+                elif faceVertexCount==4:
+                    self.__addFaceQuadrangleSmooth(
+                            obj_name, material, v, uv,
+                            weightMap, secondWeightMap
+                            )
+            else:
+                if faceVertexCount==3:
+                    self.__addFaceTriangleSolid(
+                            obj_name, material, v, uv, 
+                            bl.face.getNormal(face),
+                            weightMap, secondWeightMap
+                            )
+                elif faceVertexCount==4:
+                    self.__addFaceQuadrangleSolid(
+                            obj_name, material, v, uv, 
+                            bl.face.getNormal(face),
+                            weightMap, secondWeightMap
+                            )
+
+    def __addFaceTriangleSmooth(self, obj_name, material, v, uv,
+            weightMap, secondWeightMap):
+        # flip triangle
+        self.vertexArray.addTriangle(
+                obj_name, material.name,
+                v[2].index, 
+                v[1].index, 
+                v[0].index,
+                v[2].co, 
+                v[1].co, 
+                v[0].co,
+                bl.vertex.getNormal(v[2]), 
+                bl.vertex.getNormal(v[1]), 
+                bl.vertex.getNormal(v[0]),
+                uv[2], 
+                uv[1], 
+                uv[0],
+                weightMap[v[2].index][0],
+                weightMap[v[1].index][0],
+                weightMap[v[0].index][0],
+                secondWeightMap[v[2].index][0],
+                secondWeightMap[v[1].index][0],
+                secondWeightMap[v[0].index][0],
+                weightMap[v[2].index][1],
+                weightMap[v[1].index][1],
+                weightMap[v[0].index][1]
+                )
+
+    def __addFaceQuadrangleSmooth(self, obj_name, material, v, uv,
+            weightMap, secondWeightMap):
+        self.vertexArray.addTriangle(
+                obj_name, material.name,
+                v[2].index, 
+                v[1].index, 
+                v[0].index,
+                v[2].co, 
+                v[1].co, 
+                v[0].co,
+                bl.vertex.getNormal(v[2]), 
+                bl.vertex.getNormal(v[1]), 
+                bl.vertex.getNormal(v[0]), 
+                uv[2], 
+                uv[1], 
+                uv[0],
+                weightMap[v[2].index][0],
+                weightMap[v[1].index][0],
+                weightMap[v[0].index][0],
+                secondWeightMap[v[2].index][0],
+                secondWeightMap[v[1].index][0],
+                secondWeightMap[v[0].index][0],
+                weightMap[v[2].index][1],
+                weightMap[v[1].index][1],
+                weightMap[v[0].index][1]
+                )
+        self.vertexArray.addTriangle(
+                obj_name, material.name,
+                v[0].index, 
+                v[3].index, 
+                v[2].index,
+                v[0].co, 
+                v[3].co, 
+                v[2].co,
+                bl.vertex.getNormal(v[0]), 
+                bl.vertex.getNormal(v[3]), 
+                bl.vertex.getNormal(v[2]), 
+                uv[0], 
+                uv[3], 
+                uv[2],
+                weightMap[v[0].index][0],
+                weightMap[v[3].index][0],
+                weightMap[v[2].index][0],
+                secondWeightMap[v[0].index][0],
+                secondWeightMap[v[3].index][0],
+                secondWeightMap[v[2].index][0],
+                weightMap[v[0].index][1],
+                weightMap[v[3].index][1],
+                weightMap[v[2].index][1]
+                )
+
+    def __addFaceTriangleSolid(self, obj_name, material, v, normal, uv,
+            weightMap, secondWeightMap):
+        print(normal)
+        # flip triangle
+        self.vertexArray.addTriangle(
+                obj_name, material.name,
+                v[2].index, 
+                v[1].index, 
+                v[0].index,
+                v[2].co, 
+                v[1].co, 
+                v[0].co,
+                normal, 
+                normal, 
+                normal,
+                uv[2], 
+                uv[1], 
+                uv[0],
+                weightMap[v[2].index][0],
+                weightMap[v[1].index][0],
+                weightMap[v[0].index][0],
+                secondWeightMap[v[2].index][0],
+                secondWeightMap[v[1].index][0],
+                secondWeightMap[v[0].index][0],
+                weightMap[v[2].index][1],
+                weightMap[v[1].index][1],
+                weightMap[v[0].index][1]
+                )
+
+    def __addFaceQuadrangleSolid(self, obj_name, material, v, uv, normal,
+            weightMap, secondWeightMap):
+        print(normal)
+        self.vertexArray.addTriangle(
+                obj_name, material.name,
+                v[2].index, 
+                v[1].index, 
+                v[0].index,
+                v[2].co, 
+                v[1].co, 
+                v[0].co,
+                normal,
+                normal,
+                normal,
+                uv[2], 
+                uv[1], 
+                uv[0],
+                weightMap[v[2].index][0],
+                weightMap[v[1].index][0],
+                weightMap[v[0].index][0],
+                secondWeightMap[v[2].index][0],
+                secondWeightMap[v[1].index][0],
+                secondWeightMap[v[0].index][0],
+                weightMap[v[2].index][1],
+                weightMap[v[1].index][1],
+                weightMap[v[0].index][1]
+                )
+        self.vertexArray.addTriangle(
+                obj_name, material.name,
+                v[0].index, 
+                v[3].index, 
+                v[2].index,
+                v[0].co, 
+                v[3].co, 
+                v[2].co,
+                normal, 
+                normal, 
+                normal, 
+                uv[0], 
+                uv[3], 
+                uv[2],
+                weightMap[v[0].index][0],
+                weightMap[v[3].index][0],
+                weightMap[v[2].index][0],
+                secondWeightMap[v[0].index][0],
+                secondWeightMap[v[3].index][0],
+                secondWeightMap[v[2].index][0],
+                weightMap[v[0].index][1],
+                weightMap[v[3].index][1],
+                weightMap[v[2].index][1]
+                )
 
     def __mesh(self, obj):
         if bl.RIGID_SHAPE_TYPE in obj:

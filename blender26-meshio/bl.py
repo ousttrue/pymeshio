@@ -578,6 +578,10 @@ class face:
     def setSmooth(face, isSmooth):
         face.use_smooth=True if isSmooth else False
 
+    @staticmethod
+    def isSmooth(face):
+        return face.use_smooth
+
 
 class armature:
     @staticmethod
