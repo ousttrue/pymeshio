@@ -159,6 +159,8 @@ class Bone(Diff):
             'local_z_vector',
             'external_key',
             'ik',
+
+            'index',
             ]
     def __init__(self,
             name,
@@ -192,6 +194,7 @@ class Bone(Diff):
         self.local_z_vector=local_z_vector or common.Vector3()
         self.external_key=external_key
         self.ik=ik
+        self.index=-1
 
     def __eq__(self, rhs):
         return (
@@ -211,12 +214,12 @@ class Bone(Diff):
         self._diff(rhs, 'english_name')
         self._diff(rhs, 'position')
         self._diff(rhs, 'parent_index')
-        #self._diff(rhs, 'layer')
+        self._diff(rhs, 'layer')
         self._diff(rhs, 'flag')
         self._diff(rhs, 'tail_position')
         self._diff(rhs, 'tail_index')
-        #self._diff(rhs, 'effect_index')
-        #self._diff(rhs, 'effect_factor')
+        self._diff(rhs, 'effect_index')
+        self._diff(rhs, 'effect_factor')
         #self._diff(rhs, 'fixed_axis')
         self._diff(rhs, 'local_x_vector')
         self._diff(rhs, 'local_z_vector')

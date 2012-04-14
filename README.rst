@@ -98,6 +98,11 @@ Usage as python module
 
 New
 ---
+2.5.3 (2012-04-14)
+~~~~~~~~~~~~~~~~~~
+* update pmd to pmx converter(bone flag)
+* use face normal when the face is not smooth
+
 2.5.2 (2012-04-11)
 ~~~~~~~~~~~~~~~~~~
 * update pmd to pmx converter(bone group)

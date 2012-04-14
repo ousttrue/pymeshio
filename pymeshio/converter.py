@@ -242,27 +242,48 @@ def pmd_to_pmx(src):
                     ik.target, ik.iterations, ik.weight * 4, [
                         get_ik_link(child) for child in ik.children ])
         return None
-    def get_layer(b):
-        return 0
-    dst.bones=[
-            pmx.Bone(
+    def get_external_infl(b):
+        """
+        return effect_index, effect_factor, layer
+        """
+        if isinstance(b, pmd.Bone_RotateInfl):
+            return b.ik_index, 1.0, 2
+        elif isinstance(b, pmd.Bone_Tweak):
+            return b.tail_index, b.ik_index * 0.01, 0
+        elif isinstance(b, pmd.Bone_IK):
+            return -1, 0, 1
+        else:
+            return -1, 0, 0
+
+    def convert_bone(bones, b, parent_layer=0):
+        effect_index, effect_factor, layer=get_external_infl(b)
+        layer=max(layer, parent_layer)
+        converted=pmx.Bone(
                 name=b.name.decode('cp932'),
                 english_name=b.english_name.decode('cp932'),
                 position=b.pos,
                 parent_index=b.parent_index if b.parent_index!=65535 else -1,
-                layer=get_layer(b),
+                layer=layer,
                 flag=get_bone_flag(b),
                 tail_position=get_tail_position(b),
                 tail_index=get_tail_index(b),
-                effect_index=-1,
-                effect_factor=0.0,
+                effect_index=effect_index,
+                effect_factor=effect_factor,
                 fixed_axis=common.Vector3(),
                 local_x_vector=common.Vector3(),
                 local_z_vector=common.Vector3(),
                 external_key=-1,
                 ik=get_ik(b),
                 )
-            for i, b in enumerate(src.bones)]
+        converted.index=b.index
+        bones.append(converted)
+        for child in b.children:
+            convert_bone(bones, child, layer)
+
+    dst.bones=[]
+    for b in src.no_parent_bones:
+        convert_bone(dst.bones, b)
+    dst.bones.sort(key=lambda x: x.index)
 
     # bones
     def get_panel(m):
