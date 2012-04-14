@@ -102,6 +102,7 @@ New
 ~~~~~~~~~~~~~~~~~~
 * update pmd to pmx converter(bone flag)
 * use face normal when the face is not smooth
+* implement ik-limit for pmx_importer
 
 2.5.2 (2012-04-11)
 ~~~~~~~~~~~~~~~~~~
