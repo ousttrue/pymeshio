@@ -245,8 +245,36 @@ def __create_armature(bones, display_slots):
             constraint=bl.armature.createIkConstraint(
                     armature_object, p_bone, bone.name,
                     ik.link, ik.limit_radian, ik.loop)
+            for chain in ik.link:
+                if chain.limit_angle:
+                    p_bone=pose.bones[bones[chain.bone_index].name]
+                    # IK limit
+                    # x
+                    if chain.limit_min.x==0 or chain.limit_max.x==0:
+                        p_bone.lock_ik_x=True
+                    else:
+                        p_bone.use_ik_limit_x=True
+                        # left handed to right handed ?
+                        p_bone.ik_min_x=-chain.limit_max.x
+                        p_bone.ik_max_x=-chain.limit_min.x
 
-        if b.get
+                    # y
+                    if chain.limit_min.y==0 or chain.limit_max.y==0:
+                        p_bone.lock_ik_y=True
+                    else:
+                        p_bone.use_ik_limit_y=True
+                        p_bone.ik_min_y=chain.limit_min.y
+                        p_bone.ik_max_y=chain.limit_max.y
+
+                    # z
+                    if chain.limit_min.z==0 or chain.limit_max.z==0:
+                        p_bone.lock_ik_z=True
+                    else:
+                        p_bone.use_ik_limit_z=True
+                        p_bone.ik_min_z=chain.limit_min.z
+                        p_bone.ik_max_z=chain.limit_max.z
+
+
     bl.armature.makeEditable(armature_object)
     bl.armature.update(armature)
 
