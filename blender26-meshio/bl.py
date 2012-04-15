@@ -517,8 +517,13 @@ class mesh:
         enterObjectMode()
 
     @staticmethod
-    def flipNormals(m):
-        m.flipNormals()
+    def flipNormals(mesh_object):
+        bpy.ops.object.select_all(action='DESELECT')
+        object.activate(mesh_object)
+        # edit
+        enterEditMode()
+        bpy.ops.mesh.flip_normals()
+        enterObjectMode()
 
     @staticmethod
     def addMaterial(m, material):

@@ -409,8 +409,9 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
             indices=[next(index_generator)
                         for _ in range(m.vertex_count)]
             used_indices=set(indices)
+            # flip
             bl.mesh.addGeometry(mesh, vertices,
-                    [(indices[i], indices[i+1], indices[i+2])
+                    [(indices[i+2], indices[i+1], indices[i])
                         for i in range(0, len(indices), 3)])
             assert(len(model.vertices)==len(mesh.vertices))
 
@@ -428,10 +429,11 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
                     uv0=model.vertices[next(index_gen)].uv
                     uv1=model.vertices[next(index_gen)].uv
                     uv2=model.vertices[next(index_gen)].uv
+                    # flip
                     bl.mesh.setFaceUV(mesh, i, face, [# fix uv
-                        (uv0.x, 1.0-uv0.y),
+                        (uv2.x, 1.0-uv2.y),
                         (uv1.x, 1.0-uv1.y),
-                        (uv2.x, 1.0-uv2.y)
+                        (uv0.x, 1.0-uv0.y)
                         ],
                         image)
 
@@ -486,6 +488,9 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
             #############################
             bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
                 if i not in used_indices])
+
+            # flip
+            #bl.mesh.flipNormals(mesh_object)
 
     if import_physics:
         # import rigid bodies
