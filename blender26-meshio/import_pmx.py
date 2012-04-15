@@ -253,11 +253,19 @@ def __create_armature(bones, display_slots):
         bone=bl.armature.createBone(armature, b.name)
         # bone position
         bone.head=bl.createVector(*convert_coord(b.position))
-        if not b.getConnectionFlag():
-            bone.tail=bl.createVector(*convert_coord(b.position))
-        elif not b.getVisibleFlag():
+        if b.getConnectionFlag():
+            # 仮
             bone.tail=bone.head+bl.createVector(0, 1, 0)
-
+        else:
+            # 尻尾位置の座標指定
+            bone.tail=bone.head+bl.createVector(
+                    *convert_coord(b.tail_position))
+            if bone.tail==bone.head:
+                bone.tail=bone.head+bl.createVector(0, 1, 0)
+            pass
+        if not b.getVisibleFlag():
+            # 不可視(目立たなくする)
+            bone.tail=bone.head+bl.createVector(0, 0.01, 0)
         return bone
     bl_bones=[create_bone(b) for b in bones]
 
@@ -345,6 +353,7 @@ def __create_armature(bones, display_slots):
                     print("pose %s is not found" % name)
 
     bl.enterObjectMode()
+    print(len(armature.bones), "bones")
     return armature_object
 
 

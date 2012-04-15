@@ -16,8 +16,8 @@ class IKSolver(object):
 class Bone(object):
     __slots__=['index', 'name', 'ik_index',
             'pos', 'tail', 'parent_index', 'tail_index', 'type', 'isConnect']
-    def __init__(self, name, pos, tail, isConnect):
-        self.index=-1
+    def __init__(self, index, name, pos, tail, isConnect):
+        self.index=index
         self.name=name
         self.pos=pos
         self.tail=tail
@@ -64,21 +64,37 @@ class BoneBuilder(object):
             self.bone_groups.append((g.name, []))
 
         ####################
-        # get bones
+        # create bones
         ####################
-        for b in armature.bones.values():
-            if not b.parent:
-                # root bone
-                bone=Bone(b.name, 
-                        bl.bone.getHeadLocal(b),
-                        bl.bone.getTailLocal(b),
-                        False)
-                self.__addBone(bone)
-                self.__getBone(bone, b)
+        self.bones=[Bone(i, b.name,
+            bl.bone.getHeadLocal(b),
+            bl.bone.getTailLocal(b),
+            False) for i, b in enumerate(armature.bones.values())]
+        for bone in self.bones:
+            self.boneMap[bone.name]=bone
+        print(len(self.bones))
+
+        # buid tree hierarchy
+        def __getBone(parent, b):
+            if len(b.children)==0:
+                parent.type=7
+                return
+
+            for i, c in enumerate(b.children):
+                bone=self.boneMap[c.name]
+                bone.isConnect=bl.bone.isConnected(c)
+                if parent:
+                    bone.parent_index=parent.index
+                    #if i==0:
+                    if bone.isConnect or (
+                            not parent.tail_index and parent.tail==bone.pos):
+                        parent.tail_index=bone.index
+                __getBone(bone, c)
 
         for b in armature.bones.values():
             if not b.parent:
-                self.__checkConnection(b, None)
+                # root bone
+                __getBone(bone, b)
 
         ####################
         # get IK
@@ -122,7 +138,7 @@ class BoneBuilder(object):
         ####################
 
         # boneのsort
-        self._sortBy()
+        #self._sortBy()
         self._fix()
         # IKのsort
         def getIndex(ik):
@@ -137,14 +153,6 @@ class BoneBuilder(object):
             for g in self.bone_groups:
                 if g[0]==boneGroup.name:
                     g[1].append(poseBone.name)
-
-    def __checkConnection(self, b, p):
-        if bl.bone.isConnected(b):
-            parent=self.__boneByName(p.name)
-            parent.isConnect=True
-
-        for c in b.children:
-            self.__checkConnection(c, b)
 
     def _sortBy(self):
         """
@@ -213,26 +221,4 @@ class BoneBuilder(object):
     def __boneByName(self, name):
         return self.boneMap[name]
 
-    def __getBone(self, parent, b):
-        if len(b.children)==0:
-            parent.type=7
-            return
-
-        for i, c in enumerate(b.children):
-            bone=Bone(c.name, 
-                    bl.bone.getHeadLocal(c),
-                    bl.bone.getTailLocal(c),
-                    bl.bone.isConnected(c))
-            self.__addBone(bone)
-            if parent:
-                bone.parent_index=parent.index
-                #if i==0:
-                if bone.isConnect or (not parent.tail_index and parent.tail==bone.pos):
-                    parent.tail_index=bone.index
-            self.__getBone(bone, c)
-
-    def __addBone(self, bone):
-        bone.index=len(self.bones)
-        self.bones.append(bone)
-        self.boneMap[bone.name]=bone
 
