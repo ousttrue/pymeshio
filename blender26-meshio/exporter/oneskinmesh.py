@@ -258,7 +258,6 @@ class OneSkinMesh(object):
 
     def __addFaceTriangleSolid(self, obj_name, material, v, normal, uv,
             weightMap, secondWeightMap):
-        print(normal)
         # flip triangle
         self.vertexArray.addTriangle(
                 obj_name, material.name,
@@ -287,7 +286,6 @@ class OneSkinMesh(object):
 
     def __addFaceQuadrangleSolid(self, obj_name, material, v, uv, normal,
             weightMap, secondWeightMap):
-        print(normal)
         self.vertexArray.addTriangle(
                 obj_name, material.name,
                 v[2].index, 

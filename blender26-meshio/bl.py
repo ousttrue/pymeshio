@@ -392,6 +392,17 @@ class material:
                         continue
                     yield image.filepath
 
+    @staticmethod
+    def eachEnalbeTexture(m):
+        for i, slot in enumerate(m.texture_slots):
+            if m.use_textures[i] and slot and slot.texture:
+                texture=slot.texture
+                if  texture.type=="IMAGE":
+                    image=texture.image
+                    if not image:
+                        continue
+                    yield slot.texture
+
 
 class mesh:
     @staticmethod
@@ -681,10 +692,19 @@ class constraint:
     def isIKSolver(c):
         return c.type=='IK'
 
+
+"""
+custom property keys
+"""
 MMD_SHAPE_GROUP_NAME='_MMD_SHAPE'
+
 MMD_MB_NAME='mb_name'
+MMD_ENGLISH_NAME='english_name'
+
 MMD_MB_COMMENT='mb_comment'
 MMD_COMMENT='comment'
+MMD_ENGLISH_COMMENT='english_comment'
+
 BASE_SHAPE_NAME='Basis'
 RIGID_NAME='rigid_name'
 RIGID_SHAPE_TYPE='rigid_shape_type'
@@ -707,4 +727,13 @@ CONSTRAINT_ROT_MAX='const_rot_max'
 CONSTRAINT_SPRING_POS='const_spring_pos'
 CONSTRAINT_SPRING_ROT='const_spring_rot'
 TOON_TEXTURE_OBJECT='ToonTextures'
+
+MATERIALFLAG_BOTHFACE='material_flag_bothface'
+MATERIALFLAG_GROUNDSHADOW='material_flag_groundshadow'
+MATERIALFLAG_SELFSHADOWMAP='material_flag_selfshadowmap'
+MATERIALFLAG_SELFSHADOW='material_flag_drawselfshadow'
+MATERIALFLAG_EDGE='material_flag_drawedge'
+MATERIAL_SHAREDTOON='material_shared_toon'
+MATERIAL_SPHERE_MODE='material_sphere_mode'
+TEXTURE_TYPE='texture_type'
 

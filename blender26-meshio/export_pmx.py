@@ -20,10 +20,10 @@ def create_pmx(ex):
     model=pmx.Model()
 
     o=ex.root.o
-    model.english_name=o.name
-    model.name=o[bl.MMD_MB_NAME] if bl.MMD_MB_NAME in o else 'Blenderエクスポート'
-    model.comment=o[bl.MMD_MB_COMMENT] if bl.MMD_MB_COMMENT in o else 'Blnderエクスポート\n'
-    model.english_comment=o[bl.MMD_COMMENT] if bl.MMD_COMMENT in o else 'blender export\n'
+    model.name=o.get(bl.MMD_MB_NAME, 'Blenderエクスポート')
+    model.english_name=o.get(bl.MMD_ENGLISH_NAME, 'blender export model')
+    model.comment=o.get(bl.MMD_MB_COMMENT, 'Blnderエクスポート\n')
+    model.english_comment=o.get(bl.MMD_ENGLISH_COMMENT, 'blender export commen\n')
 
     def get_deform(b0, b1, weight):
         if b0==-1:
@@ -87,6 +87,7 @@ def create_pmx(ex):
     model.bones=[create_bone(b)
             for b in ex.skeleton.bones]
 
+    # textures
     textures=set()
     def get_texture_name(texture):
         pos=texture.replace("\\", "/").rfind("/")
@@ -99,6 +100,64 @@ def create_pmx(ex):
             textures.add(get_texture_name(path))
     model.textures=list(textures)
 
+    # texture pathからtexture indexを逆引き
+    texturePathMap={}
+    for i, texture_path in enumerate(model.textures):
+        texturePathMap[texture_path]=i
+
+    def get_flag(m):
+        """
+        return material flag
+        """
+        return (
+                m.get(bl.MATERIALFLAG_BOTHFACE, 0)
+                +(m.get(bl.MATERIALFLAG_GROUNDSHADOW, 0) << 1)
+                +(m.get(bl.MATERIALFLAG_SELFSHADOWMAP, 0) << 2)
+                +(m.get(bl.MATERIALFLAG_SELFSHADOW, 0) << 3)
+                +(m.get(bl.MATERIALFLAG_EDGE, 0) << 4)
+                )
+
+    def get_toon_shareing_flag(m):
+        """
+        return
+        shared: 1
+        not shared: 0
+        """
+        for t in bl.material.eachEnalbeTexturePath(m):
+            if re.match("""toon\d\d.bmp"""):
+                return 1
+        return 0
+
+    def get_texture_params(m, texturePathMap):
+        texture_index=-1
+        toon_texture_index=-1
+        toon_sharing_flag=0
+        sphere_texture_index=-1
+        sphere_mode=pmx.MATERIALSPHERE_NONE
+
+        for t in bl.material.eachEnalbeTexture(m):
+            texture_type=t.get(bl.TEXTURE_TYPE, 'NORMAL')
+            texture_path=get_texture_name(bl.texture.getPath(t))
+            if texture_type=='NORMAL': 
+                texture_index=texturePathMap[texture_path]
+            elif texture_type=='TOON':
+                toon_texture_index=texturePathMap[texture_path]
+                toon_sharing_flag=0
+            elif texture_type=='SPH':
+                sphere_texture_index=texturePathMap[texture_path]
+                sphere_mode=pmx.MATERIALSPHERE_SPH
+            elif texture_type=='SPA':
+                sphere_texture_index=texturePathMap[texture_path]
+                sphere_mode=pmx.MATERIALSPHERE_SPA
+        
+        if bl.MATERIAL_SHAREDTOON in m:
+            toon_texture_index=m[bl.MATERIAL_SHAREDTOON]
+            toon_sharing_flag=1
+
+        return (texture_index,
+                toon_texture_index, toon_sharing_flag,
+                sphere_texture_index, sphere_mode)
+
     # 面とマテリアル
     vertexCount=ex.oneSkinMesh.getVertexCount()
     for material_name, indices in ex.oneSkinMesh.vertexArray.each():
@@ -107,23 +166,39 @@ def create_pmx(ex):
             m=bl.material.get(material_name)
         except KeyError as e:
             m=DefaultMatrial()
+        (
+                texture_index, 
+                toon_texture_index, toon_sharing_flag, 
+                sphere_texture_index, sphere_mode,
+                )=get_texture_params(m, texturePathMap)
         # マテリアル
         model.materials.append(pmx.Material(
                 name=m.name,
                 english_name='',
-                diffuse_color=common.RGB(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2]),
+                diffuse_color=common.RGB(
+                    m.diffuse_color[0], 
+                    m.diffuse_color[1], 
+                    m.diffuse_color[2]),
                 alpha=m.alpha,
-                specular_factor=0 if m.specular_toon_size<1e-5 else m.specular_hardness*10,
-                specular_color=common.RGB(m.specular_color[0], m.specular_color[1], m.specular_color[2]),
-                ambient_color=common.RGB(m.mirror_color[0], m.mirror_color[1], m.mirror_color[2]),
-                flag=1 if m.subsurface_scattering.use else 0,
+                specular_factor=(0 
+                    if m.specular_toon_size<1e-5 
+                    else m.specular_toon_size * 10),
+                specular_color=common.RGB(
+                    m.specular_color[0], 
+                    m.specular_color[1], 
+                    m.specular_color[2]),
+                ambient_color=common.RGB(
+                    m.mirror_color[0], 
+                    m.mirror_color[1], 
+                    m.mirror_color[2]),
+                flag=get_flag(m),
                 edge_color=common.RGBA(0, 0, 0, 1),
                 edge_size=1.0,
-                texture_index=0,
-                sphere_texture_index=0,
-                sphere_mode=0,
-                toon_sharing_flag=0,
-                toon_texture_index=0,
+                texture_index=texture_index,
+                sphere_texture_index=sphere_texture_index,
+                sphere_mode=sphere_mode,
+                toon_sharing_flag=toon_sharing_flag,
+                toon_texture_index=toon_texture_index,
                 comment='',
                 vertex_count=len(indices)
                 ))
@@ -167,7 +242,7 @@ def create_pmx(ex):
     rigidNameMap={}
     for i, obj in enumerate(ex.oneSkinMesh.rigidbodies):
         name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
-        print(name)
+        #print(name)
         rigidNameMap[name]=i
         boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
         if boneIndex==0:

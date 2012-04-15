@@ -269,6 +269,14 @@ class Bone(Diff):
         return self.hasFlag(BONEFLAG_IS_EXTERNAL_PARENT_DEFORM)
 
  
+MATERIALFLAG_BOTHFACE=0x01
+MATERIALFLAG_GROUNDSHADOW=0x02
+MATERIALFLAG_SELFSHADOWMAP=0x04
+MATERIALFLAG_SELFSHADOW=0x08
+MATERIALFLAG_EDGE=0x10
+MATERIALSPHERE_NONE=0
+MATERIALSPHERE_SPH=1
+MATERIALSPHERE_SPA=2
 class Material(Diff):
     """material
 
@@ -329,6 +337,9 @@ class Material(Diff):
         self.toon_texture_index=toon_texture_index
         self.comment=comment
         self.vertex_count=vertex_count
+
+    def hasFlag(self, mask):
+        return (self.flag & mask)!=0
 
     def __eq__(self, rhs):
         return (
@@ -1049,8 +1060,8 @@ class Model(Diff):
         self._diff(rhs, "english_name")
         self._diff(rhs, "comment")
         self._diff(rhs, "english_comment")
-        self._diff_array(rhs, "vertices")
-        self._diff_array(rhs, "indices")
+        #self._diff_array(rhs, "vertices")
+        #self._diff_array(rhs, "indices")
         self._diff_array(rhs, "textures")
         self._diff_array(rhs, "materials")
         self._diff_array(rhs, "bones")

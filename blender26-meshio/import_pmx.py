@@ -20,13 +20,24 @@ def convert_coord(pos):
 def VtoV(v):
     return bl.createVector(v.x, v.y, v.z)
 
+def trim_by_utf8_21byte(src):
+    len_list=[len(src[:i].encode('utf-8')) for i in range(1, len(src)+1, 1)]
+    max_length=21
+    letter_count=0
+    for str_len in len_list:
+        if str_len>max_length:
+            break
+        letter_count+=1
+    return src[:letter_count]
+
 def get_object_name(fmt, index, name):
     """
     object名を作る。最大21バイト
     """
-    len_list=[len(name[:i].encode('utf-8')) for i in range(1, len(name)+1, 1)]
-    letter_count=0
-    prefix=fmt.format(index)
+    #len_list=[len(name[:i].encode('utf-8')) for i in range(1, len(name)+1, 1)]
+    #prefix=
+    return trim_by_utf8_21byte(fmt.format(index)+name)
+    """
     max_length=21-len(prefix)
     for str_len in len_list:
         if str_len>max_length:
@@ -35,6 +46,7 @@ def get_object_name(fmt, index, name):
     name=prefix+name[:letter_count]
     #print("%s(%d)" % (name, letter_count))
     return name
+    """
 
 def __import_joints(joints, rigidbodies):
     print("create joints")
@@ -166,16 +178,23 @@ def __create_a_material(m, name, textures_and_images):
     material = bl.material.create(name)
     # diffuse
     material.diffuse_shader='FRESNEL'
-    material.diffuse_color=[m.diffuse_color.r, m.diffuse_color.g, m.diffuse_color.b]
+    material.diffuse_color=[
+            m.diffuse_color.r, m.diffuse_color.g, m.diffuse_color.b]
     material.alpha=m.alpha
     # specular
     material.specular_shader='TOON'
-    material.specular_color=[m.specular_color.r, m.specular_color.g, m.specular_color.b]
-    material.specular_toon_size=int(m.specular_factor)
+    material.specular_color=[
+            m.specular_color.r, m.specular_color.g, m.specular_color.b]
+    material.specular_toon_size=m.specular_factor * 0.1
     # ambient
-    material.mirror_color=[m.ambient_color.r, m.ambient_color.g, m.ambient_color.b]
-    # todo
+    material.mirror_color=[
+            m.ambient_color.r, m.ambient_color.g, m.ambient_color.b]
     # flag
+    material[bl.MATERIALFLAG_BOTHFACE]=m.hasFlag(pmx.MATERIALFLAG_BOTHFACE)
+    material[bl.MATERIALFLAG_GROUNDSHADOW]=m.hasFlag(pmx.MATERIALFLAG_GROUNDSHADOW)
+    material[bl.MATERIALFLAG_SELFSHADOWMAP]=m.hasFlag(pmx.MATERIALFLAG_SELFSHADOWMAP)
+    material[bl.MATERIALFLAG_SELFSHADOW]=m.hasFlag(pmx.MATERIALFLAG_SELFSHADOW)
+    material[bl.MATERIALFLAG_EDGE]=m.hasFlag(pmx.MATERIALFLAG_EDGE)
     # edge_color
     # edge_size
     # other
@@ -183,7 +202,39 @@ def __create_a_material(m, name, textures_and_images):
     material.use_transparency=True
     # texture
     if m.texture_index!=-1:
-        bl.material.addTexture(material, textures_and_images[m.texture_index][0])
+        texture=textures_and_images[m.texture_index][0]
+        bl.material.addTexture(material, texture)
+    # toon texture
+    if m.toon_sharing_flag==1:
+        material[bl.MATERIAL_SHAREDTOON]=m.toon_texture_index
+    else:
+        if m.toon_texture_index!=-1:
+            toon_texture=textures_and_images[m.toon_texture_index][0]
+            toon_texture[bl.TEXTURE_TYPE]='TOON'
+            bl.material.addTexture(material, toon_texture)
+    # sphere texture
+    if m.sphere_mode==pmx.MATERIALSPHERE_NONE:
+        material[bl.MATERIAL_SPHERE_MODE]=pmx.MATERIALSPHERE_NONE
+    elif m.sphere_mode==pmx.MATERIALSPHERE_SPH:
+        # SPH
+        if m.sphere_texture_index==-1:
+            material[bl.MATERIAL_SPHERE_MODE]=pmx.MATERIALSPHERE_NONE
+        else:
+            sph_texture=textures_and_images[m.sphere_texture_index][0]
+            sph_texture[bl.TEXTURE_TYPE]='SPH'
+            bl.material.addTexture(material, sph_texture)
+            material[bl.MATERIAL_SPHERE_MODE]=m.sphere_mode
+    elif m.sphere_mode==pmx.MATERIALSPHERE_SPA:
+        # SPA
+        if m.sphere_texture_index==-1:
+            material[bl.MATERIAL_SPHERE_MODE]=pmx.MATERIALSPHERE_NONE
+        else:
+            spa_texture=textures_and_images[m.sphere_texture_index][0]
+            spa_texture[bl.TEXTURE_TYPE]='SPA'
+            bl.material.addTexture(material, spa_texture)
+            material[bl.MATERIAL_SPHERE_MODE]=m.sphere_mode
+    else:
+        print("unknown sphere mode:", m.sphere_mode)
     return material
 
 def __create_armature(bones, display_slots):
@@ -283,9 +334,7 @@ def __create_armature(bones, display_slots):
     pose = bl.object.getPose(armature_object)
     bone_groups={}
     for i, ds in enumerate(display_slots):
-        print(ds)
-        for target, index in ds.references:
-            print(target, index)
+        #print(ds)
         g=bl.object.createBoneGroup(armature_object, ds.name, "THEME%02d" % (i+1))
         for t, index in ds.references:
             if t==0:
@@ -306,14 +355,17 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
     print(model)
 
     # メッシュをまとめるエンプティオブジェクト
-    model_name=model.english_name
+    model_name=model.name
     if len(model_name)==0:
-        model_name=os.path.basename(filepath)
+        model_name=model.english
+        if len(model_name)==0:
+            model_name=os.path.basename(filepath)
 
-    root_object=bl.object.createEmpty(model_name)
+    root_object=bl.object.createEmpty(trim_by_utf8_21byte(model_name))
     root_object[bl.MMD_MB_NAME]=model.name
+    root_object[bl.MMD_ENGLISH_NAME]=model.english_name
     root_object[bl.MMD_MB_COMMENT]=model.comment
-    root_object[bl.MMD_COMMENT]=model.english_comment
+    root_object[bl.MMD_ENGLISH_COMMENT]=model.english_comment
 
     # armatureを作る
     armature_object=__create_armature(model.bones, model.display_slots)
@@ -323,6 +375,7 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
     if import_mesh:
         # テクスチャを作る
         texture_dir=os.path.dirname(filepath)
+        print(model.textures)
         textures_and_images=[bl.texture.create(os.path.join(texture_dir, t))
                 for t in model.textures]
         print(textures_and_images)
