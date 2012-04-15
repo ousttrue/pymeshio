@@ -98,6 +98,11 @@ Usage as python module
 
 New
 ---
+2.5.4 (2012-04-15)
+~~~~~~~~~~~~~~~~~~
+* fix face flip for pmx_importer/pmx_export
+* implement material flags for pmx_importer/pmx_export
+
 2.5.3 (2012-04-14)
 ~~~~~~~~~~~~~~~~~~
 * update pmd to pmx converter(bone flag)
