@@ -251,6 +251,7 @@ def __create_armature(bones, display_slots):
     bl.armature.makeEditable(armature_object)
     def create_bone(b):
         bone=bl.armature.createBone(armature, b.name)
+        bone[bl.BONE_ENGLISH_NAME]=b.english_name
         # bone position
         bone.head=bl.createVector(*convert_coord(b.position))
         if b.getConnectionFlag():
@@ -264,7 +265,9 @@ def __create_armature(bones, display_slots):
                 bone.tail=bone.head+bl.createVector(0, 1, 0)
             pass
         if not b.getVisibleFlag():
-            # 不可視(目立たなくする)
+            # 不可視
+            bone.hide=True
+            #目立たなくする
             bone.tail=bone.head+bl.createVector(0, 0.01, 0)
         return bone
     bl_bones=[create_bone(b) for b in bones]
@@ -290,48 +293,55 @@ def __create_armature(bones, display_slots):
         else:
             #print("no parent %s" % b.name)
             pass
+
     bl.armature.update(armature)
 
-    # create ik constraint
+    # pose bone construction
     bl.enterObjectMode()
     pose = bl.object.getPose(armature_object)
     for b, bone in zip(bones, bl_bones):
+        p_bone=pose.bones[b.name]
         if b.getIkFlag():
+            # create ik constraint
             ik=b.ik
             assert(len(ik.link)<16)
-            p_bone=pose.bones[bones[ik.target_index].name]
-            assert(p_bone)
+            ik_p_bone=pose.bones[bones[ik.target_index].name]
+            assert(ik_p_bone)
             constraint=bl.armature.createIkConstraint(
-                    armature_object, p_bone, bone.name,
+                    armature_object, ik_p_bone, bone.name,
                     ik.link, ik.limit_radian, ik.loop)
             for chain in ik.link:
                 if chain.limit_angle:
-                    p_bone=pose.bones[bones[chain.bone_index].name]
+                    ik_p_bone=pose.bones[bones[chain.bone_index].name]
                     # IK limit
                     # x
                     if chain.limit_min.x==0 or chain.limit_max.x==0:
-                        p_bone.lock_ik_x=True
+                        ik_p_bone.lock_ik_x=True
                     else:
-                        p_bone.use_ik_limit_x=True
+                        ik_p_bone.use_ik_limit_x=True
                         # left handed to right handed ?
-                        p_bone.ik_min_x=-chain.limit_max.x
-                        p_bone.ik_max_x=-chain.limit_min.x
+                        ik_p_bone.ik_min_x=-chain.limit_max.x
+                        ik_p_bone.ik_max_x=-chain.limit_min.x
 
                     # y
                     if chain.limit_min.y==0 or chain.limit_max.y==0:
-                        p_bone.lock_ik_y=True
+                        ik_p_bone.lock_ik_y=True
                     else:
-                        p_bone.use_ik_limit_y=True
-                        p_bone.ik_min_y=chain.limit_min.y
-                        p_bone.ik_max_y=chain.limit_max.y
+                        ik_p_bone.use_ik_limit_y=True
+                        ik_p_bone.ik_min_y=chain.limit_min.y
+                        ik_p_bone.ik_max_y=chain.limit_max.y
 
                     # z
                     if chain.limit_min.z==0 or chain.limit_max.z==0:
-                        p_bone.lock_ik_z=True
+                        ik_p_bone.lock_ik_z=True
                     else:
-                        p_bone.use_ik_limit_z=True
-                        p_bone.ik_min_z=chain.limit_min.z
-                        p_bone.ik_max_z=chain.limit_max.z
+                        ik_p_bone.use_ik_limit_z=True
+                        ik_p_bone.ik_min_z=chain.limit_min.z
+                        ik_p_bone.ik_max_z=chain.limit_max.z
+
+        if not b.hasFlag(pmx.BONEFLAG_CAN_TRANSLATE):
+            # translatation lock
+            p_bone.lock_location=(True, True, True)
 
 
     bl.armature.makeEditable(armature_object)

@@ -14,11 +14,14 @@ class IKSolver(object):
 
 
 class Bone(object):
-    __slots__=['index', 'name', 'ik_index',
-            'pos', 'tail', 'parent_index', 'tail_index', 'type', 'isConnect']
-    def __init__(self, index, name, pos, tail, isConnect):
+    __slots__=['index', 'name', 'english_name', 'ik_index',
+            'pos', 'tail', 'parent_index', 'tail_index', 'type', 
+            'isConnect', 'isVisible', 'hasTail', 
+            'canTranslate']
+    def __init__(self, index, name, english_name, pos, tail, isConnect):
         self.index=index
         self.name=name
+        self.english_name=english_name
         self.pos=pos
         self.tail=tail
         self.parent_index=None
@@ -26,12 +29,20 @@ class Bone(object):
         self.type=0
         self.isConnect=isConnect
         self.ik_index=0
+        self.isVisible=True
+        self.hasTail=False
+        self.canTranslate=False
 
     def __eq__(self, rhs):
         return self.index==rhs.index
 
     def __str__(self):
         return "<Bone %s %d>" % (self.name, self.type)
+
+    def canManipulate(self):
+        if not self.isVisible:
+            return False
+        return True
 
 
 class BoneBuilder(object):
@@ -66,7 +77,8 @@ class BoneBuilder(object):
         ####################
         # create bones
         ####################
-        self.bones=[Bone(i, b.name,
+        self.bones=[Bone(i, 
+            b.name, b.get(bl.BONE_ENGLISH_NAME, 'bone%04d' % i),
             bl.bone.getHeadLocal(b),
             bl.bone.getTailLocal(b),
             False) for i, b in enumerate(armature.bones.values())]
@@ -79,9 +91,12 @@ class BoneBuilder(object):
                 parent.type=7
                 return
 
+            parent.hasTail=True
             for i, c in enumerate(b.children):
                 bone=self.boneMap[c.name]
                 bone.isConnect=bl.bone.isConnected(c)
+                if c.hide:
+                    bone.isVisible=False
                 if parent:
                     bone.parent_index=parent.index
                     #if i==0:
@@ -90,7 +105,7 @@ class BoneBuilder(object):
                         parent.tail_index=bone.index
                 __getBone(bone, c)
 
-        for b in armature.bones.values():
+        for bone, b in zip(self.bones, armature.bones.values()):
             if not b.parent:
                 # root bone
                 __getBone(bone, b)
@@ -100,10 +115,17 @@ class BoneBuilder(object):
         ####################
         pose = bl.object.getPose(armatureObj)
         for b in pose.bones.values():
+            bone=self.boneMap[b.name]
             ####################
             # assing bone group
             ####################
             self.__assignBoneGroup(b, b.bone_group)
+
+            # translation lock
+            if not b.lock_location[0]:
+                bone.canTranslate=True
+
+            # IK
             for c in b.constraints:
                 if bl.constraint.isIKSolver(c):
                     ####################
@@ -162,7 +184,6 @@ class BoneBuilder(object):
         def getIndex(bone):
             for i, k_v in enumerate(boneMap):
                 if (k_v[0]==bone.name or k_v[1]==bone.name):
-                    print(bone.name)
                     return i
             #print(bone)
             return len(boneMap)

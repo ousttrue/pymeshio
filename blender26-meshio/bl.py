@@ -710,6 +710,8 @@ MMD_MB_COMMENT='mb_comment'
 MMD_COMMENT='comment'
 MMD_ENGLISH_COMMENT='english_comment'
 
+BONE_ENGLISH_NAME='english_name'
+
 BASE_SHAPE_NAME='Basis'
 RIGID_NAME='rigid_name'
 RIGID_SHAPE_TYPE='rigid_shape_type'

@@ -61,10 +61,11 @@ def create_pmx(ex):
         solver.weight=ik.weight
         model.ik_list.append(solver)
     '''
+       
     def create_bone(b):
-        return pmx.Bone(
+        bone=pmx.Bone(
             name=b.name,
-            english_name=b.name,
+            english_name=b.english_name,
             # convert right-handed z-up to left-handed y-up
             position=common.Vector3(
                 b.pos[0] if not near(b.pos[0], 0) else 0,
@@ -84,6 +85,14 @@ def create_pmx(ex):
             external_key=-1,
             ik=None
                 )
+
+        bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, b.hasTail)
+        bone.setFlag(pmx.BONEFLAG_CAN_ROTATE, True)
+        bone.setFlag(pmx.BONEFLAG_CAN_TRANSLATE, b.canTranslate)
+        bone.setFlag(pmx.BONEFLAG_IS_VISIBLE, b.isVisible)
+        bone.setFlag(pmx.BONEFLAG_CAN_MANIPULATE, b.canManipulate())
+
+        return bone
     model.bones=[create_bone(b)
             for b in ex.skeleton.bones]
 

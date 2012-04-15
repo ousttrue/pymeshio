@@ -232,6 +232,12 @@ class Bone(Diff):
     def hasFlag(self, flag):
         return (self.flag & flag)!=0
 
+    def setFlag(self, flag, enable):
+        if enable:
+            self.flag |= flag
+        else:
+            self.flag &= ~flag
+
     def getConnectionFlag(self):
         return self.hasFlag(BONEFLAG_TAILPOS_IS_BONE)
 
