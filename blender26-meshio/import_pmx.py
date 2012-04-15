@@ -353,7 +353,6 @@ def __create_armature(bones, display_slots):
                     print("pose %s is not found" % name)
 
     bl.enterObjectMode()
-    print(len(armature.bones), "bones")
     return armature_object
 
 

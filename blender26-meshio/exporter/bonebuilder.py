@@ -72,7 +72,6 @@ class BoneBuilder(object):
             False) for i, b in enumerate(armature.bones.values())]
         for bone in self.bones:
             self.boneMap[bone.name]=bone
-        print(len(self.bones))
 
         # buid tree hierarchy
         def __getBone(parent, b):
@@ -138,7 +137,7 @@ class BoneBuilder(object):
         ####################
 
         # boneのsort
-        #self._sortBy()
+        self._sortBy()
         self._fix()
         # IKのsort
         def getIndex(ik):
@@ -162,7 +161,8 @@ class BoneBuilder(object):
         original=self.bones[:]
         def getIndex(bone):
             for i, k_v in enumerate(boneMap):
-                if k_v[0]==bone.name:
+                if (k_v[0]==bone.name or k_v[1]==bone.name):
+                    print(bone.name)
                     return i
             #print(bone)
             return len(boneMap)
