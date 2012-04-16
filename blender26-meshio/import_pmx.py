@@ -239,8 +239,6 @@ def __create_a_material(m, name, textures_and_images):
 
 def __create_armature(bones, display_slots):
     """
-    armatureを作成する
-
     :Params:
         bones
             list of pymeshio.pmx.Bone
@@ -255,19 +253,19 @@ def __create_armature(bones, display_slots):
         # bone position
         bone.head=bl.createVector(*convert_coord(b.position))
         if b.getConnectionFlag():
-            # 仮
+            # dummy tail
             bone.tail=bone.head+bl.createVector(0, 1, 0)
         else:
-            # 尻尾位置の座標指定
+            # offset tail
             bone.tail=bone.head+bl.createVector(
                     *convert_coord(b.tail_position))
             if bone.tail==bone.head:
                 bone.tail=bone.head+bl.createVector(0, 1, 0)
             pass
         if not b.getVisibleFlag():
-            # 不可視
+            # invisible
             bone.hide=True
-            #目立たなくする
+            # dummy tail
             bone.tail=bone.head+bl.createVector(0, 0.01, 0)
         return bone
     bl_bones=[create_bone(b) for b in bones]
@@ -282,10 +280,12 @@ def __create_armature(bones, display_slots):
                 print("invalid name:[%s][%s]" %(b.name, bone.name))
         used_bone_name.add(b.name)
         if b.parent_index!=-1:
+            # has parent bone
             #print("%s -> %s" % (bones[b.parent_index].name, b.name))
             parent_bone=bl_bones[b.parent_index]
             bone.parent=parent_bone
             if b.getConnectionFlag() and b.tail_index!=-1:
+                # connect...
                 assert(b.tail_index!=0)
                 tail_bone=bl_bones[b.tail_index]
                 bone.tail=tail_bone.head
@@ -301,7 +301,7 @@ def __create_armature(bones, display_slots):
     pose = bl.object.getPose(armature_object)
     for b, bone in zip(bones, bl_bones):
         p_bone=pose.bones[b.name]
-        if b.getIkFlag():
+        if b.hasFlag(pmx.BONEFLAG_IS_IK):
             # create ik constraint
             ik=b.ik
             assert(len(ik.link)<16)
@@ -338,6 +338,12 @@ def __create_armature(bones, display_slots):
                         ik_p_bone.use_ik_limit_z=True
                         ik_p_bone.ik_min_z=chain.limit_min.z
                         ik_p_bone.ik_max_z=chain.limit_max.z
+
+        if b.hasFlag(pmx.BONEFLAG_IS_EXTERNAL_ROTATION):
+            constraint_p_bone=pose.bones[bones[b.effect_index].name]
+            bl.bone.addCopyRotationConstraint(p_bone,
+                    armature_object, constraint_p_bone, 
+                    b.effect_factor)
 
         if not b.hasFlag(pmx.BONEFLAG_CAN_TRANSLATE):
             # translatation lock
