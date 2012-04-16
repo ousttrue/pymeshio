@@ -436,24 +436,21 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
             # assign material
             bl.mesh.addUV(mesh)
             hasTexture=bl.material.hasTexture(material)
-            if hasTexture:
-                index_gen=(i for i in indices)
-                image=(textures_and_images.get[m.texture_index] 
-                        if m.texture_index in textures_and_images
-                        else None)
+            index_gen=(i for i in indices)
+            image=(textures_and_images.get[m.texture_index] 
+                    if m.texture_index in textures_and_images
+                    else None)
             for i, face in enumerate(bl.mesh.getFaces(mesh)):
                 bl.face.setMaterial(face, 0)
-                if hasTexture:
-                    uv0=model.vertices[next(index_gen)].uv
-                    uv1=model.vertices[next(index_gen)].uv
-                    uv2=model.vertices[next(index_gen)].uv
-                    # flip
-                    bl.mesh.setFaceUV(mesh, i, face, [# fix uv
-                        (uv2.x, 1.0-uv2.y),
-                        (uv1.x, 1.0-uv1.y),
-                        (uv0.x, 1.0-uv0.y)
-                        ],
-                        image)
+                uv0=model.vertices[next(index_gen)].uv
+                uv1=model.vertices[next(index_gen)].uv
+                uv2=model.vertices[next(index_gen)].uv
+                bl.mesh.setFaceUV(mesh, i, face, [# fix uv
+                    (uv2.x, 1.0-uv2.y),
+                    (uv1.x, 1.0-uv1.y),
+                    (uv0.x, 1.0-uv0.y)
+                    ],
+                    image)
 
                 # set smooth
                 bl.face.setSmooth(face, True)
