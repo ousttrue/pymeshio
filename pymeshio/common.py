@@ -71,7 +71,12 @@ class Vector3(object):
         return "<%f %.32f %f>" % (self.x, self.y, self.z)
 
     def __eq__(self, rhs):
-        return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z
+        #return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z
+        return (
+                abs(self.x-rhs.x)<1e-4 
+                and abs(self.y-rhs.y)<1e-4 
+                and abs(self.z-rhs.z)<1e-4
+                )
 
     def __ne__(self, rhs):
         return not self.__eq__(rhs)

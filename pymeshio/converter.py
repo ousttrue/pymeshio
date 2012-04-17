@@ -275,6 +275,10 @@ def pmd_to_pmx(src):
                 external_key=-1,
                 ik=get_ik(b),
                 )
+
+        if isinstance(b, pmd.Bone_Rolling):
+            converted.fixed_axis=(b.tail-b.pos).normalize()
+
         converted.index=b.index
         bones.append(converted)
         for child in b.children:
