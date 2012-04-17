@@ -341,7 +341,7 @@ def __create_armature(bones, display_slots):
 
         if b.hasFlag(pmx.BONEFLAG_IS_EXTERNAL_ROTATION):
             constraint_p_bone=pose.bones[bones[b.effect_index].name]
-            bl.bone.addCopyRotationConstraint(p_bone,
+            bl.constraint.addCopyRotation(p_bone,
                     armature_object, constraint_p_bone, 
                     b.effect_factor)
 

@@ -675,14 +675,6 @@ class bone:
     def getTailLocal(b):
         return b.tail_local[0:3]
 
-    @staticmethod
-    def addCopyRotationConstraint(pose_bone, target_object, target_bone, factor):
-        c=pose_bone.constraints.new(type='COPY_ROTATION')
-        c.target=target_object
-        c.subtarget=target_bone.name
-        c.influence=factor
-        c.target_space='LOCAL'
-        c.owner_space='LOCAL'
 
 class constraint:
     @staticmethod
@@ -704,6 +696,19 @@ class constraint:
     @staticmethod
     def isIKSolver(c):
         return c.type=='IK'
+
+    @staticmethod
+    def isCopyRotation(c):
+        return c.type=='COPY_ROTATION'
+
+    @staticmethod
+    def addCopyRotation(pose_bone, target_object, target_bone, factor):
+        c=pose_bone.constraints.new(type='COPY_ROTATION')
+        c.target=target_object
+        c.subtarget=target_bone.name
+        c.influence=factor
+        c.target_space='LOCAL'
+        c.owner_space='LOCAL'
 
 
 """

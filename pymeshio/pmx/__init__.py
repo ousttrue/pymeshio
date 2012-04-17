@@ -220,7 +220,7 @@ class Bone(Diff):
         self._diff(rhs, 'tail_index')
         self._diff(rhs, 'effect_index')
         self._diff(rhs, 'effect_factor')
-        #self._diff(rhs, 'fixed_axis')
+        self._diff(rhs, 'fixed_axis')
         self._diff(rhs, 'local_x_vector')
         self._diff(rhs, 'local_z_vector')
         self._diff(rhs, 'external_key')

@@ -62,7 +62,10 @@ def create_pmx(ex):
         model.ik_list.append(solver)
     '''
        
+    boneMap=dict([(b.name, i) for i, b in enumerate(ex.skeleton.bones)])
+    
     def create_bone(b):
+
         bone=pmx.Bone(
             name=b.name,
             english_name=b.english_name,
@@ -86,6 +89,12 @@ def create_pmx(ex):
             ik=None
                 )
 
+        if b.constraint==exporter.bonebuilder.CONSTRAINT_COPY_ROTATION:
+            bone.layer=2
+            bone.effect_index=boneMap[b.constraintTarget]
+            bone.effect_factor=b.constraintInfluence
+            bone.setFlag(pmx.BONEFLAG_IS_EXTERNAL_ROTATION, True)
+
         bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, b.hasTail)
         bone.setFlag(pmx.BONEFLAG_CAN_ROTATE, True)
         bone.setFlag(pmx.BONEFLAG_CAN_TRANSLATE, b.canTranslate)
@@ -93,8 +102,8 @@ def create_pmx(ex):
         bone.setFlag(pmx.BONEFLAG_CAN_MANIPULATE, b.canManipulate())
 
         return bone
-    model.bones=[create_bone(b)
-            for b in ex.skeleton.bones]
+
+    model.bones=[create_bone(b) for b in ex.skeleton.bones]
 
     # textures
     textures=set()

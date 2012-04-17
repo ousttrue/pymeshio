@@ -13,11 +13,18 @@ class IKSolver(object):
         self.weight=weight
 
 
+CONSTRAINT_NONE=0
+CONSTRAINT_IK=1
+CONSTRAINT_COPY_ROTATION=2
 class Bone(object):
     __slots__=['index', 'name', 'english_name', 'ik_index',
             'pos', 'tail', 'parent_index', 'tail_index', 'type', 
             'isConnect', 'isVisible', 'hasTail', 
-            'canTranslate']
+            'canTranslate',
+            'constraint',
+            'constraintTarget',
+            'constraintInfluence',
+            ]
     def __init__(self, index, name, english_name, pos, tail, isConnect):
         self.index=index
         self.name=name
@@ -32,6 +39,10 @@ class Bone(object):
         self.isVisible=True
         self.hasTail=False
         self.canTranslate=False
+        #
+        self.constraint=CONSTRAINT_NONE
+        self.constraintTarget=0
+        self.constraintInfluence=0
 
     def __eq__(self, rhs):
         return self.index==rhs.index
@@ -111,7 +122,7 @@ class BoneBuilder(object):
                 __getBone(bone, b)
 
         ####################
-        # get IK
+        # get pose bone info
         ####################
         pose = bl.object.getPose(armatureObj)
         for b in pose.bones.values():
@@ -125,16 +136,13 @@ class BoneBuilder(object):
             if not b.lock_location[0]:
                 bone.canTranslate=True
 
-            # IK
             for c in b.constraints:
                 if bl.constraint.isIKSolver(c):
-                    ####################
                     # IK target
                     ####################
                     target=self.__boneByName(bl.constraint.ikTarget(c))
                     target.type=2
 
-                    ####################
                     # IK effector
                     ####################
                     # IK 接続先
@@ -142,6 +150,7 @@ class BoneBuilder(object):
                     link.type=6
 
                     # IK chain
+                    ####################
                     e=b.parent
                     chainLength=bl.constraint.ikChainLen(c)
                     for i in range(chainLength):
@@ -155,6 +164,12 @@ class BoneBuilder(object):
                                 int(bl.constraint.ikItration(c) * 0.1), 
                                 bl.constraint.ikRotationWeight(c)
                                 ))
+
+                if bl.constraint.isCopyRotation(c):
+                    # copy rotation
+                    bone.constraint=CONSTRAINT_COPY_ROTATION
+                    bone.constraintTarget=c.subtarget
+                    bone.constraintInfluence=c.influence
 
         ####################
 
