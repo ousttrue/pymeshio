@@ -98,6 +98,16 @@ Usage as python module
 
 New
 ---
+2.5.5 (2012-04-17)
+~~~~~~~~~~~~~~~~~~
+* blender pmx importer/exporter improvement
+    * fix lost bones
+    * fix bone order
+    * implement bone flags
+    * fix lost uv
+    * copy rotation
+    * fix fixed_axis in convert 
+
 2.5.4 (2012-04-15)
 ~~~~~~~~~~~~~~~~~~
 * fix face flip for pmx_importer/pmx_export
