@@ -260,7 +260,8 @@ def __create_armature(bones, display_slots):
             bone.tail=bone.head+bl.createVector(
                     *convert_coord(b.tail_position))
             if bone.tail==bone.head:
-                bone.tail=bone.head+bl.createVector(0, 1, 0)
+                # 捻りボーン
+                bone.tail=bone.head+bl.createVector(0, 0.01, 0)
             pass
         if not b.getVisibleFlag():
             # invisible
@@ -284,15 +285,25 @@ def __create_armature(bones, display_slots):
             #print("%s -> %s" % (bones[b.parent_index].name, b.name))
             parent_bone=bl_bones[b.parent_index]
             bone.parent=parent_bone
-            if b.getConnectionFlag() and b.tail_index!=-1:
-                # connect...
-                assert(b.tail_index!=0)
-                tail_bone=bl_bones[b.tail_index]
-                bone.tail=tail_bone.head
-                bl.bone.setConnected(tail_bone)
+            # connect with parent
+            parent_b=bones[b.parent_index]
+            if parent_b.hasFlag(pmx.BONEFLAG_HAS_FIXED_AXIS):
+                pass
+                #parent_bone.tail=bone.head
+                #bl.bone.setConnected(bone)
         else:
             #print("no parent %s" % b.name)
             pass
+        if b.getConnectionFlag() and b.tail_index!=-1:
+            assert(b.tail_index!=0)
+            # set tail position
+            tail_bone=bl_bones[b.tail_index]
+            bone.tail=tail_bone.head
+
+            tail_b=bones[b.tail_index]
+            if bones[tail_b.parent_index]==b:
+                # connect with tail
+                bl.bone.setConnected(tail_bone)
 
     bl.armature.update(armature)
 
@@ -344,6 +355,9 @@ def __create_armature(bones, display_slots):
             bl.constraint.addCopyRotation(p_bone,
                     armature_object, constraint_p_bone, 
                     b.effect_factor)
+
+        if b.hasFlag(pmx.BONEFLAG_HAS_FIXED_AXIS):
+            bl.constraint.addLimitRotation(p_bone)
 
         if not b.hasFlag(pmx.BONEFLAG_CAN_TRANSLATE):
             # translatation lock

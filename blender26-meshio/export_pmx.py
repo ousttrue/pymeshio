@@ -95,6 +95,9 @@ def create_pmx(ex):
             bone.effect_factor=b.constraintInfluence
             bone.setFlag(pmx.BONEFLAG_IS_EXTERNAL_ROTATION, True)
 
+        if b.constraint==exporter.bonebuilder.CONSTRAINT_LIMIT_ROTATION:
+            bone.setFlag(pmx.BONEFLAG_HAS_FIXED_AXIS, True)
+
         bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, b.hasTail)
         bone.setFlag(pmx.BONEFLAG_CAN_ROTATE, True)
         bone.setFlag(pmx.BONEFLAG_CAN_TRANSLATE, b.canTranslate)

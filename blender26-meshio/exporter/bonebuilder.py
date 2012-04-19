@@ -16,6 +16,7 @@ class IKSolver(object):
 CONSTRAINT_NONE=0
 CONSTRAINT_IK=1
 CONSTRAINT_COPY_ROTATION=2
+CONSTRAINT_LIMIT_ROTATION=3
 class Bone(object):
     __slots__=['index', 'name', 'english_name', 'ik_index',
             'pos', 'tail', 'parent_index', 'tail_index', 'type', 
@@ -111,8 +112,7 @@ class BoneBuilder(object):
                 if parent:
                     bone.parent_index=parent.index
                     #if i==0:
-                    if bone.isConnect or (
-                            not parent.tail_index and parent.tail==bone.pos):
+                    if bone.isConnect:
                         parent.tail_index=bone.index
                 __getBone(bone, c)
 
@@ -171,6 +171,9 @@ class BoneBuilder(object):
                     bone.constraintTarget=c.subtarget
                     bone.constraintInfluence=c.influence
 
+                if bl.constraint.isLimitRotation(c):
+                    bone.constraint=CONSTRAINT_LIMIT_ROTATION
+
         ####################
 
         # boneのsort
@@ -227,11 +230,9 @@ class BoneBuilder(object):
             if b.parent_index==None:
                 b.parent_index=-1
             else:
-                if b.type==6 or b.type==7:
-                    # fix tail bone
-                    parent=self.bones[b.parent_index]
-                    #print('parnet', parent.name)
-                    parent.tail_index=b.index
+                parent_b=self.bones[b.parent_index]
+                if not parent_b.tail_index and b.constraint==CONSTRAINT_LIMIT_ROTATION:
+                    parent_b.tail_index=b.tail_index
 
         for b in self.bones:
             if b.tail_index==None:
