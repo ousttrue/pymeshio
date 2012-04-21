@@ -245,6 +245,10 @@ def __create_armature(bones, display_slots):
     """
     armature, armature_object=bl.armature.create()
 
+    # numbering
+    for i, b in enumerate(bones): 
+        b.index=i
+
     # create bones
     bl.armature.makeEditable(armature_object)
     def create_bone(b):
@@ -264,8 +268,6 @@ def __create_armature(bones, display_slots):
                 bone.tail=bone.head+bl.createVector(0, 0.01, 0)
             pass
         if not b.getVisibleFlag():
-            # invisible
-            bone.hide=True
             # dummy tail
             bone.tail=bone.head+bl.createVector(0, 0.01, 0)
         return bone
@@ -281,25 +283,16 @@ def __create_armature(bones, display_slots):
                 print("invalid name:[%s][%s]" %(b.name, bone.name))
         used_bone_name.add(b.name)
         if b.parent_index!=-1:
-            # has parent bone
-            #print("%s -> %s" % (bones[b.parent_index].name, b.name))
+            # set parent
             parent_bone=bl_bones[b.parent_index]
             bone.parent=parent_bone
-            # connect with parent
-            parent_b=bones[b.parent_index]
-            if parent_b.hasFlag(pmx.BONEFLAG_HAS_FIXED_AXIS):
-                pass
-                #parent_bone.tail=bone.head
-                #bl.bone.setConnected(bone)
-        else:
-            #print("no parent %s" % b.name)
-            pass
+
         if b.getConnectionFlag() and b.tail_index!=-1:
             assert(b.tail_index!=0)
             # set tail position
             tail_bone=bl_bones[b.tail_index]
             bone.tail=tail_bone.head
-
+            # connect with child
             tail_b=bones[b.tail_index]
             if bones[tail_b.parent_index]==b:
                 # connect with tail
@@ -359,6 +352,23 @@ def __create_armature(bones, display_slots):
         if b.hasFlag(pmx.BONEFLAG_HAS_FIXED_AXIS):
             bl.constraint.addLimitRotation(p_bone)
 
+        if b.parent_index!=-1:
+            parent_b=bones[b.parent_index]
+            if (
+                    parent_b.hasFlag(pmx.BONEFLAG_TAILPOS_IS_BONE)
+                    and parent_b.tail_index==b.index
+                    ):
+                # 移動制限を尻尾位置の接続フラグに流用する
+                bl.constraint.addLimitTranslateion(p_bone)
+            else:
+                parent_parent_b=bones[parent_b.parent_index]
+                if (
+                        parent_parent_b.hasFlag(pmx.BONEFLAG_TAILPOS_IS_BONE)
+                        and parent_parent_b.tail_index==b.index
+                        ):
+                    # 移動制限を尻尾位置の接続フラグに流用する
+                    bl.constraint.addLimitTranslateion(p_bone)
+
         if not b.hasFlag(pmx.BONEFLAG_CAN_TRANSLATE):
             # translatation lock
             p_bone.lock_location=(True, True, True)
@@ -383,6 +393,15 @@ def __create_armature(bones, display_slots):
                     print("pose %s is not found" % name)
 
     bl.enterObjectMode()
+
+
+    boneNameMap={}
+    for b in bones:
+        boneNameMap[b.name]=b
+    for b in armature.bones.values():
+        if not boneNameMap[b.name].hasFlag(pmx.BONEFLAG_IS_VISIBLE):
+            b.hide=True
+
     return armature_object
 
 

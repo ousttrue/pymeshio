@@ -17,29 +17,33 @@ CONSTRAINT_NONE=0
 CONSTRAINT_IK=1
 CONSTRAINT_COPY_ROTATION=2
 CONSTRAINT_LIMIT_ROTATION=3
+CONSTRAINT_LIMIT_TRANSLATION=4
 class Bone(object):
     __slots__=['index', 'name', 'english_name', 'ik_index',
-            'pos', 'tail', 'parent_index', 'tail_index', 'type', 
-            'isConnect', 'isVisible', 'hasTail', 
+            'ikEffector', 'ikTarget',
+            'pos', 'tail', 'parent_index', 'tail_index',
+            'isVisible', 'hasTail', 
+            'fixed_axis',
             'canTranslate',
             'constraint',
             'constraintTarget',
             'constraintInfluence',
             ]
-    def __init__(self, index, name, english_name, pos, tail, isConnect):
+    def __init__(self, index, name, english_name, pos, isVisible):
         self.index=index
         self.name=name
         self.english_name=english_name
         self.pos=pos
-        self.tail=tail
+        self.tail=None
+        self.fixed_axis=None
         self.parent_index=None
         self.tail_index=None
-        self.type=0
-        self.isConnect=isConnect
         self.ik_index=0
-        self.isVisible=True
+        self.isVisible=isVisible
         self.hasTail=False
         self.canTranslate=False
+        self.ikEffector=False
+        self.ikTarget=None
         #
         self.constraint=CONSTRAINT_NONE
         self.constraintTarget=0
@@ -49,10 +53,10 @@ class Bone(object):
         return self.index==rhs.index
 
     def __str__(self):
-        return "<Bone %s %d>" % (self.name, self.type)
+        return "<Bone %s>" % (self.name)
 
     def canManipulate(self):
-        if not self.isVisible:
+        if not self.isVisible and not self.ikEffector:
             return False
         return True
 
@@ -92,28 +96,22 @@ class BoneBuilder(object):
         self.bones=[Bone(i, 
             b.name, b.get(bl.BONE_ENGLISH_NAME, 'bone%04d' % i),
             bl.bone.getHeadLocal(b),
-            bl.bone.getTailLocal(b),
-            False) for i, b in enumerate(armature.bones.values())]
+            not b.hide
+            ) for i, b in enumerate(armature.bones.values())]
         for bone in self.bones:
             self.boneMap[bone.name]=bone
 
         # buid tree hierarchy
         def __getBone(parent, b):
             if len(b.children)==0:
-                parent.type=7
                 return
 
             parent.hasTail=True
             for i, c in enumerate(b.children):
                 bone=self.boneMap[c.name]
-                bone.isConnect=bl.bone.isConnected(c)
-                if c.hide:
-                    bone.isVisible=False
                 if parent:
                     bone.parent_index=parent.index
-                    #if i==0:
-                    if bone.isConnect:
-                        parent.tail_index=bone.index
+                    #parent.tail=bone.pos
                 __getBone(bone, c)
 
         for bone, b in zip(self.bones, armature.bones.values()):
@@ -141,13 +139,14 @@ class BoneBuilder(object):
                     # IK target
                     ####################
                     target=self.__boneByName(bl.constraint.ikTarget(c))
-                    target.type=2
+                    target.ikTarget=True
 
                     # IK effector
                     ####################
                     # IK 接続先
                     link=self.__boneByName(b.name)
-                    link.type=6
+                    link.ikEffector=True
+                    target.ikTarget=link.index
 
                     # IK chain
                     ####################
@@ -156,7 +155,6 @@ class BoneBuilder(object):
                     for i in range(chainLength):
                         # IK影響下
                         chainBone=self.__boneByName(e.name)
-                        chainBone.type=4
                         chainBone.ik_index=target.index
                         e=e.parent
                     self.ik_list.append(
@@ -173,6 +171,9 @@ class BoneBuilder(object):
 
                 if bl.constraint.isLimitRotation(c):
                     bone.constraint=CONSTRAINT_LIMIT_ROTATION
+
+                if bl.constraint.isLimitTranslation(c):
+                    bone.constraint=CONSTRAINT_LIMIT_TRANSLATION
 
         ####################
 
@@ -231,14 +232,21 @@ class BoneBuilder(object):
                 b.parent_index=-1
             else:
                 parent_b=self.bones[b.parent_index]
-                if not parent_b.tail_index and b.constraint==CONSTRAINT_LIMIT_ROTATION:
-                    parent_b.tail_index=b.tail_index
+                if b.constraint==CONSTRAINT_LIMIT_ROTATION:
+                    b.tail_index=-1
+                    b.fixed_axis=b.tail
+                    b.tail=(0, 0, 0)
+                elif b.constraint==CONSTRAINT_LIMIT_TRANSLATION:
+                    if parent_b.constraint==CONSTRAINT_LIMIT_ROTATION:
+                        # 軸固定
+                        self.bones[parent_b.parent_index].tail_index=b.index
+                    else:
+                        # 移動不可
+                        parent_b.tail_index=b.index
 
         for b in self.bones:
             if b.tail_index==None:
-                b.tail_index=0
-            elif b.type==9:
-                b.tail_index==0
+                b.tail_index=-1
 
     def getIndex(self, bone):
         for i, b in enumerate(self.bones):

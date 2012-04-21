@@ -706,6 +706,10 @@ class constraint:
         return c.type=='LIMIT_ROTATION'
 
     @staticmethod
+    def isLimitTranslation(c):
+        return c.type=='LIMIT_LOCATION'
+
+    @staticmethod
     def addCopyRotation(pose_bone, target_object, target_bone, factor):
         c=pose_bone.constraints.new(type='COPY_ROTATION')
         c.target=target_object
@@ -717,6 +721,11 @@ class constraint:
     @staticmethod
     def addLimitRotation(pose_bone):
         c=pose_bone.constraints.new(type='LIMIT_ROTATION')
+        c.owner_space='LOCAL'
+
+    @staticmethod
+    def addLimitTranslateion(pose_bone):
+        c=pose_bone.constraints.new(type='LIMIT_LOCATION')
         c.owner_space='LOCAL'
 
 

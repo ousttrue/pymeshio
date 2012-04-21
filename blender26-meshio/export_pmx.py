@@ -82,12 +82,15 @@ def create_pmx(ex):
             tail_index=b.tail_index,
             effect_index=-1,
             effect_factor=0.0,
-            fixed_axis=None,
+            fixed_axis=common.Vector3(*b.fixed_axis).normalize() if b.fixed_axis else None,
             local_x_vector=None,
             local_z_vector=None,
             external_key=-1,
             ik=None
                 )
+
+        if b.tail:
+            bone.tail_position=common.Vector3(*b.tail)
 
         if b.constraint==exporter.bonebuilder.CONSTRAINT_COPY_ROTATION:
             bone.layer=2
@@ -98,15 +101,22 @@ def create_pmx(ex):
         if b.constraint==exporter.bonebuilder.CONSTRAINT_LIMIT_ROTATION:
             bone.setFlag(pmx.BONEFLAG_HAS_FIXED_AXIS, True)
 
-        bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, b.hasTail)
+        bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, not b.tail)
         bone.setFlag(pmx.BONEFLAG_CAN_ROTATE, True)
         bone.setFlag(pmx.BONEFLAG_CAN_TRANSLATE, b.canTranslate)
         bone.setFlag(pmx.BONEFLAG_IS_VISIBLE, b.isVisible)
         bone.setFlag(pmx.BONEFLAG_CAN_MANIPULATE, b.canManipulate())
 
+        # ToDo
+        #if b.ikTarget:
+        #    bone.setFlag(pmx.BONEFLAG_IS_IK, True)
+        #    bone.ik_target_index=b.ikTarget
+
         return bone
 
     model.bones=[create_bone(b) for b in ex.skeleton.bones]
+
+    # IK
 
     # textures
     textures=set()
