@@ -243,6 +243,9 @@ class RGB(object):
         self.g=g
         self.b=b
 
+    def __str__(self):
+        return "<%f %f %f>" % (self.r, self.g, self.b)
+
     def __eq__(self, rhs):
         return self.r==rhs.r and self.g==rhs.g and self.b==rhs.b
 

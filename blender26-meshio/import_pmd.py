@@ -84,7 +84,7 @@ def createPmdMaterial(m, index):
     # specular
     material.specular_shader='TOON'
     material.specular_color=([m.specular_color.r, m.specular_color.g, m.specular_color.b])
-    material.specular_toon_size=int(m.specular_factor)
+    material.specular_toon_size=m.specular_factor * 0.1
     # ambient
     material.mirror_color=([m.ambient_color.r, m.ambient_color.g, m.ambient_color.b])
     # flag

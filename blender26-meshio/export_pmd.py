@@ -105,15 +105,15 @@ def write(self, path):
                 common.RGB(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2]),
                 m.alpha,
                 # specular_factor
-                0 if m.specular_toon_size<1e-5 else m.specular_hardness*10,
+                0 if m.specular_toon_size<1e-5 else m.specular_toon_size * 10,
                 # specular_color
                 common.RGB(m.specular_color[0], m.specular_color[1], m.specular_color[2]),
                 # ambient_color
                 common.RGB(m.mirror_color[0], m.mirror_color[1], m.mirror_color[2]),
-                # flag
-                1 if m.subsurface_scattering.use else 0,
                 # toon
                 0,
+                # flag
+                1 if m.subsurface_scattering.use else 0,
                 # vertex_count
                 len(indices),
                 # texture

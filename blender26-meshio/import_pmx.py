@@ -561,6 +561,8 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
         if joint_object:
             bl.object.makeParent(root_object, joint_object)
 
+    bl.object.activate(root_object)
+
     return {'FINISHED'}
 
 

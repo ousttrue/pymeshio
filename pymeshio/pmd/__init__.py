@@ -141,7 +141,12 @@ class Material(common.Diff):
         self.texture_file=texture_file
 
     def __str__(self):
-        return "<Material [%s]>" % (str(self.diffuse_color))
+        return "<Material [%s, %f] [%s %f] [%s] %d %d '%s' %d>" % (
+                str(self.diffuse_color), self.alpha,
+                str(self.specular_color), self.specular_factor,
+                str(self.ambient_color), self.toon_index,
+                self.edge_flag, self.texture_file, self.vertex_count
+                )
 
     def __eq__(self, rhs):
         return (
@@ -163,7 +168,8 @@ class Material(common.Diff):
         self._diff(rhs, "specular_factor")
         self._diff(rhs, "ambient_color")
         self._diff(rhs, "edge_flag")
-        self._diff(rhs, "toon_index")
+        # todo
+        #self._diff(rhs, "toon_index")
         self._diff(rhs, "texture_file")
         self._diff(rhs, "vertex_count")
 
@@ -245,6 +251,16 @@ class Bone(common.Diff):
                 and self.children==rhs.children
                 and self.english_name==rhs.english_name
                 )
+
+    def diff(self, rhs):
+        self._diff(rhs, "name")
+        self._diff(rhs, "english_name")
+        self._diff(rhs, "index")
+        self._diff(rhs, "type")
+        self._diff(rhs, "parent_index")
+        self._diff(rhs, "tail_index")
+        self._diff(rhs, "ik_index")
+        self._diff(rhs, "pos")
 
     def hasParent(self):
         return self.parent_index!=0xFFFF
@@ -621,8 +637,8 @@ class Model(common.Diff):
     def diff(self, rhs):
         self._diff(rhs, "name")
         self._diff(rhs, "english_name")
-        self._diff(rhs, "comment")
-        self._diff(rhs, "english_comment")
+        #self._diff(rhs, "comment")
+        #self._diff(rhs, "english_comment")
         #self._diff_array(rhs, "vertices")
         #self._diff_array(rhs, "indices")
         self._diff_array(rhs, "materials")

@@ -43,6 +43,8 @@ class Bone(object):
             'constraint',
             'constraintTarget',
             'constraintInfluence',
+
+            'children',
             ]
     def __init__(self, index, name, english_name, pos, isVisible):
         self.index=index
@@ -57,6 +59,7 @@ class Bone(object):
         self.canTranslate=False
         self.ikSolver=None
         self.ikEffector=None
+        self.children=[]
         #
         self.constraint=CONSTRAINT_NONE
         self.constraintTarget=0
@@ -76,12 +79,13 @@ class Bone(object):
 
 
 class BoneBuilder(object):
-    __slots__=['bones', 'boneMap', 'ik_list', 'bone_groups',]
+    __slots__=['bones', 'boneMap', 'ik_list', 'bone_groups', 'no_parent_bones']
     def __init__(self):
         self.bones=[]
         self.boneMap={}
         self.ik_list=[]
         self.bone_groups=[]
+        self.no_parent_bones=[]
 
     def getBoneGroup(self, bone):
         for i, g in enumerate(self.bone_groups):
@@ -208,6 +212,7 @@ class BoneBuilder(object):
         # boneのsort
         self._sortBy()
         self._fix()
+        self._build_hierarchy()
         # IKのsort
         def getIndex(ik):
             for i, v in enumerate(englishmap.boneMap):
@@ -264,6 +269,7 @@ class BoneBuilder(object):
             else:
                 parent_b=self.bones[b.parent_index]
                 if b.constraint==CONSTRAINT_LIMIT_TRANSLATION:
+                    # 移動不可ボーン
                     if parent_b.isFixedAxis():
                         self.bones[parent_b.parent_index].tail_index=b.index
                         parent_b.tail=[l - r for l, r in zip(b.pos, parent_b.pos)]
@@ -278,6 +284,16 @@ class BoneBuilder(object):
                     if not b.isFixedAxis():
                         b.tail=(0, 0, 0)
                     b.tail_index=-1
+
+    def _build_hierarchy(self):
+        """
+        親子関係を再構築する
+        """
+        for b in self.bones:
+            if b.parent_index==-1:
+                self.no_parent_bones.append(b)
+            else:
+                self.bones[b.parent_index].children.append(b)
 
     def getIndex(self, bone):
         for i, b in enumerate(self.bones):
