@@ -303,7 +303,7 @@ def __create_armature(bones, display_slots):
     # pose bone construction
     bl.enterObjectMode()
     pose = bl.object.getPose(armature_object)
-    for b, bone in zip(bones, bl_bones):
+    for b in bones:
         p_bone=pose.bones[b.name]
         if b.hasFlag(pmx.BONEFLAG_IS_IK):
             # create ik constraint
@@ -312,14 +312,15 @@ def __create_armature(bones, display_slots):
             ik_p_bone=pose.bones[bones[ik.target_index].name]
             assert(ik_p_bone)
             constraint=bl.armature.createIkConstraint(
-                    armature_object, ik_p_bone, bone.name,
+                    armature_object, ik_p_bone, b.name,
                     ik.link, ik.limit_radian, ik.loop)
+            armature.bones[b.name][bl.IK_UNITRADIAN]=ik.limit_radian
             for chain in ik.link:
                 if chain.limit_angle:
                     ik_p_bone=pose.bones[bones[chain.bone_index].name]
                     # IK limit
                     # x
-                    if chain.limit_min.x==0 or chain.limit_max.x==0:
+                    if chain.limit_min.x==0 and chain.limit_max.x==0:
                         ik_p_bone.lock_ik_x=True
                     else:
                         ik_p_bone.use_ik_limit_x=True
@@ -328,7 +329,7 @@ def __create_armature(bones, display_slots):
                         ik_p_bone.ik_max_x=-chain.limit_min.x
 
                     # y
-                    if chain.limit_min.y==0 or chain.limit_max.y==0:
+                    if chain.limit_min.y==0 and chain.limit_max.y==0:
                         ik_p_bone.lock_ik_y=True
                     else:
                         ik_p_bone.use_ik_limit_y=True
@@ -336,7 +337,7 @@ def __create_armature(bones, display_slots):
                         ik_p_bone.ik_max_y=chain.limit_max.y
 
                     # z
-                    if chain.limit_min.z==0 or chain.limit_max.z==0:
+                    if chain.limit_min.z==0 and chain.limit_max.z==0:
                         ik_p_bone.lock_ik_z=True
                     else:
                         ik_p_bone.use_ik_limit_z=True

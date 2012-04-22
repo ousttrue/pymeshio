@@ -73,9 +73,9 @@ class Vector3(object):
     def __eq__(self, rhs):
         #return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z
         return (
-                abs(self.x-rhs.x)<1e-4 
-                and abs(self.y-rhs.y)<1e-4 
-                and abs(self.z-rhs.z)<1e-4
+                abs(self.x-rhs.x)<1e-2 
+                and abs(self.y-rhs.y)<1e-2 
+                and abs(self.z-rhs.z)<1e-2
                 )
 
     def __ne__(self, rhs):

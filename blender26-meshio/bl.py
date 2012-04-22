@@ -633,10 +633,8 @@ class armature:
         constraint.target=armature_object
         constraint.subtarget=effector_name
         constraint.use_tail=False
-        # ToDo
-        # not used. place folder when export.
-        #constraint.weight=weight
-        #constraint.iterations=iterations * 10
+        #constraint.influence=weight * 0.25
+        constraint.iterations=iterations * 10
         return constraint
 
     @staticmethod
@@ -742,6 +740,8 @@ MMD_COMMENT='comment'
 MMD_ENGLISH_COMMENT='english_comment'
 
 BONE_ENGLISH_NAME='english_name'
+BONE_USE_TAILOFFSET='bone_use_tailoffset'
+IK_UNITRADIAN='ik_unit_radian'
 
 BASE_SHAPE_NAME='Basis'
 RIGID_NAME='rigid_name'
@@ -774,4 +774,5 @@ MATERIALFLAG_EDGE='material_flag_drawedge'
 MATERIAL_SHAREDTOON='material_shared_toon'
 MATERIAL_SPHERE_MODE='material_sphere_mode'
 TEXTURE_TYPE='texture_type'
+
 

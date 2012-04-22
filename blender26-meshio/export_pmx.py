@@ -46,22 +46,6 @@ def create_pmx(ex):
         )
         for pos, attribute, b0, b1, weight in ex.oneSkinMesh.vertexArray.zip()]
 
-    '''
-    # IK
-    for ik in self.skeleton.ik_list:
-        solver=pmd.IK()
-        solver.index=self.skeleton.getIndex(ik.target)
-        solver.target=self.skeleton.getIndex(ik.effector)
-        solver.length=ik.length
-        b=self.skeleton.bones[ik.effector.parent_index]
-        for i in range(solver.length):
-            solver.children.append(self.skeleton.getIndex(b))
-            b=self.skeleton.bones[b.parent_index]
-        solver.iterations=ik.iterations
-        solver.weight=ik.weight
-        model.ik_list.append(solver)
-    '''
-       
     boneMap=dict([(b.name, i) for i, b in enumerate(ex.skeleton.bones)])
     
     def create_bone(b):
@@ -107,16 +91,25 @@ def create_pmx(ex):
         bone.setFlag(pmx.BONEFLAG_IS_VISIBLE, b.isVisible)
         bone.setFlag(pmx.BONEFLAG_CAN_MANIPULATE, b.canManipulate())
 
-        # ToDo
-        #if b.ikTarget:
-        #    bone.setFlag(pmx.BONEFLAG_IS_IK, True)
-        #    bone.ik_target_index=b.ikTarget
+        if b.ikSolver:
+            print(b.ikSolver)
+            bone.setFlag(pmx.BONEFLAG_IS_IK, True)
+            bone.ik_target_index=b.ikSolver.effector_index
+            for c in b.ikSolver.chain:
+                print(c.limitAngle, c.limitMin, c.limitMax)
+            bone.ik=pmx.Ik(
+                    b.ikSolver.effector_index,
+                    b.ikSolver.iterations,
+                    b.ikSolver.weight,
+                    [pmx.IkLink(c.index, c.limitAngle, 
+                        common.Vector3(*c.limitMin),
+                        common.Vector3(*c.limitMax))
+                        for c in b.ikSolver.chain
+                        ])
 
         return bone
 
     model.bones=[create_bone(b) for b in ex.skeleton.bones]
-
-    # IK
 
     # textures
     textures=set()

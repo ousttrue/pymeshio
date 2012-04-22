@@ -3,14 +3,28 @@ from .. import bl
 from ..pymeshio import englishmap
 
 
+class IKChain(object):
+    __slots__=['index', 'limitAngle', 'limitMin', 'limitMax']
+    def __init__(self, index, limitAngle, limitMin, limitMax):
+        self.index=index
+        self.limitAngle=limitAngle
+        self.limitMin=limitMin
+        self.limitMax=limitMax
+
+
 class IKSolver(object):
-    __slots__=['target', 'effector', 'length', 'iterations', 'weight']
-    def __init__(self, target, effector, length, iterations, weight):
-        self.target=target
-        self.effector=effector
-        self.length=length
+    __slots__=['target_index', 'effector_index', 'iterations', 'weight', 'chain']
+    def __init__(self, target_index, effector_index, iterations, weight):
+        self.target_index=target_index
+        self.effector_index=effector_index
         self.iterations=iterations
         self.weight=weight
+        self.chain=[]
+
+    def __str__(self):
+        return "<IKSolver %d->%d, %d times(%f)>" % (
+                self.target_index, self.effector_index,
+                self.iterations, self.weight)
 
 
 CONSTRAINT_NONE=0
@@ -20,7 +34,8 @@ CONSTRAINT_LIMIT_ROTATION=3
 CONSTRAINT_LIMIT_TRANSLATION=4
 class Bone(object):
     __slots__=['index', 'name', 'english_name', 'ik_index',
-            'ikEffector', 'ikTarget',
+            'ikSolver',
+            'ikEffector',
             'pos', 'tail', 'parent_index', 'tail_index',
             'isVisible', 'hasTail', 
             'fixed_axis',
@@ -38,12 +53,11 @@ class Bone(object):
         self.fixed_axis=None
         self.parent_index=None
         self.tail_index=None
-        self.ik_index=0
         self.isVisible=isVisible
         self.hasTail=False
         self.canTranslate=False
-        self.ikEffector=False
-        self.ikTarget=None
+        self.ikSolver=None
+        self.ikEffector=None
         #
         self.constraint=CONSTRAINT_NONE
         self.constraintTarget=0
@@ -56,8 +70,8 @@ class Bone(object):
         return "<Bone %s>" % (self.name)
 
     def canManipulate(self):
-        if not self.isVisible and not self.ikEffector:
-            return False
+        #if not self.isVisible and not self.ikEffector:
+        #    return False
         return True
 
 
@@ -102,17 +116,17 @@ class BoneBuilder(object):
             self.boneMap[bone.name]=bone
 
         # buid tree hierarchy
-        def __getBone(parent, b):
+        def __getBone(bone, b):
             if len(b.children)==0:
                 return
 
-            parent.hasTail=True
+            #bone.hasTail= not (bl.BONE_USE_TAILOFFSET in b)
             for i, c in enumerate(b.children):
-                bone=self.boneMap[c.name]
-                if parent:
-                    bone.parent_index=parent.index
-                    #parent.tail=bone.pos
-                __getBone(bone, c)
+                child=self.boneMap[c.name]
+                if bone:
+                    child.parent_index=bone.index
+                    #bone.tail=child.pos
+                __getBone(child, c)
 
         for bone, b in zip(self.bones, armature.bones.values()):
             if not b.parent:
@@ -136,32 +150,46 @@ class BoneBuilder(object):
 
             for c in b.constraints:
                 if bl.constraint.isIKSolver(c):
-                    # IK target
-                    ####################
-                    target=self.__boneByName(bl.constraint.ikTarget(c))
-                    target.ikTarget=True
-
                     # IK effector
                     ####################
                     # IK 接続先
-                    link=self.__boneByName(b.name)
-                    link.ikEffector=True
-                    target.ikTarget=link.index
+                    effector=self.__boneByName(b.name)
+                    effector.ikEffector=True
 
-                    # IK chain
+                    # IK solver
                     ####################
-                    e=b.parent
+                    target=self.__boneByName(bl.constraint.ikTarget(c))
+                    target.ikSolver=IKSolver(target.index, effector.index, 
+                                int(c.iterations * 0.1), 
+                                armature.bones[target.name].get(bl.IK_UNITRADIAN, 0)
+                                )
+                    # ik chain
+                    ####################
+                    chain=b.parent
                     chainLength=bl.constraint.ikChainLen(c)
                     for i in range(chainLength):
+                        limit_anlge=False
+                        limit_min=[0, 0, 0]
+                        limit_max=[0, 0, 0]
+                        if chain.use_ik_limit_x:
+                            limit_anlge=True
+                            # right handed to left handed ?
+                            limit_min[0]=-chain.ik_max_x
+                            limit_max[0]=-chain.ik_min_x
+                        if chain.use_ik_limit_y:
+                            limit_anlge=True
+                            limit_min[1]=chain.ik_min_y
+                            limit_max[1]=chain.ik_max_y
+                        if chain.use_ik_limit_z:
+                            limit_anlge=True
+                            limit_min[2]=chain.ik_min_z
+                            limit_max[2]=chain.ik_max_z
                         # IK影響下
-                        chainBone=self.__boneByName(e.name)
-                        chainBone.ik_index=target.index
-                        e=e.parent
-                    self.ik_list.append(
-                            IKSolver(target, link, chainLength, 
-                                int(bl.constraint.ikItration(c) * 0.1), 
-                                bl.constraint.ikRotationWeight(c)
-                                ))
+                        target.ikSolver.chain.append(IKChain(
+                            self.__boneByName(chain.name).index,
+                            limit_anlge, limit_min, limit_max))
+                        # next
+                        chain=chain.parent
 
                 if bl.constraint.isCopyRotation(c):
                     # copy rotation
@@ -219,8 +247,12 @@ class BoneBuilder(object):
                 b.parent_index=sortMap[b.parent_index]
             if b.tail_index:
                 b.tail_index=sortMap[b.tail_index]
-            if b.ik_index>0:
-                b.ik_index=sortMap[b.ik_index]
+            if b.ikSolver:
+                solver=b.ikSolver
+                solver.target_index=sortMap[solver.target_index]
+                solver.effector_index=sortMap[solver.effector_index]
+                for c in solver.chain:
+                    c.index=sortMap[c.index]
 
     def _fix(self):
         """
