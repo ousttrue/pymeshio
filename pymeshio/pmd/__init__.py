@@ -257,7 +257,16 @@ class Bone(common.Diff):
 
     def diff(self, rhs):
         self._diff(rhs, "name")
-        #self._diff(rhs, "english_name")
+        if (
+                self.english_name.endswith("_t") 
+                or rhs.english_name.endswith("_t")):
+            pass
+        elif (
+                self.english_name.startswith("arm twist") 
+                or rhs.english_name.startswith("arm twist")):
+            pass
+        else:
+            self._diff(rhs, "english_name")
         self._diff(rhs, "index")
         self._diff(rhs, "type")
         self._diff(rhs, "parent_index")
@@ -436,6 +445,13 @@ class Morph(common.Diff):
                 and self.vertex_count==rhs.vertex_count
                 )
 
+    def diff(self, rhs):
+        self._diff(rhs, "name")
+        self._diff(rhs, "english_name")
+        self._diff(rhs, "type")
+        #self._diff_array(rhs, "indices")
+        #self._diff_array(rhs, "pos_list")
+
 
 class BoneGroup(common.Diff):
     __slots__=['name', 'english_name']
@@ -445,6 +461,10 @@ class BoneGroup(common.Diff):
 
     def __eq__(self, rhs):
         return self.name==rhs.name and self.english_name==rhs.english_name
+
+    def diff(self, rhs):
+        self._diff(rhs, "name")
+        self._diff(rhs, "english_name")
 
 
 SHAPE_SPHERE=0
@@ -520,6 +540,27 @@ class RigidBody(common.Diff):
                 and self.mode==rhs.mode
                 )
 
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'bone_index')
+        self._diff(rhs, 'collision_group')
+        self._diff(rhs, 'no_collision_group')
+        self._diff(rhs, 'shape_type')
+        if self.shape_type==SHAPE_SPHERE:
+            pass
+        elif self.shape_type==SHAPE_CAPSULE:
+            pass
+        elif self.shape_type==SHAPE_BOX:
+            self._diff(rhs, 'shape_size')
+        self._diff(rhs, 'shape_position')
+        self._diff(rhs, 'shape_rotation')
+        self._diff(rhs, 'mass')
+        self._diff(rhs, 'linear_damping')
+        self._diff(rhs, 'angular_damping')
+        self._diff(rhs, 'restitution')
+        self._diff(rhs, 'friction')
+        self._diff(rhs, 'mode')
+
 
 class Joint(common.Diff):
     __slots__=[ 'name', 'rigidbody_index_a', 'rigidbody_index_b', 
@@ -561,6 +602,19 @@ class Joint(common.Diff):
                 and self.spring_constant_translation==rhs.spring_constant_translation
                 and self.spring_constant_rotation==rhs.spring_constant_rotation
                 )
+
+    def diff(self, rhs):
+        self._diff(rhs, 'name')
+        self._diff(rhs, 'rigidbody_index_a')
+        self._diff(rhs, 'rigidbody_index_b')
+        self._diff(rhs, 'position')
+        self._diff(rhs, 'rotation')
+        self._diff(rhs, 'translation_limit_min')
+        self._diff(rhs, 'translation_limit_max')
+        self._diff(rhs, 'rotation_limit_min')
+        self._diff(rhs, 'rotation_limit_max')
+        self._diff(rhs, 'spring_constant_translation')
+        self._diff(rhs, 'spring_constant_rotation')
 
 
 class Model(common.Diff):
@@ -649,7 +703,11 @@ class Model(common.Diff):
         self._diff_array(rhs, "morphs")
         self._diff_array(rhs, "morph_indices")
         self._diff_array(rhs, "bone_group_list")
-        self._diff_array(rhs, "bone_display_list")
+        for i, (l, r) in enumerate(zip(
+                sorted(self.bone_display_list, key=lambda e: e[0]), 
+                sorted(rhs.bone_display_list, key=lambda e: e[0]))):
+            if l!=r:
+                raise common.DifferenceException("{0}: {1}-{2}".format(i, l, r))
         self._diff_array(rhs, "toon_textures")
         self._diff_array(rhs, "rigidbodies")
         self._diff_array(rhs, "joints")

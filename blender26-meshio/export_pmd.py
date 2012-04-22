@@ -246,7 +246,7 @@ def write(ex, path):
 
         model.bone_group_list.append(pmd.BoneGroup(
                 (name+'\n').encode('cp932'),
-                (englishName+'\n').encode('cp932')
+                (englishName).encode('cp932')
                 ))
 
     # ボーングループメンバー
@@ -255,7 +255,9 @@ def write(ex, path):
            continue
         #if b.type in [6, 7]:
         #   continue
-        model.bone_display_list.append((i, ex.skeleton.getBoneGroup(b)))
+        g=ex.skeleton.getBoneGroup(b)
+        if g:
+            model.bone_display_list.append((i, g))
 
     # toon
     toonMeshObject=None

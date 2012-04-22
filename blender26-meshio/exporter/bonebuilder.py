@@ -97,8 +97,6 @@ class BoneBuilder(object):
             for b in g[1]:
                 if b==bone.name:
                     return i+1
-        print('no gorup', bone)
-        return 0
 
     def build(self, armatureObj):
         if not armatureObj:
