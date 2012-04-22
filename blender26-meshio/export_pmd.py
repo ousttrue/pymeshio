@@ -52,10 +52,10 @@ def toCP932(s):
     return s.encode('cp932')
 
 
-def write(self, path):
+def write(ex, path):
     model=pmd.Model()
 
-    o=self.root.o
+    o=ex.root.o
     englishName=o.name
     name=o[bl.MMD_MB_NAME] if bl.MMD_MB_NAME in o else 'Blenderエクスポート'
     comment=o[bl.MMD_MB_COMMENT] if bl.MMD_MB_COMMENT in o else 'Blnderエクスポート\n'
@@ -74,17 +74,17 @@ def write(self, path):
         common.Vector3(attribute.nx, attribute.nz, attribute.ny),
         # reverse vertical
         common.Vector2(attribute.u, 1.0-attribute.v),
-        self.skeleton.indexByName(b0),
-        self.skeleton.indexByName(b1),
+        ex.skeleton.indexByName(b0),
+        ex.skeleton.indexByName(b1),
         int(100*weight),
         # edge flag, 0: enable edge, 1: not edge
         0 
         )
-        for pos, attribute, b0, b1, weight in self.oneSkinMesh.vertexArray.zip()]
+        for pos, attribute, b0, b1, weight in ex.oneSkinMesh.vertexArray.zip()]
 
     # 面とマテリアル
-    vertexCount=self.oneSkinMesh.getVertexCount()
-    for material_name, indices in self.oneSkinMesh.vertexArray.each():
+    vertexCount=ex.oneSkinMesh.getVertexCount()
+    for material_name, indices in ex.oneSkinMesh.vertexArray.each():
         #print('material:', material_name)
         try:
             m=bl.material.get(material_name)
@@ -128,12 +128,12 @@ def write(self, path):
             model.indices.append(indices[i+1])
             model.indices.append(indices[i+2])
 
+    boneMap=dict([(b.name, i) for i, b in enumerate(ex.skeleton.bones)])
+
     # bones
-    boneNameMap={}
-    for i, b in enumerate(self.skeleton.bones):
+    for i, b in enumerate(ex.skeleton.bones):
 
         # name
-        boneNameMap[b.name]=i
         v=englishmap.getUnicodeBoneName(b.name)
         if not v:
             v=[b.name, b.name]
@@ -147,20 +147,31 @@ def write(self, path):
             #assert(len(bone_english_name)<20)
         bone.english_name=bone_english_name
 
-        if len(v)>=3:
-            # has type
-            if v[2]==5:
-                b.ik_index=self.skeleton.indexByName('eyes')
-            bone.type=v[2]
-        else:
-            bone.type=0
-
         bone.parent_index=b.parent_index
         bone.tail_index=b.tail_index
-        if b.ikSolver:
-            bone.ik_index=b.ikSolver.effector_index
+        bone.ik_index=0
+
+        if b.constraint==exporter.bonebuilder.CONSTRAINT_NONE:
+            bone.type=pmd.Bone.ROTATE_MOVE
         else:
-            bone.ik_index=-1
+            bone.type=pmd.Bone.ROTATE
+
+        if not b.isVisible:
+            bone.type=pmd.Bone.UNVISIBLE
+            bone.tail_index=0
+
+        if b.constraint==exporter.bonebuilder.CONSTRAINT_LIMIT_ROTATION:
+            bone.type=pmd.Bone.ROLLING
+
+        if b.constraint==exporter.bonebuilder.CONSTRAINT_COPY_ROTATION:
+            if b.constraintInfluence==1.0:
+                bone.type=pmd.Bone.ROTATE_INFL
+                bone.ik_index=boneMap[b.constraintTarget]
+
+            else:
+                bone.type=pmd.Bone.TWEAK
+                bone.tail_index=boneMap[b.constraintTarget]
+                bone.ik_index=int(b.constraintInfluence * 100)
 
         # convert right-handed z-up to left-handed y-up
         bone.pos.x=b.pos[0] if not near(b.pos[0], 0) else 0
@@ -170,21 +181,32 @@ def write(self, path):
         model.bones.append(bone)
 
     # IK
-    for ik in self.skeleton.ik_list:
+    for ik in ex.skeleton.ik_list:
         solver=pmd.IK()
-        solver.index=self.skeleton.getIndex(ik.target)
-        solver.target=self.skeleton.getIndex(ik.effector)
-        solver.length=ik.length
-        b=self.skeleton.bones[ik.effector.parent_index]
-        for i in range(solver.length):
-            solver.children.append(self.skeleton.getIndex(b))
-            b=self.skeleton.bones[b.parent_index]
+
+        solver.index=ik.target_index
+        model.bones[ik.target_index].type=pmd.Bone.IK
+        model.bones[ik.target_index].ik_index=0
+
+        solver.target=ik.effector_index
+        model.bones[ik.effector_index].type=pmd.Bone.IK_TARGET
+
+        solver.length=len(ik.chain)
+        for i, chain in enumerate(ik.chain):
+            solver.children.append(chain.index)
+            model.bones[chain.index].type=pmd.Bone.IK_ROTATE_INFL
+
         solver.iterations=ik.iterations
         solver.weight=ik.weight
         model.ik_list.append(solver)
 
+    for i, b in enumerate(model.bones):
+        if b.type==pmd.Bone.IK_TARGET:
+            b.tail_index=0
+        print(i, b.name, b.type)
+
     # 表情
-    for i, m in enumerate(self.oneSkinMesh.morphList):
+    for i, m in enumerate(ex.oneSkinMesh.morphList):
         v=englishmap.getUnicodeSkinName(m.name)
         if not v:
             v=[m.name, m.name, 0]
@@ -202,21 +224,21 @@ def write(self, path):
 
     # 表情枠
     # type==0はbase
-    for i, m in enumerate(self.oneSkinMesh.morphList):
+    for i, m in enumerate(ex.oneSkinMesh.morphList):
         if m.type==3:
             model.morph_indices.append(i)
-    for i, m in enumerate(self.oneSkinMesh.morphList):
+    for i, m in enumerate(ex.oneSkinMesh.morphList):
         if m.type==2:
             model.morph_indices.append(i)
-    for i, m in enumerate(self.oneSkinMesh.morphList):
+    for i, m in enumerate(ex.oneSkinMesh.morphList):
         if m.type==1:
             model.morph_indices.append(i)
-    for i, m in enumerate(self.oneSkinMesh.morphList):
+    for i, m in enumerate(ex.oneSkinMesh.morphList):
         if m.type==4:
             model.morph_indices.append(i)
 
     # ボーングループ
-    for g in self.skeleton.bone_groups:
+    for g in ex.skeleton.bone_groups:
         name=englishmap.getUnicodeBoneGroupName(g[0])
         if not name:
             name=g[0]
@@ -228,12 +250,12 @@ def write(self, path):
                 ))
 
     # ボーングループメンバー
-    for i, b in enumerate(self.skeleton.bones):
+    for i, b in enumerate(ex.skeleton.bones):
         if i==0:
            continue
         #if b.type in [6, 7]:
         #   continue
-        model.bone_display_list.append((i, self.skeleton.getBoneGroup(b)))
+        model.bone_display_list.append((i, ex.skeleton.getBoneGroup(b)))
 
     # toon
     toonMeshObject=None
@@ -259,16 +281,16 @@ def write(self, path):
 
     # rigid body
     rigidNameMap={}
-    for i, obj in enumerate(self.oneSkinMesh.rigidbodies):
+    for i, obj in enumerate(ex.oneSkinMesh.rigidbodies):
         name=obj[bl.RIGID_NAME] if bl.RIGID_NAME in obj else obj.name
         #print('rigidbody', name)
         rigidNameMap[name]=i
-        boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
+        boneIndex=boneMap[obj[bl.RIGID_BONE_NAME]]
         if boneIndex==0:
             boneIndex=-1
-            bone=self.skeleton.bones[0]
+            bone=ex.skeleton.bones[0]
         else:
-            bone=self.skeleton.bones[boneIndex]
+            bone=ex.skeleton.bones[boneIndex]
         # x, z, y -> x, y, z
         if obj[bl.RIGID_SHAPE_TYPE]==0:
             shape_type=pmd.SHAPE_SPHERE
@@ -343,7 +365,7 @@ def write(self, path):
             obj[bl.CONSTRAINT_SPRING_ROT][1],
             obj[bl.CONSTRAINT_SPRING_ROT][2])
         )
-        for obj in self.oneSkinMesh.constraints]
+        for obj in ex.oneSkinMesh.constraints]
 
     bl.message('write: %s' % path)
     with io.open(path, 'wb') as f:
@@ -358,7 +380,6 @@ def _execute(filepath='', **kwargs):
 
     ex=exporter.Exporter()
     ex.setup()
-    print(ex)
 
     write(ex, filepath)
     bl.object.activate(active)

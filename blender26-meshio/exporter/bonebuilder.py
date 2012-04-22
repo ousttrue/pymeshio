@@ -77,6 +77,9 @@ class Bone(object):
     def canManipulate(self):
         return True
 
+    def hasValidTailIndex(self):
+        return self.tail_index and self.tail_index!=-1 and self.tail_index!=0
+
 
 class BoneBuilder(object):
     __slots__=['bones', 'boneMap', 'ik_list', 'bone_groups', 'no_parent_bones']
@@ -202,9 +205,11 @@ class BoneBuilder(object):
                     bone.constraintInfluence=c.influence
 
                 if bl.constraint.isLimitRotation(c):
+                    # fixed_axis
                     bone.constraint=CONSTRAINT_LIMIT_ROTATION
 
                 if bl.constraint.isLimitTranslation(c):
+                    # rotation only
                     bone.constraint=CONSTRAINT_LIMIT_TRANSLATION
 
         ####################
@@ -214,9 +219,12 @@ class BoneBuilder(object):
         self._fix()
         self._build_hierarchy()
         # IKのsort
+        for b in self.bones:
+            if b.ikSolver:
+                self.ik_list.append(b.ikSolver)
         def getIndex(ik):
             for i, v in enumerate(englishmap.boneMap):
-                if v[0]==ik.target.name:
+                if v[0]==self.bones[ik.target_index].name:
                     return i
             return len(englishmap.boneMap)
         self.ik_list.sort(key=getIndex)
@@ -270,7 +278,7 @@ class BoneBuilder(object):
                 parent_b=self.bones[b.parent_index]
                 if b.constraint==CONSTRAINT_LIMIT_TRANSLATION:
                     # 移動不可ボーン
-                    if parent_b.isFixedAxis():
+                    if b.isVisible and parent_b.isFixedAxis():
                         self.bones[parent_b.parent_index].tail_index=b.index
                         parent_b.tail=[l - r for l, r in zip(b.pos, parent_b.pos)]
                     else:

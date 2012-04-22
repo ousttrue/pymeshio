@@ -238,6 +238,9 @@ class Bone(common.Diff):
         self.children=[]
         self.english_name=b''
 
+    def __str__(self):
+        return '<Bone:%s %d %d>' % (self.name, self.type, self.ik_index)
+
     def __eq__(self, rhs):
         return (
                 self.name==rhs.name
@@ -254,7 +257,8 @@ class Bone(common.Diff):
 
     def diff(self, rhs):
         self._diff(rhs, "name")
-        self._diff(rhs, "english_name")
+        # todo
+        #self._diff(rhs, "english_name")
         self._diff(rhs, "index")
         self._diff(rhs, "type")
         self._diff(rhs, "parent_index")

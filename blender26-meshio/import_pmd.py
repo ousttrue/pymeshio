@@ -230,62 +230,103 @@ def __importShape(obj, l, vertex_map):
     bl.object.setActivateShapeKey(obj, 0)
 
 
-def __build(armature, b, p, parent):
-    name=englishmap.getEnglishBoneName(b.name.decode('cp932'))
-    if not name:
-        name=b.name.decode('cp932')
-
-    bone=bl.armature.createBone(armature, name)
-
-    if parent and (b.tail_index==0 or b.type==6 or b.type==7 or b.type==9):
-        # 先端ボーン
-        bone.head = bl.createVector(*convert_coord(b.pos))
-        bone.tail=bone.head+bl.createVector(0, 1, 0)
-        bone.parent=parent
-        if bone.name=="center_t":
-            # センターボーンは(0, 1, 0)の方向を向いていないと具合が悪い
-            parent.tail=parent.head+bl.createVector(0, 1, 0)
-            bone.head=parent.tail
-            bone.tail=bone.head+bl.createVector(0, 1, 0)
-        else:
-            if parent.tail==bone.head:
-                pass
-            else:
-                print('diffurence with parent.tail and head', name)
-
-        if b.type!=9:
-            bl.bone.setConnected(bone)
-        # armature layer 2
-        bl.bone.setLayerMask(bone, [0, 1])
-    else:
-        # 通常ボーン
-        bone.head = bl.createVector(*convert_coord(b.pos))
-        bone.tail = bl.createVector(*convert_coord(b.tail))
-        if parent:
-            bone.parent=parent
-            if parent.tail==bone.head:
-                bl.bone.setConnected(bone)
-
-    if bone.head==bone.tail:
-        bone.tail=bone.head+bl.createVector(0, 1, 0)
-
-    for c in b.children:
-        __build(armature, c, b, bone)
-
-
 def __importArmature(l):
+    # create new armature
     armature, armature_object=bl.armature.create()
 
-    # build bone
+    # bone生成
     bl.armature.makeEditable(armature_object)
-    for b in l.bones:
-        if not b.parent:
-            __build(armature, b, None, None)
+    def CreateBone(armature, b):
+        name=englishmap.getEnglishBoneName(b.name.decode('cp932'))
+        if not name:
+            name=b.name.decode('cp932')
+
+        # bone生成
+        bone=bl.armature.createBone(armature, name)
+        bone.head = bl.createVector(*convert_coord(b.pos))
+        print(bone.name, bone.head, b.pos)
+
+        # armature layer 2
+        #bl.bone.setLayerMask(bone, [0, 1])
+
+        return bone
+    bl_bones=[CreateBone(armature, b) for b in l.bones]
+
+    # build skeleton
+    for b, bone in zip(l.bones, bl_bones):
+        if b.parent_index!=0xFFFF:
+            bone.parent=bl_bones[b.parent_index]
+        if (b.tail_index!=0 
+                and b.tail_index!=0xFFFF
+                and b.type!=pmd.Bone.TWEAK
+                ):
+            bone.tail=bl_bones[b.tail_index].head
+
+        else:
+            bone.tail=bone.head+bl.createVector(0, 0.01, 0)
+
+    # connect bones
+    for bone in bl_bones:
+        if bone.parent:
+            if bone.parent.tail==bone.head:
+                bl.bone.setConnected(bone)
+
     bl.armature.update(armature)
     bl.enterObjectMode()
 
-    # IK constraint
     pose = bl.object.getPose(armature_object)
+
+    print('pose.bones', len(pose.bones))
+
+    # pose params
+    for b in l.bones:
+        name=englishmap.getEnglishBoneName(b.name.decode('cp932'))
+        if not name:
+            name=b.name.decode('cp932')
+
+        if not name in pose.bones:
+            print("%s is not found !!" % name)
+            continue
+        p_bone=pose.bones[name]
+
+        if b.parent_index!=0xFFFF:
+            parent_b=l.bones[b.parent_index]
+            if  parent_b.tail_index==b.index:
+                # 移動制限を尻尾位置の接続フラグに流用する
+                bl.constraint.addLimitTranslateion(p_bone)
+            elif parent_b.parent_index!=0xFFFF:
+                parent_parent_b=l.bones[parent_b.parent_index]
+                if parent_parent_b.tail_index==b.index:
+                    # 移動制限を尻尾位置の接続フラグに流用する
+                    bl.constraint.addLimitTranslateion(p_bone)
+
+        if b.type==pmd.Bone.ROTATE_INFL:
+            # 回転影響下
+            target_b=l.bones[b.ik_index]
+            name=englishmap.getEnglishBoneName(target_b.name.decode('cp932'))
+            if not name:
+                name=target_b.name.decode('cp932')
+            constraint_p_bone=pose.bones[name]
+            bl.constraint.addCopyRotation(p_bone,
+                    armature_object, constraint_p_bone, 
+                    1.0)
+
+        if b.type==pmd.Bone.ROLLING:
+            # 軸固定
+            bl.constraint.addLimitRotation(p_bone)
+
+        if b.type==pmd.Bone.TWEAK:
+            # 回転連動
+            target_b=l.bones[b.tail_index]
+            name=englishmap.getEnglishBoneName(target_b.name.decode('cp932'))
+            if not name:
+                name=target_b.name.decode('cp932')
+            constraint_p_bone=pose.bones[name]
+            bl.constraint.addCopyRotation(p_bone,
+                    armature_object, constraint_p_bone, 
+                    b.ik_index * 0.01)
+
+    # IK constraint
     for ik in l.ik_list:
         target=l.bones[ik.target]
         name = englishmap.getEnglishBoneName(target.name.decode('cp932'))
@@ -298,19 +339,32 @@ def __importArmature(l):
         if len(ik.children) >= 16:
             print('over MAX_CHAINLEN', ik, len(ik.children))
             continue
+
+        # IK effector
         effector_name=englishmap.getEnglishBoneName(
                 l.bones[ik.index].name.decode('cp932'))
         if not effector_name:
             effector_name=l.bones[ik.index].name.decode('cp932')
 
-        constraint=bl.armature.createIkConstraint(armature_object,
-                p_bone, effector_name, 
+        bl.constraint.addIk(p_bone,
+                armature_object, effector_name, 
                 ik.children, ik.weight, ik.iterations)
 
     bl.armature.makeEditable(armature_object)
     bl.armature.update(armature)
     bl.enterObjectMode()
 
+    # fix
+    boneNameMap={}
+    for b in l.bones:
+        name=englishmap.getEnglishBoneName(b.name.decode('cp932'))
+        if not name:
+            name=b.name.decode('cp932')
+        boneNameMap[name]=b
+    for b in armature.bones.values():
+        if boneNameMap[b.name].type==pmd.Bone.UNVISIBLE:
+            b.hide=True
+ 
     # create bone group
     for i, g in enumerate(l.bone_group_list):
         name=get_group_name(g.name)

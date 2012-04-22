@@ -311,8 +311,9 @@ def __create_armature(bones, display_slots):
             assert(len(ik.link)<16)
             ik_p_bone=pose.bones[bones[ik.target_index].name]
             assert(ik_p_bone)
-            constraint=bl.armature.createIkConstraint(
-                    armature_object, ik_p_bone, b.name,
+            bl.constraint.addIk(
+                    ik_p_bone, 
+                    armature_object, b.name,
                     ik.link, ik.limit_radian, ik.loop)
             armature.bones[b.name][bl.IK_UNITRADIAN]=ik.limit_radian
             for chain in ik.link:

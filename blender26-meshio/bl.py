@@ -613,7 +613,7 @@ class armature:
         armature.draw_type='STICK'
         armature.use_deform_envelopes=False
         armature.use_deform_vertex_groups=True
-        armature.use_mirror_x=True
+        #armature.use_mirror_x=True
 
         return armature, armature_object
 
@@ -624,18 +624,6 @@ class armature:
         SCENE.objects.active=armature_object
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-
-    @staticmethod
-    def createIkConstraint(armature_object, p_bone, effector_name, 
-            chain, weight, iterations):
-        constraint = p_bone.constraints.new('IK')
-        constraint.chain_count=len(chain)
-        constraint.target=armature_object
-        constraint.subtarget=effector_name
-        constraint.use_tail=False
-        #constraint.influence=weight * 0.25
-        constraint.iterations=iterations * 10
-        return constraint
 
     @staticmethod
     def createBone(armature, name):
@@ -706,6 +694,18 @@ class constraint:
     @staticmethod
     def isLimitTranslation(c):
         return c.type=='LIMIT_LOCATION'
+
+    @staticmethod
+    def addIk(p_bone, 
+            armature_object, effector_name, 
+            chain, weight, iterations):
+        constraint = p_bone.constraints.new('IK')
+        constraint.chain_count=len(chain)
+        constraint.target=armature_object
+        constraint.subtarget=effector_name
+        constraint.use_tail=False
+        #constraint.influence=weight * 0.25
+        constraint.iterations=iterations * 10
 
     @staticmethod
     def addCopyRotation(pose_bone, target_object, target_bone, factor):
