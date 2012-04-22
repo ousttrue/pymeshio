@@ -40,6 +40,7 @@ class Bone(object):
             'isVisible', 'hasTail', 
             'fixed_axis',
             'canTranslate',
+            'connected',
             'constraint',
             'constraintTarget',
             'constraintInfluence',
@@ -59,6 +60,7 @@ class Bone(object):
         self.canTranslate=False
         self.ikSolver=None
         self.ikEffector=None
+        self.connected=None
         self.children=[]
         #
         self.constraint=CONSTRAINT_NONE
@@ -114,11 +116,19 @@ class BoneBuilder(object):
         ####################
         # create bones
         ####################
-        self.bones=[Bone(i, 
-            b.name, b.get(bl.BONE_ENGLISH_NAME, 'bone%04d' % i),
-            bl.bone.getHeadLocal(b),
-            not b.hide
-            ) for i, b in enumerate(armature.bones.values())]
+        def createBone(i, b):
+            bone=Bone(i, 
+                    b.name, b.get(bl.BONE_ENGLISH_NAME, 'bone%04d' % i),
+                    bl.bone.getHeadLocal(b),
+                    not b.hide
+                    )
+            if bl.BONE_CAN_TRANSLATE in b:
+                pass
+            else:
+                bone.constraint=CONSTRAINT_LIMIT_TRANSLATION
+            return bone
+        self.bones=[createBone(i, b) for i, b in enumerate(armature.bones.values())]
+        # name map
         for bone in self.bones:
             self.boneMap[bone.name]=bone
 
@@ -133,6 +143,8 @@ class BoneBuilder(object):
                 child=self.boneMap[c.name]
                 if bone:
                     child.parent_index=bone.index
+                if bl.bone.isConnected(c):
+                    bone.connected=child
                 __getBone(child, c)
 
         for bone, b in zip(self.bones, armature.bones.values()):
@@ -276,13 +288,13 @@ class BoneBuilder(object):
                 b.parent_index=-1
             else:
                 parent_b=self.bones[b.parent_index]
+                if parent_b.connected:
+                    parent_b.tail_index=parent_b.connected.index
                 if b.constraint==CONSTRAINT_LIMIT_TRANSLATION:
                     # 移動不可ボーン
                     if b.isVisible and parent_b.isFixedAxis():
                         self.bones[parent_b.parent_index].tail_index=b.index
                         parent_b.tail=[l - r for l, r in zip(b.pos, parent_b.pos)]
-                    else:
-                        parent_b.tail_index=b.index
 
         # set tail
         for b in self.bones:

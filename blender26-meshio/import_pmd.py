@@ -244,7 +244,8 @@ def __importArmature(l):
         # bone生成
         bone=bl.armature.createBone(armature, name)
         bone.head = bl.createVector(*convert_coord(b.pos))
-        print(bone.name, bone.head, b.pos)
+        if b.type==pmd.Bone.ROTATE_MOVE:
+            bone[bl.BONE_CAN_TRANSLATE]=True
 
         # armature layer 2
         #bl.bone.setLayerMask(bone, [0, 1])

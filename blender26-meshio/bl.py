@@ -741,6 +741,7 @@ MMD_ENGLISH_COMMENT='english_comment'
 
 BONE_ENGLISH_NAME='english_name'
 BONE_USE_TAILOFFSET='bone_use_tailoffset'
+BONE_CAN_TRANSLATE='bone_can_translate'
 IK_UNITRADIAN='ik_unit_radian'
 
 BASE_SHAPE_NAME='Basis'
@@ -774,5 +775,4 @@ MATERIALFLAG_EDGE='material_flag_drawedge'
 MATERIAL_SHAREDTOON='material_shared_toon'
 MATERIAL_SPHERE_MODE='material_sphere_mode'
 TEXTURE_TYPE='texture_type'
-
 
