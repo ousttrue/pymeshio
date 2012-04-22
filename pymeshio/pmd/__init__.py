@@ -24,7 +24,7 @@ import warnings
 from .. import common
 
 
-class Vertex(object):
+class Vertex(common.Diff):
     """
     ==========
     pmd vertex
@@ -91,7 +91,7 @@ class Vertex(object):
             assert(False)
 
 
-class Material(object):
+class Material(common.Diff):
     """
     ============
     pmd material
@@ -141,10 +141,7 @@ class Material(object):
         self.texture_file=texture_file
 
     def __str__(self):
-        return "<Material [%f, %f, %f, %f]>" % (
-                self.diffuse[0], self.diffuse[1], 
-                self.diffuse[2], self.diffuse[3],
-                )
+        return "<Material [%s]>" % (str(self.diffuse_color))
 
     def __eq__(self, rhs):
         return (
@@ -159,8 +156,19 @@ class Material(object):
                 and self.texture_file==rhs.texture_file
                 )
 
+    def diff(self, rhs):
+        self._diff(rhs, "diffuse_color")
+        self._diff(rhs, "alpha")
+        self._diff(rhs, "specular_color")
+        self._diff(rhs, "specular_factor")
+        self._diff(rhs, "ambient_color")
+        self._diff(rhs, "edge_flag")
+        self._diff(rhs, "toon_index")
+        self._diff(rhs, "texture_file")
+        self._diff(rhs, "vertex_count")
 
-class Bone(object):
+
+class Bone(common.Diff):
     """
     ==========
     pmd bone
@@ -358,7 +366,7 @@ def createBone(name, type):
         raise Exception("unknown bone type: %d(%s)" % (type, name.decode('cp932')))
 
 
-class IK(object):
+class IK(common.Diff):
     __slots__=['index', 'target', 'iterations', 'weight', 'length', 'children']
     def __init__(self, index=0, target=0):
         self.index=index
@@ -380,7 +388,7 @@ class IK(object):
                 )
 
 
-class Morph(object):
+class Morph(common.Diff):
     __slots__=['name', 'type', 'indices', 'pos_list', 'english_name',
             'vertex_count']
     def __init__(self, name):
@@ -410,7 +418,7 @@ class Morph(object):
                 )
 
 
-class BoneGroup(object):
+class BoneGroup(common.Diff):
     __slots__=['name', 'english_name']
     def __init__(self, name=b'group', english_name=b'center'): 
         self.name=name
@@ -429,7 +437,7 @@ RIGIDBODY_PHYSICS=1
 RIGIDBODY_PHYSICS_WITH_BONE=2
 
 
-class RigidBody(object):
+class RigidBody(common.Diff):
     __slots__=['name', 
             'bone_index', 
             'collision_group', 
@@ -494,7 +502,7 @@ class RigidBody(object):
                 )
 
 
-class Joint(object):
+class Joint(common.Diff):
     __slots__=[ 'name', 'rigidbody_index_a', 'rigidbody_index_b', 
             'position', 'rotation',
             'translation_limit_max', 'translation_limit_min',
@@ -536,7 +544,7 @@ class Joint(object):
                 )
 
 
-class Model(object):
+class Model(common.Diff):
     """pmd loader class.
 
     Attributes:
@@ -611,18 +619,19 @@ class Model(object):
                 )
 
     def diff(self, rhs):
-        diffrence=[]
-        for attr in [
-                'name', 'comment', 'english_name', 'english_comment',
-                'vertices', 'indices', 'materials', 
-                'bones', 'ik_list',
-                'morphs', 
-                'morph_indices', 'bone_group_list', 'bone_display_list', 
-                'toon_textures', 
-                'rigidbodies', 'joints',
-                ]:
-            if getattr(self, attr)!=getattr(rhs, attr):
-                diffrence.append(attr)
-        if len(diffrence)>0:
-            print(diffrence)
+        self._diff(rhs, "name")
+        self._diff(rhs, "english_name")
+        self._diff(rhs, "comment")
+        self._diff(rhs, "english_comment")
+        #self._diff_array(rhs, "vertices")
+        #self._diff_array(rhs, "indices")
+        self._diff_array(rhs, "materials")
+        self._diff_array(rhs, "bones")
+        self._diff_array(rhs, "morphs")
+        self._diff_array(rhs, "morph_indices")
+        self._diff_array(rhs, "bone_group_list")
+        self._diff_array(rhs, "bone_display_list")
+        self._diff_array(rhs, "toon_textures")
+        self._diff_array(rhs, "rigidbodies")
+        self._diff_array(rhs, "joints")
 

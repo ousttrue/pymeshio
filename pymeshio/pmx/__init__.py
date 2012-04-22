@@ -30,42 +30,7 @@ from .. import common
 
 
 
-class DifferenceException(Exception):
-    pass
-
-
-class Diff(object):
-    def _diff(self, rhs, key):
-        l=getattr(self, key)
-        r=getattr(rhs, key)
-        if l!=r:
-            print(l)
-            print(r)
-            raise DifferenceException(key)
-
-    def _diff_array(self, rhs, key):
-        la=getattr(self, key)
-        ra=getattr(rhs, key)
-        if len(la)!=len(ra):
-            raise DifferenceException("%s diffrence %d with %d" % (key, len(la), len(ra)))
-        for i, (l, r) in enumerate(zip(la, ra)):
-            if isinstance(l, Diff):
-                try:
-                    l.diff(r)
-                except DifferenceException as e:
-                    print(i)
-                    print(l)
-                    print(r)
-                    raise DifferenceException("{0}: {1}".format(key, e.message))
-            else:
-                if l!=r:
-                    print(i)
-                    print(l)
-                    print(r)
-                    raise DifferenceException("{0}".format(key))
-
-
-class Ik(Diff):
+class Ik(common.Diff):
     """ik info
     """
     __slots__=[
@@ -95,7 +60,7 @@ class Ik(Diff):
         self._diff_array(rhs, 'link')
 
 
-class IkLink(Diff):
+class IkLink(common.Diff):
     """ik link info
     """
     __slots__=[
@@ -137,7 +102,7 @@ BONEFLAG_HAS_FIXED_AXIS=0x0400
 BONEFLAG_HAS_LOCAL_COORDINATE=0x0800
 BONEFLAG_IS_AFTER_PHYSICS_DEFORM=0x1000
 BONEFLAG_IS_EXTERNAL_PARENT_DEFORM=0x2000
-class Bone(Diff):
+class Bone(common.Diff):
     """material
 
     Bone: see __init__
@@ -283,7 +248,7 @@ MATERIALFLAG_EDGE=0x10
 MATERIALSPHERE_NONE=0
 MATERIALSPHERE_SPH=1
 MATERIALSPHERE_SPA=2
-class Material(Diff):
+class Material(common.Diff):
     """material
 
     Attributes: see __init__
@@ -396,7 +361,7 @@ class Material(Diff):
             ))
 
 
-class Bdef1(Diff):
+class Bdef1(common.Diff):
     """bone deform. use a weight
 
     Attributes: see __init__
@@ -415,7 +380,7 @@ class Bdef1(Diff):
         return not self.__eq__(rhs)
 
 
-class Bdef2(Diff):
+class Bdef2(common.Diff):
     """bone deform. use two weights
 
     Attributes: see __init__
@@ -444,7 +409,7 @@ class Bdef2(Diff):
         return not self.__eq__(rhs)
 
 
-class Bdef4(Diff):
+class Bdef4(common.Diff):
     """bone deform. use four weights
 
     Attributes: see __init__
@@ -490,7 +455,7 @@ class Bdef4(Diff):
         return not self.__eq__(rhs)
 
 
-class Sdef(Diff):
+class Sdef(common.Diff):
     """bone sphirical deform. use two weights and sphirical params
 
     Attributes: see __init__
@@ -531,7 +496,7 @@ class Sdef(Diff):
         return not self.__eq__(rhs)
 
 
-class Vertex(Diff):
+class Vertex(common.Diff):
     """
     ==========
     pmx vertex
@@ -587,7 +552,7 @@ class Vertex(Diff):
         self._diff(rhs, "edge_factor")
 
 
-class Morph(Diff):
+class Morph(common.Diff):
     """pmx morph
 
     Attributes:
@@ -631,7 +596,7 @@ class Morph(Diff):
         self._diff_array(rhs, 'offsets')
 
 
-class VertexMorphOffset(Diff):
+class VertexMorphOffset(common.Diff):
     """pmx vertex morph offset
 
     Attributes:
@@ -660,7 +625,7 @@ class VertexMorphOffset(Diff):
         self._diff(rhs, 'position_offset')
 
 
-class MaterialMorphData(Diff):
+class MaterialMorphData(common.Diff):
     """pmx mateerial morph data
 
     Attributes:
@@ -695,7 +660,7 @@ class MaterialMorphData(Diff):
         self.toon_texture_factor=toon_texture_factor
 
 
-class DisplaySlot(Diff):
+class DisplaySlot(common.Diff):
     """pmx display slot
 
     Attributes:
@@ -737,7 +702,7 @@ class DisplaySlot(Diff):
         self._diff_array(rhs, 'references')
 
 
-class RigidBodyParam(Diff):
+class RigidBodyParam(common.Diff):
     """pmx rigidbody param(for bullet)
 
     Attributes:
@@ -782,7 +747,7 @@ class RigidBodyParam(Diff):
         self._diff_array(rhs, 'friction')
 
 
-class RigidBody(Diff):
+class RigidBody(common.Diff):
     """pmx rigidbody
 
     Attributes:
@@ -869,7 +834,7 @@ class RigidBody(Diff):
         self._diff(rhs, 'mode')
 
 
-class Joint(Diff):
+class Joint(common.Diff):
     """pmx joint
 
     Attributes:
@@ -964,7 +929,7 @@ class Joint(Diff):
         self._diff(rhs, 'spring_constant_rotation')
 
 
-class Model(Diff):
+class Model(common.Diff):
     """
     ==========
     pmx model

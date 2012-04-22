@@ -448,3 +448,37 @@ class BinaryWriter(object):
         self.ios.write(struct.pack("=4f", v.r, v.g, v.b, v.a))
 
 
+class DifferenceException(Exception):
+    pass
+
+
+class Diff(object):
+    def _diff(self, rhs, key):
+        l=getattr(self, key)
+        r=getattr(rhs, key)
+        if l!=r:
+            print(l)
+            print(r)
+            raise DifferenceException(key)
+
+    def _diff_array(self, rhs, key):
+        la=getattr(self, key)
+        ra=getattr(rhs, key)
+        if len(la)!=len(ra):
+            raise DifferenceException("%s diffrence %d with %d" % (key, len(la), len(ra)))
+        for i, (l, r) in enumerate(zip(la, ra)):
+            if isinstance(l, Diff):
+                try:
+                    l.diff(r)
+                except DifferenceException as e:
+                    print(i)
+                    print(l)
+                    print(r)
+                    raise DifferenceException("{0}: {1}".format(key, e.message))
+            else:
+                if l!=r:
+                    print(i)
+                    print(l)
+                    print(r)
+                    raise DifferenceException("{0}".format(key))
+

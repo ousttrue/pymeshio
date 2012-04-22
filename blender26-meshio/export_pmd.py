@@ -153,11 +153,14 @@ def write(self, path):
                 b.ik_index=self.skeleton.indexByName('eyes')
             bone.type=v[2]
         else:
-            bone.type=b.type
+            bone.type=0
 
         bone.parent_index=b.parent_index
         bone.tail_index=b.tail_index
-        bone.ik_index=b.ik_index
+        if b.ikSolver:
+            bone.ik_index=b.ikSolver.effector_index
+        else:
+            bone.ik_index=-1
 
         # convert right-handed z-up to left-handed y-up
         bone.pos.x=b.pos[0] if not near(b.pos[0], 0) else 0
@@ -228,8 +231,8 @@ def write(self, path):
     for i, b in enumerate(self.skeleton.bones):
         if i==0:
            continue
-        if b.type in [6, 7]:
-           continue
+        #if b.type in [6, 7]:
+        #   continue
         model.bone_display_list.append((i, self.skeleton.getBoneGroup(b)))
 
     # toon
