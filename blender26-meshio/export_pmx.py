@@ -47,6 +47,16 @@ def create_pmx(ex):
         for pos, attribute, b0, b1, weight in ex.oneSkinMesh.vertexArray.zip()]
 
     boneMap=dict([(b.name, i) for i, b in enumerate(ex.skeleton.bones)])
+
+    def getFixedAxis(b):
+        if b.isFixedAxis():
+            return common.Vector3(
+                    b.tail[0],
+                    b.tail[2],
+                    b.tail[1]
+                    ).normalize()
+        else:
+            return common.Vector3(0, 0, 0)
     
     def create_bone(b):
 
@@ -66,15 +76,12 @@ def create_pmx(ex):
             tail_index=b.tail_index,
             effect_index=-1,
             effect_factor=0.0,
-            fixed_axis=common.Vector3(*b.fixed_axis).normalize() if b.fixed_axis else None,
+            fixed_axis=getFixedAxis(b),
             local_x_vector=None,
             local_z_vector=None,
             external_key=-1,
             ik=None
                 )
-
-        if b.tail:
-            bone.tail_position=common.Vector3(*b.tail)
 
         if b.constraint==exporter.bonebuilder.CONSTRAINT_COPY_ROTATION:
             bone.layer=2
@@ -85,18 +92,15 @@ def create_pmx(ex):
         if b.constraint==exporter.bonebuilder.CONSTRAINT_LIMIT_ROTATION:
             bone.setFlag(pmx.BONEFLAG_HAS_FIXED_AXIS, True)
 
-        bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, not b.tail)
+        bone.setFlag(pmx.BONEFLAG_TAILPOS_IS_BONE, b.hasTail)
         bone.setFlag(pmx.BONEFLAG_CAN_ROTATE, True)
         bone.setFlag(pmx.BONEFLAG_CAN_TRANSLATE, b.canTranslate)
         bone.setFlag(pmx.BONEFLAG_IS_VISIBLE, b.isVisible)
         bone.setFlag(pmx.BONEFLAG_CAN_MANIPULATE, b.canManipulate())
 
         if b.ikSolver:
-            print(b.ikSolver)
             bone.setFlag(pmx.BONEFLAG_IS_IK, True)
             bone.ik_target_index=b.ikSolver.effector_index
-            for c in b.ikSolver.chain:
-                print(c.limitAngle, c.limitMin, c.limitMax)
             bone.ik=pmx.Ik(
                     b.ikSolver.effector_index,
                     b.ikSolver.iterations,

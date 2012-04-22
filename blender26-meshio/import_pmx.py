@@ -395,13 +395,16 @@ def __create_armature(bones, display_slots):
 
     bl.enterObjectMode()
 
-
+    # fix flag
     boneNameMap={}
     for b in bones:
         boneNameMap[b.name]=b
     for b in armature.bones.values():
         if not boneNameMap[b.name].hasFlag(pmx.BONEFLAG_IS_VISIBLE):
             b.hide=True
+        if not boneNameMap[b.name].hasFlag(pmx.BONEFLAG_TAILPOS_IS_BONE):
+            b[bl.BONE_USE_TAILOFFSET]=True
+            
 
     return armature_object
 

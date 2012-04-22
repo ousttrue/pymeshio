@@ -50,7 +50,6 @@ class Bone(object):
         self.english_name=english_name
         self.pos=pos
         self.tail=None
-        self.fixed_axis=None
         self.parent_index=None
         self.tail_index=None
         self.isVisible=isVisible
@@ -69,9 +68,10 @@ class Bone(object):
     def __str__(self):
         return "<Bone %s>" % (self.name)
 
+    def isFixedAxis(self):
+        return self.constraint==CONSTRAINT_LIMIT_ROTATION
+
     def canManipulate(self):
-        #if not self.isVisible and not self.ikEffector:
-        #    return False
         return True
 
 
@@ -117,15 +117,15 @@ class BoneBuilder(object):
 
         # buid tree hierarchy
         def __getBone(bone, b):
+            bone.hasTail=not (bl.BONE_USE_TAILOFFSET in b)
+
             if len(b.children)==0:
                 return
 
-            #bone.hasTail= not (bl.BONE_USE_TAILOFFSET in b)
             for i, c in enumerate(b.children):
                 child=self.boneMap[c.name]
                 if bone:
                     child.parent_index=bone.index
-                    #bone.tail=child.pos
                 __getBone(child, c)
 
         for bone, b in zip(self.bones, armature.bones.values()):
@@ -232,7 +232,6 @@ class BoneBuilder(object):
             for i, k_v in enumerate(boneMap):
                 if (k_v[0]==bone.name or k_v[1]==bone.name):
                     return i
-            #print(bone)
             return len(boneMap)
 
         self.bones.sort(key=getIndex)
@@ -258,27 +257,27 @@ class BoneBuilder(object):
         """
         調整
         """
+        # set parent_index and tail_index
         for b in self.bones:
-            # parent index
             if b.parent_index==None:
                 b.parent_index=-1
             else:
                 parent_b=self.bones[b.parent_index]
-                if b.constraint==CONSTRAINT_LIMIT_ROTATION:
-                    b.tail_index=-1
-                    b.fixed_axis=b.tail
-                    b.tail=(0, 0, 0)
-                elif b.constraint==CONSTRAINT_LIMIT_TRANSLATION:
-                    if parent_b.constraint==CONSTRAINT_LIMIT_ROTATION:
-                        # 軸固定
+                if b.constraint==CONSTRAINT_LIMIT_TRANSLATION:
+                    if parent_b.isFixedAxis():
                         self.bones[parent_b.parent_index].tail_index=b.index
+                        parent_b.tail=[l - r for l, r in zip(b.pos, parent_b.pos)]
                     else:
-                        # 移動不可
                         parent_b.tail_index=b.index
 
+        # set tail
         for b in self.bones:
-            if b.tail_index==None:
+            if not b.tail_index:
                 b.tail_index=-1
+                if not b.hasTail:
+                    if not b.isFixedAxis():
+                        b.tail=(0, 0, 0)
+                    b.tail_index=-1
 
     def getIndex(self, bone):
         for i, b in enumerate(self.bones):
