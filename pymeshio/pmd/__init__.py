@@ -257,7 +257,6 @@ class Bone(common.Diff):
 
     def diff(self, rhs):
         self._diff(rhs, "name")
-        # todo
         #self._diff(rhs, "english_name")
         self._diff(rhs, "index")
         self._diff(rhs, "type")

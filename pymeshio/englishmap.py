@@ -90,7 +90,7 @@ boneMap=[
 ("front hair3", "前髪３"),
 ("eyelight_L", "左目光"),
 ("eyelight_R", "右目光"),
-("necktie3_t", "ﾈｸﾀｲ４"),
+("necktie4", "ﾈｸﾀｲ４"),
 ("hair6_L_t", "左髪７"),
 ("hair6_R_t", "右髪７"),
 ("ankle_L_t", "左つま先"),
