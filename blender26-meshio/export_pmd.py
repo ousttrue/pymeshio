@@ -124,9 +124,9 @@ def write(ex, path):
             assert(i<vertexCount)
         for i in range(0, len(indices), 3):
             # reverse triangle
-            model.indices.append(indices[i])
-            model.indices.append(indices[i+1])
             model.indices.append(indices[i+2])
+            model.indices.append(indices[i+1])
+            model.indices.append(indices[i])
 
     boneMap=dict([(b.name, i) for i, b in enumerate(ex.skeleton.bones)])
 
