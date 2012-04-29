@@ -98,6 +98,11 @@ Usage as python module
 
 New
 ---
+2.5.6 (2012-04-22)
+~~~~~~~~~~~~~~~~~~
+* restore blender pmd importer/exporter
+* fix englishmap
+
 2.5.5 (2012-04-17)
 ~~~~~~~~~~~~~~~~~~
 * blender pmx importer/exporter improvement
