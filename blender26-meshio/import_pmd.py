@@ -523,7 +523,7 @@ def __import16MaerialAndMesh(meshObject, l,
     used_map={}
     bl.mesh.addUV(mesh)
     for i, (face, material_index) in enumerate(
-            zip(mesh.faces, mesh_face_materials)):
+            zip(mesh.tessfaces, mesh_face_materials)):
         try:
             index=mesh_material_map[material_index]
         except KeyError as message:

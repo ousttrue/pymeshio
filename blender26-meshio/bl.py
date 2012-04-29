@@ -415,7 +415,12 @@ class mesh:
 
     @classmethod
     def addGeometry(cls, mesh, vertices, faces):
-        mesh.from_pydata(vertices, [], faces)
+        from bpy_extras.io_utils import unpack_list, unpack_face_list
+        mesh.vertices.add(len(vertices))
+        mesh.vertices.foreach_set("co", unpack_list(vertices))
+        mesh.tessfaces.add(len(faces))
+        mesh.tessfaces.foreach_set("vertices_raw", unpack_face_list(faces))
+        #mesh.from_pydata(vertices, [], faces)
         """
         mesh.add_geometry(len(vertices), 0, len(faces))
         # add vertex
@@ -440,11 +445,11 @@ class mesh:
         mesh.faces.foreach_set("verts_raw", unpackedFaces)
         """
         assert(len(vertices)==len(mesh.vertices))
-        assert(len(faces)==len(cls.getFaces(mesh)))
+        #assert(len(faces)==len(cls.getFaces(mesh)))
 
     @staticmethod
     def hasUV(mesh):
-        return len(mesh.uv_textures)>0
+        return len(mesh.tessface_uv_textures)>0
 
     @staticmethod
     def useVertexUV(mesh):
@@ -452,12 +457,12 @@ class mesh:
 
     @staticmethod
     def addUV(mesh):
-        mesh.uv_textures.new()
+        mesh.tessface_uv_textures.new()
 
     @staticmethod
     def hasFaceUV(mesh, i, face):
         active_uv_texture=None
-        for t in mesh.uv_textures:
+        for t in mesh.tessface_uv_textures:
             if t.active:
                 active_uv_texture=t
                 break
@@ -466,7 +471,7 @@ class mesh:
     @staticmethod
     def getFaceUV(mesh, i, faces, count=3):
         active_uv_texture=None
-        for t in mesh.uv_textures:
+        for t in mesh.tessface_uv_textures:
             if t.active:
                 active_uv_texture=t
                 break
@@ -484,7 +489,7 @@ class mesh:
 
     @staticmethod
     def setFaceUV(m, i, face, uv_array, image):
-        uv_face=m.uv_textures[0].data[i]
+        uv_face=m.tessface_uv_textures[0].data[i]
         uv_face.uv=uv_array
         if image:
             uv_face.image=image
