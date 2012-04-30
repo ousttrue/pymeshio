@@ -151,6 +151,7 @@ class object:
         #bpy.ops.object.rotation_apply()
         #bpy.ops.object.scale_apply()
         #bpy.ops.object.location_apply()
+        dumy.data.update(calc_tessface=True)
         return dumy.data, dumy
 
     @staticmethod

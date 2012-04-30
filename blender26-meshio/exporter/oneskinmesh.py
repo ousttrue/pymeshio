@@ -142,7 +142,7 @@ class OneSkinMesh(object):
     def __processFaces(self, obj_name, mesh, weightMap, secondWeightMap):
         default_material=DefaultMatrial()
         # 各面の処理
-        for i, face in enumerate(mesh.faces):
+        for i, face in enumerate(mesh.tessfaces):
             faceVertexCount=bl.face.getVertexCount(face)
             try:
                 material=mesh.materials[bl.face.getMaterialIndex(face)]
