@@ -484,7 +484,7 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
             image=(textures_and_images.get[m.texture_index] 
                     if m.texture_index in textures_and_images
                     else None)
-            for i, face in enumerate(bl.mesh.getFaces(mesh)):
+            for i, face in enumerate(mesh.tessfaces):
                 bl.face.setMaterial(face, 0)
                 uv0=model.vertices[next(index_gen)].uv
                 uv1=model.vertices[next(index_gen)].uv
@@ -498,6 +498,7 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
 
                 # set smooth
                 bl.face.setSmooth(face, True)
+
 
             ####################
             # armature
