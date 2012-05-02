@@ -524,23 +524,34 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
             ####################
             # shape keys
             ####################
-            # set shape_key pin
-            bl.object.pinShape(mesh_object, True)
-            # create base key
-            baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
-            mesh.update()
-            for m in model.morphs:
-                new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
-                for o in m.offsets:
-                    if isinstance(o, pmx.VertexMorphOffset):
-                        bl.shapekey.assign(new_shape_key, 
-                                o.vertex_index, 
-                                mesh.vertices[o.vertex_index].co+
-                                bl.createVector(*convert_coord(o.position_offset)))
-                    else:
-                        raise Exception("unknown morph type: %s" % o)
-            # select base shape
-            bl.object.setActivateShapeKey(mesh_object, 0)
+            if len(model.morphs)>0:
+                # set shape_key pin
+                bl.object.pinShape(mesh_object, True)
+                # create base key
+                bl.object.addVertexGroup(mesh_object, bl.MMD_SHAPE_GROUP_NAME)
+                # assign all vertext to group
+                for i, v in enumerate(mesh.vertices):
+                    bl.object.assignVertexGroup(mesh_object,
+                            bl.MMD_SHAPE_GROUP_NAME, i, 0);
+                # create base key
+                baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
+                mesh.update()
+
+                # each morph
+                for m in model.morphs:
+                    new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
+                    for o in m.offsets:
+                        if isinstance(o, pmx.VertexMorphOffset):
+                            # vertex morph
+                            bl.shapekey.assign(new_shape_key, 
+                                    o.vertex_index, 
+                                    mesh.vertices[o.vertex_index].co+
+                                    bl.createVector(*convert_coord(o.position_offset)))
+                        else:
+                            raise Exception("unknown morph type: %s" % o)
+
+                # select base shape
+                bl.object.setActivateShapeKey(mesh_object, 0)
 
             #############################
             # clean up not used vertices

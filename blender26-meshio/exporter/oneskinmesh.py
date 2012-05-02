@@ -412,7 +412,6 @@ class OneSkinMesh(object):
             if b.name==bl.BASE_SHAPE_NAME:
                 continue
 
-            #print(b.name)
             morph=self.__getOrCreateMorph(b.name, 4)
             used=set()
             for index, src, dst in zip(

@@ -593,7 +593,7 @@ class Morph(common.Diff):
         self._diff(rhs, 'english_name')
         self._diff(rhs, 'panel')
         self._diff(rhs, 'morph_type')
-        self._diff_array(rhs, 'offsets')
+        #self._diff_array(rhs, 'offsets')
 
 
 class VertexMorphOffset(common.Diff):

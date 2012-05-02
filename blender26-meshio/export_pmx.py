@@ -240,11 +240,21 @@ def create_pmx(ex):
             model.indices.append(indices[i])
 
     # 表情
-    for i, m in enumerate(ex.oneSkinMesh.morphList):
+    from .pymeshio import englishmap
+    for i, m in enumerate(ex.oneSkinMesh.morphList[1:]):
+        # name
+        english_name="morph: %d" % i
+        panel=0
+        for en, n, p in englishmap.skinMap:
+            if n==m.name:
+                english_name=en
+                panel=p
+                break
+
         morph=pmx.Morph(
                 name=m.name,
-                english_name='',
-                panel=0,
+                english_name=english_name,
+                panel=panel,
                 morph_type=1,
                 )
         morph.offsets=[pmx.VertexMorphOffset(
