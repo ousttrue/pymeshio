@@ -699,7 +699,7 @@ class DisplaySlot(common.Diff):
         self._diff(rhs, 'name')
         self._diff(rhs, 'english_name')
         self._diff(rhs, 'special_flag')
-        self._diff_array(rhs, 'references')
+        #self._diff_array(rhs, 'references')
 
 
 class RigidBodyParam(common.Diff):
@@ -747,6 +747,9 @@ class RigidBodyParam(common.Diff):
         self._diff_array(rhs, 'friction')
 
 
+SHAPE_SPHERE=0
+SHAPE_BOX=1
+SHAPE_CAPSULE=2
 class RigidBody(common.Diff):
     """pmx rigidbody
 
@@ -804,6 +807,12 @@ class RigidBody(common.Diff):
                 restitution, friction)
         self.mode=mode
 
+    def __str__(self):
+        return ("<pmx.RigidBody {name} shape:{type}>".format(
+            name=self.english_name,
+            type=self.shape_type
+            ))
+
     def __eq__(self, rhs):
         return (
                 self.name==rhs.name
@@ -827,7 +836,21 @@ class RigidBody(common.Diff):
         self._diff(rhs, 'collision_group')
         self._diff(rhs, 'no_collision_group')
         self._diff(rhs, 'shape_type')
-        self._diff(rhs, 'shape_size')
+        if self.shape_type==SHAPE_SPHERE: 
+            if self.shape_size.x!=rhs.shape_size.x:
+                print(self.shape_size)
+                print(rhs.shape_size)
+                raise DifferenceException('self.shape_size')
+        elif self.shape_type==SHAPE_BOX:
+            self._diff(rhs, 'shape_size')
+        elif self.shape_type==SHAPE_CAPSULE:
+            if (self.shape_size.x!=rhs.shape_size.x 
+                    or self.shape_size.y!=rhs.shape_size.y):
+                print(self.shape_size)
+                print(rhs.shape_size)
+                raise DifferenceException('self.shape_size')
+        else:
+            assert(False)
         self._diff(rhs, 'shape_position')
         self._diff(rhs, 'shape_rotation')
         self._diff(rhs, 'param')

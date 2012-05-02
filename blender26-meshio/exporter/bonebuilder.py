@@ -170,12 +170,12 @@ class BoneBuilder(object):
                     # IK effector
                     ####################
                     # IK 接続先
-                    effector=self.__boneByName(b.name)
+                    effector=self.boneByName(b.name)
                     effector.ikEffector=True
 
                     # IK solver
                     ####################
-                    target=self.__boneByName(bl.constraint.ikTarget(c))
+                    target=self.boneByName(bl.constraint.ikTarget(c))
                     target.ikSolver=IKSolver(target.index, effector.index, 
                                 int(c.iterations * 0.1), 
                                 armature.bones[target.name].get(bl.IK_UNITRADIAN, 0)
@@ -203,7 +203,7 @@ class BoneBuilder(object):
                             limit_max[2]=chain.ik_max_z
                         # IK影響下
                         target.ikSolver.chain.append(IKChain(
-                            self.__boneByName(chain.name).index,
+                            self.boneByName(chain.name).index,
                             limit_anlge, limit_min, limit_max))
                         # next
                         chain=chain.parent
@@ -324,11 +324,11 @@ class BoneBuilder(object):
             return 0
         else:
             try:
-                return self.getIndex(self.__boneByName(name))
+                return self.getIndex(self.boneByName(name))
             except:
                 return 0
 
-    def __boneByName(self, name):
+    def boneByName(self, name):
         return self.boneMap[name]
 
 

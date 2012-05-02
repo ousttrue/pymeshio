@@ -264,14 +264,26 @@ def create_pmx(ex):
             for index, offset in m.offsets]
         model.morphs.append(morph)
 
-
     # ボーングループ
-    model.display_slots=[pmx.DisplaySlot(
-        name=name,
-        english_name='',
-        special_flag=0,
-        )
-        for name, members in ex.skeleton.bone_groups]
+    model.display_slots=[]
+    for name, members in ex.skeleton.bone_groups:
+        if name=="表情":
+            slot=pmx.DisplaySlot(
+                    name=name,
+                    english_name=englishmap.getEnglishBoneGroupName(name),
+                    special_flag=1
+                    )
+            slot.references=[(1, i) for i in range(len(model.morphs))]
+            model.display_slots.append(slot)
+
+        else:
+            slot=pmx.DisplaySlot(
+                    name=name,
+                    english_name=englishmap.getEnglishBoneGroupName(name),
+                    special_flag=1 if name=="Root" else 0
+                    )
+            slot.references=[(0, ex.skeleton.boneByName(m).index) for m in members]
+            model.display_slots.append(slot)
 
     # rigid body
     boneNameMap={}
@@ -285,15 +297,12 @@ def create_pmx(ex):
         boneIndex=boneNameMap[obj[bl.RIGID_BONE_NAME]]
         if boneIndex==0:
             boneIndex=-1
-            bone=ex.skeleton.bones[0]
-        else:
-            bone=ex.skeleton.bones[boneIndex]
         if obj[bl.RIGID_SHAPE_TYPE]==0:
             shape_type=0
             shape_size=common.Vector3(obj.scale[0], 0, 0)
         elif obj[bl.RIGID_SHAPE_TYPE]==1:
             shape_type=1
-            shape_size=common.Vector3(obj.scale[0], obj.scale[1], obj.scale[2])
+            shape_size=common.Vector3(obj.scale[0], obj.scale[2], obj.scale[1])
         elif obj[bl.RIGID_SHAPE_TYPE]==2:
             shape_type=2
             shape_size=common.Vector3(obj.scale[0], obj.scale[2], 0)
@@ -304,9 +313,9 @@ def create_pmx(ex):
                 no_collision_group=obj[bl.RIGID_INTERSECTION_GROUP],
                 bone_index=boneIndex,
                 shape_position=common.Vector3(
-                    obj.location.x-bone.pos[0],
-                    obj.location.z-bone.pos[2],
-                    obj.location.y-bone.pos[1]),
+                    obj.location.x,
+                    obj.location.z,
+                    obj.location.y),
                 shape_rotation=common.Vector3(
                     -obj.rotation_euler[0],
                     -obj.rotation_euler[2],

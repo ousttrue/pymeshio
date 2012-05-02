@@ -236,6 +236,8 @@ def getUnicodeSkinName(name):
 ボーングループ名変換
 """
 boneGroupMap=[
+        ("Root", "Root"),
+        ("Exp", "表情"),
         ("IK", "ＩＫ"),
         ("Body[u]", "体(上)"),
         ("Hair", "髪"),
