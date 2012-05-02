@@ -98,9 +98,13 @@ Usage as python module
 
 New
 ---
+2.6.1 (2012-05-03)
+~~~~~~~~~~~~~~~~~~
+* implement pmd importer/exporter
+
 2.6.0 (2012-04-30)
 ~~~~~~~~~~~~~~~~~~
-* fix pmd import/exporter for blender2.63
+* fix pmd importer/exporter for blender2.63
 * it cannot be used in blender2.62
 
 2.5.6 (2012-04-22)
