@@ -98,6 +98,10 @@ Usage as python module
 
 New
 ---
+2.6.2 (2012-05-18)
+~~~~~~~~~~~~~~~~~~
+* fix export_pmd bug that flip face. thanks to griffon-9
+
 2.6.1 (2012-05-03)
 ~~~~~~~~~~~~~~~~~~
 * implement pmd importer/exporter
