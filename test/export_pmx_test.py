@@ -19,12 +19,12 @@ class TestExportedPmx(unittest.TestCase):
     def test_exported_diff(self):
         # convert
         pmx=pymeshio.pmx.reader.read_from_file(PMX_FILE)
-        exported=pymeshio.pmx.reader.read_from_file(EXPORT_PMX_FILE)
+        #exported=pymeshio.pmx.reader.read_from_file(EXPORT_PMX_FILE)
 
         # validate
         pmx=pymeshio.pmx.reader.read_from_file(PMX_FILE)
         # check diffference
-        pmx.diff(exported)
+        #pmx.diff(exported)
         #self.assertEqual(pmx, exported)
-        pymeshio.pmx.writer.write(io.open("tmp.pmx", "wb"), exported)
+        #pymeshio.pmx.writer.write(io.open("tmp.pmx", "wb"), exported)
 

@@ -17,9 +17,12 @@ class Writer(common.BinaryWriter):
         super(Writer, self).__init__(ios)
         if text_encoding==0:
             def write_text(unicode):
-               utf16=unicode.encode('utf16') 
-               self.write_int(len(utf16), 4)
-               self.write_bytes(utf16)
+                if not unicode:
+                    self.write_int(0, 4)
+                else:
+                    utf16=unicode.encode('utf-16-le') 
+                    self.write_int(len(utf16), 4)
+                    self.write_bytes(utf16)
             self.write_text=write_text
         elif text_encoding==1:
             def write_text(unicode):
@@ -259,7 +262,7 @@ class Writer(common.BinaryWriter):
             self.write_vector3(j.spring_constant_rotation)
 
 
-def write(ios, model, text_encoding=1):
+def write(ios, model, text_encoding=0):
     """
     write model to ios.
 
@@ -270,7 +273,6 @@ def write(ios, model, text_encoding=1):
             pmx model
         text_encoding
             text field encoding (0: UTF16, 1:UTF-8).
-            0: UTF16 has bug. it write BOM(FFFE).
 
     >>> import pymeshio.pmx.writer
     >>> pymeshio.pmx.writer.write(io.open('out.pmx', 'wb'), pmx_model)
