@@ -39,7 +39,7 @@ class Reader(common.BinaryReader):
         if text_encoding==0:
             def read_text():
                 size=self.read_int(4)
-                return self.unpack("{0}s".format(size), size).decode("UTF-16-le")
+                return self.unpack("{0}s".format(size), size).decode("utf-16-le")
             return read_text
         elif text_encoding==1:
             def read_text():
