@@ -350,6 +350,8 @@ def __importArmature(l):
         bl.constraint.addIk(p_bone,
                 armature_object, effector_name, 
                 ik.children, ik.weight, ik.iterations)
+        effector_bone=pose.bones[effector_name].bone
+        effector_bone[bl.IK_UNITRADIAN]=ik.weight
 
     bl.armature.makeEditable(armature_object)
     bl.armature.update(armature)
