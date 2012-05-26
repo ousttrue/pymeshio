@@ -265,9 +265,9 @@ def write(ex, path):
         try:
             if o.name.startswith(bl.TOON_TEXTURE_OBJECT):
                 toonMeshObject=o
+                break
         except:
             p(o.name)
-        break
     if toonMeshObject:
         toonMesh=bl.object.getData(toonMeshObject)
         toonMaterial=bl.mesh.getMaterial(toonMesh, 0)
