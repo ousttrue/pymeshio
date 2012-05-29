@@ -271,10 +271,19 @@ def write(ex, path):
     if toonMeshObject:
         toonMesh=bl.object.getData(toonMeshObject)
         toonMaterial=bl.mesh.getMaterial(toonMesh, 0)
+        material_names=[ name for name, dummy in ex.oneSkinMesh.vertexArray.each() ]
         for i in range(10):
             t=bl.material.getTexture(toonMaterial, i)
             if t:
                 model.toon_textures[i]=("%s" % t.name).encode('cp932')
+                # update toon_index
+                for material_name, material in zip(material_names, model.materials):
+                    try:
+                        m=bl.material.get(material_name)
+                        if any(t == slot.texture for slot in m.texture_slots if slot is not None):
+                            material.toon_index=i
+                    except KeyError as e:
+                        pass
             else:
                 model.toon_textures[i]=("toon%02d.bmp" % (i+1)).encode('cp932')
     else:
