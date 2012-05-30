@@ -98,6 +98,11 @@ Usage as python module
 
 New
 ---
+2.6.4 (2012-05-30)
+~~~~~~~~~~~~~~~~~~
+* implement toon texture for pmd. thanks to griffon-9
+* fix ik_target index for pmd. thanks. to griffon-9
+
 2.6.3 (2012-05-18)
 ~~~~~~~~~~~~~~~~~~
 * fix pmx writing for utf-16-le. change default encoding to utf-16-le
