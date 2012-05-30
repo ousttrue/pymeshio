@@ -195,6 +195,7 @@ def write(ex, path):
         for i, chain in enumerate(ik.chain):
             solver.children.append(chain.index)
             model.bones[chain.index].type=pmd.Bone.IK_ROTATE_INFL
+            model.bones[chain.index].ik_index=ik.target_index
 
         solver.iterations=ik.iterations
         solver.weight=ik.weight
@@ -203,6 +204,9 @@ def write(ex, path):
     for i, b in enumerate(model.bones):
         if b.type==pmd.Bone.IK_TARGET:
             b.tail_index=0
+        if b.type==pmd.Bone.IK_ROTATE_INFL or b.type==pmd.Bone.IK_TARGET:
+            if model.bones[b.parent_index].type==pmd.Bone.IK_ROTATE_INFL:
+                b.ik_index=model.bones[b.parent_index].ik_index
         print(i, b.name, b.type)
 
     # 表情
