@@ -352,6 +352,7 @@ class OneSkinMesh(object):
                 for key in copyMesh.shape_keys.key_blocks:
                     for point in key.data:
                         point.co=matrix*point.co
+            copyMesh.calc_normals()
 
             # apply modifier
             for m in [m for m in copyObj.modifiers]:
