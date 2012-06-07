@@ -239,6 +239,9 @@ def create_pmx(ex):
             model.indices.append(indices[i+1])
             model.indices.append(indices[i])
 
+    def get_vertex_index(rel_index):
+        return ex.oneSkinMesh.morphList[0].offsets[rel_index][0]
+
     # 表情
     from .pymeshio import englishmap
     for i, m in enumerate(ex.oneSkinMesh.morphList[1:]):
@@ -258,7 +261,7 @@ def create_pmx(ex):
                 morph_type=1,
                 )
         morph.offsets=[pmx.VertexMorphOffset(
-            index, 
+            get_vertex_index(index),
             common.Vector3(offset[0], offset[2], offset[1])
             )
             for index, offset in m.offsets]
