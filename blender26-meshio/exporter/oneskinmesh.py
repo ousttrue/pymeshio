@@ -385,7 +385,7 @@ class OneSkinMesh(object):
                 baseMorph=self.__getOrCreateMorph('base', 0)
                 basis=b
 
-                relativeIndex=0
+                relativeIndex=len(baseMorph.offsets)
                 for index in vg:
                     v=bl.shapekey.getByIndex(b, index)
                     pos=[v[0], v[1], v[2]]
