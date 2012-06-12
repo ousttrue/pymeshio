@@ -98,10 +98,14 @@ Usage as python module
 
 New
 ---
+2.6.5 (2012-06-13)
+~~~~~~~~~~~~~~~~~~
+* fix and implovement vertex morph for pmd/pmx exporter. thanks to griffon-9
+
 2.6.4 (2012-05-30)
 ~~~~~~~~~~~~~~~~~~
 * implement toon texture for pmd. thanks to griffon-9
-* fix ik_target index for pmd. thanks. to griffon-9
+* fix ik_target index for pmd. thanks to griffon-9
 
 2.6.3 (2012-05-18)
 ~~~~~~~~~~~~~~~~~~
