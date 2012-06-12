@@ -82,7 +82,6 @@ class OneSkinMesh(object):
         if not bl.object.isVisible(obj):
             return
         self.__mesh(obj)
-        self.__skin(obj)
         self.__rigidbody(obj)
         self.__constraint(obj)
 
@@ -348,6 +347,12 @@ class OneSkinMesh(object):
         if len(copyMesh.vertices)>0:
             # apply transform
             copyMesh.transform(obj.matrix_world)
+            if bl.object.hasShapeKey(copyObj):
+                matrix=obj.matrix_world
+                for key in copyMesh.shape_keys.key_blocks:
+                    for point in key.data:
+                        point.co=matrix*point.co
+            copyMesh.calc_normals()
 
             # apply modifier
             for m in [m for m in copyObj.modifiers]:
@@ -362,12 +367,13 @@ class OneSkinMesh(object):
 
             weightMap, secondWeightMap=self.__getWeightMap(copyObj, copyMesh)
             self.__processFaces(obj.name, copyMesh, weightMap, secondWeightMap)
+            self.__skin(copyObj, obj.name)
         bl.object.delete(copyObj)
 
     def createEmptyBasicSkin(self):
         self.__getOrCreateMorph('base', 0)
 
-    def __skin(self, obj):
+    def __skin(self, obj, obj_name):
         if not bl.object.hasShapeKey(obj):
             return
 
@@ -390,7 +396,7 @@ class OneSkinMesh(object):
                     v=bl.shapekey.getByIndex(b, index)
                     pos=[v[0], v[1], v[2]]
 
-                    indices=self.vertexArray.getMappedIndex(obj.name, index)
+                    indices=self.vertexArray.getMappedIndex(obj_name, index)
                     for attribute, i in indices.items():
                         if i in used:
                             continue
@@ -422,7 +428,7 @@ class OneSkinMesh(object):
                 if offset[0]==0 and offset[1]==0 and offset[2]==0:
                     continue
                 if index in vg:
-                    indices=self.vertexArray.getMappedIndex(obj.name, index)
+                    indices=self.vertexArray.getMappedIndex(obj_name, index)
                     for attribute, i in indices.items():
                         if i in used:
                             continue
