@@ -8,7 +8,7 @@ import shutil
 
 
 # copy pymeshio dir for blender26 plugin
-PYMESHIO_DIR_IN_BLENDER26='blender26-meshio/pymeshio'
+PYMESHIO_DIR_IN_BLENDER26='blender26-meshio2/pymeshio'
 if os.path.exists(PYMESHIO_DIR_IN_BLENDER26):
     shutil.rmtree(PYMESHIO_DIR_IN_BLENDER26)    
 print("copy pymeshio to %s" % PYMESHIO_DIR_IN_BLENDER26)
@@ -17,7 +17,7 @@ shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER26)
 
 setup(
         name='pymeshio',
-        version='2.6.5',
+        version='3.0.0',
         description='3d model io library for mqo, pmd, pmx, vmd and vpd',
         long_description=open('README.rst').read(),
         classifiers=[
