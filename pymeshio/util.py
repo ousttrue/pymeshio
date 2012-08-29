@@ -9,6 +9,21 @@ import pmx.reader
 class Material(object):
     __slots__=[
             'name',
+            'english_name',
+            'diffuse_color',
+            'alpha',
+            'specular_color',
+            'specular_factor',
+            'ambient_color',
+            'flag',
+            'edge_color',
+            'edge_size',
+            'texture_index',
+            'sphere_texture_index',
+            'sphere_mode',
+            'toon_sharing_flag',
+            'toon_texture_index',
+            'comment',
             ]
     def __init__(self, name):
         self.name=name
@@ -47,24 +62,36 @@ class Vertex(object):
         self.skinning=skinning
 
 
+class Face(object):
+    __slots__=['indices', 'material_index']
+    def __init__(self, *indices):
+        self.indices=indices
+        self.material_index=0
+
+
 class Mesh(object):
     __slots__=[
             'vertices', 'faces',
             ]
     def __init__(self):
-        pass
+        self.vertices=[]
+        self.faces=[]
 
 
 class GenericModel(object):
     __slots__=[
-            'meshes',
+            'meshes',  'materials', 'textures',
             ]
 
     def __init__(self):
         self.meshes=[]
+        self.materials=[]
 
     def load_pmx(self, src):
         mesh=Mesh()
+        self.meshes.append(mesh)
+
+        # vertices
         def parse_pmx_vertex(v):
             if isinstance(v.deform, pmx.Bdef1):
                 skinning=[(v.deform.index0, 1.0)]
@@ -82,9 +109,41 @@ class GenericModel(object):
                     skinning=skinning)
             return vertex
         mesh.vertices=[parse_pmx_vertex(v) for v in src.vertices]
-        self.meshes.append(mesh)
 
+        # textures
+        self.textures=src.textures[:]
 
+        # materials
+        def parse_pmx_material(m):
+            material=Material(m.name)
+            material.english_name=m.english_name
+            material.diffuse_color=m.diffuse_color
+            material.alpha=m.alpha
+            material.specular_color=m.specular_color
+            material.specular_factor=m.specular_factor
+            material.ambient_color=m.ambient_color
+            material.flag=m.flag
+            material.edge_color=m.edge_color
+            material.edge_size=m.edge_size
+            material.texture_index=m.texture_index
+            material.sphere_texture_index=m.sphere_texture_index
+            material.sphere_mode=m.sphere_mode
+            material.toon_sharing_flag=m.toon_sharing_flag
+            material.toon_texture_index=m.toon_texture_index
+            material.comment=m.comment
+            return material
+        self.materials=[parse_pmx_material(m) for m in src.materials]
+
+        # faces
+        def it():
+            for i in src.indices:
+                yield i
+        for i, m in enumerate(src.materials):
+            for _ in range(0, m.vertex_count, 3):
+                face=Face(it(), it(), it())
+                face.material_index=i
+                mesh.faces.append(face)
+            
     @staticmethod
     def read_from_file(filepath):
         if not os.path.exists(filepath):

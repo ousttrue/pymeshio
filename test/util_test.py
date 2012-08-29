@@ -19,6 +19,9 @@ class TestUtil(unittest.TestCase):
         model=pymeshio.util.GenericModel.read_from_file(PMX_FILE)
         self.assertEqual(pymeshio.util.GenericModel,  model.__class__)
         self.assertEqual(len(src.vertices), len(model.meshes[0].vertices))
+        self.assertEqual(len(src.textures), len(model.textures))
+        self.assertEqual(len(src.materials), len(model.materials))
+        self.assertEqual(len(src.indices)/3, len(model.meshes[0].faces))
 
     def test_write(self):
         # read source file
