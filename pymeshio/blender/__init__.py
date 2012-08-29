@@ -133,53 +133,73 @@ def import_pymeshio_model(model, import_mesh=True):
         materials=[__create_a_material(m, i, textures_and_images) 
                 for i, m in enumerate(model.materials)]
 
+        # 画像
+        images=[(textures_and_images.get[m.texture_index] 
+            if (m.texture_index in textures_and_images)
+            else None) 
+            for m in model.materials]
+
         for i, m in enumerate(model.meshes):
             ####################
             # mesh object
             ####################
             # object名はutf-8で21byteまで
             mesh, mesh_object=bl.mesh.create('submesh')
-            #bl.mesh.addMaterial(mesh, material)
             # activate object
             bl.object.deselectAll()
             bl.object.activate(mesh_object)
             bl.object.makeParent(root_object, mesh_object)
 
             ####################
+            # material
+            ####################
+            for material in materials:
+                bl.mesh.addMaterial(mesh, material)
+
+            ####################
             # vertices & faces
             ####################
             # 頂点配列
             vertices=[(v.pos.x, v.pos.y, v.pos.z) for v in m.vertices]
-            # flip
-            indices=[(f.indices[2], f.indices[1], f.indices[0]) for f in m.faces]
-            #used_indices=set(indices)
+            faces=[(f.indices[0], f.indices[1], f.indices[2]) for f in m.faces]
+            #used_indices=set(faces)
 
-            bl.mesh.addGeometry(mesh, vertices, indices)
+            bl.mesh.addGeometry(mesh, vertices, faces)
             assert(len(m.vertices)==len(mesh.vertices))
 
-            '''
-            # assign material
             bl.mesh.addUV(mesh)
-            hasTexture=bl.material.hasTexture(material)
-            index_gen=(i for i in indices)
-            image=(textures_and_images.get[m.texture_index] 
-                    if m.texture_index in textures_and_images
-                    else None)
-            '''
-            for i, face in enumerate(mesh.tessfaces):
-                bl.face.setMaterial(face, 0)
-                #uv0=model.vertices[next(index_gen)].uv
-                #uv1=model.vertices[next(index_gen)].uv
-                #uv2=model.vertices[next(index_gen)].uv
-                #bl.mesh.setFaceUV(mesh, i, face, [# fix uv
-                #    (uv2.x, 1.0-uv2.y),
-                #    (uv1.x, 1.0-uv1.y),
-                #    (uv0.x, 1.0-uv0.y)
-                #    ],
-                #    image)
-
+            for i, (f, face) in enumerate(zip(m.faces, mesh.tessfaces)):
+                bl.face.setMaterial(face, f.material_index)
+                uv0=m.vertices[f.indices[0]].uv
+                uv1=m.vertices[f.indices[1]].uv
+                uv2=m.vertices[f.indices[2]].uv
+                bl.mesh.setFaceUV(mesh, i, face, [# fix uv
+                    (uv2.x, 1.0-uv2.y),
+                    (uv1.x, 1.0-uv1.y),
+                    (uv0.x, 1.0-uv0.y)
+                    ],
+                    images[f.material_index])
                 # set smooth
                 bl.face.setSmooth(face, True)
+
+            # set vertex attributes(normal, bone weights)
+            bl.mesh.useVertexUV(mesh)
+            for i, (mvert, v) in enumerate(zip(mesh.vertices, m.vertices)):
+                bl.vertex.setNormal(mvert, v.normal.to_tuple())
+                '''
+                if isinstance(v.deform, pmx.Bdef1):
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, 1.0)
+                elif isinstance(v.deform, pmx.Bdef2):
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, v.deform.weight0)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
+                else:
+                    raise Exception("unknown deform: %s" % v.deform)
+                '''
+            mesh.update()
+
 
             '''
             ####################
@@ -188,20 +208,6 @@ def import_pymeshio_model(model, import_mesh=True):
             if armature_object:
                 # armature modifirer
                 bl.modifier.addArmature(mesh_object, armature_object)
-                # set vertex attributes(normal, bone weights)
-                bl.mesh.useVertexUV(mesh)
-                for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
-                    bl.vertex.setNormal(mvert, convert_coord(v.normal))
-                    if isinstance(v.deform, pmx.Bdef1):
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index0].name, i, 1.0)
-                    elif isinstance(v.deform, pmx.Bdef2):
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index0].name, i, v.deform.weight0)
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
-                    else:
-                        raise Exception("unknown deform: %s" % v.deform)
 
             ####################
             # shape keys
@@ -245,7 +251,8 @@ def import_pymeshio_model(model, import_mesh=True):
             # flip
             #bl.mesh.flipNormals(mesh_object)
             '''
-
+    bl.enterObjectMode()
+    bl.object.activate(root_object)
 
 
 def import_file(scene, filepath, **args):

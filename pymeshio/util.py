@@ -48,6 +48,9 @@ class Vector3(object):
         self.y=y
         self.z=z
 
+    def to_tuple(self):
+        return (self.x, self.y, self.z)
+
 
 class Vertex(object):
     __slots__=[
@@ -87,6 +90,10 @@ class Mesh(object):
             tmp=v.pos.y
             v.pos.y=v.pos.z
             v.pos.z=tmp
+
+            tmp=v.normal.y
+            v.normal.y=v.normal.z
+            v.normal.z=tmp
 
 
 class GenericModel(object):
