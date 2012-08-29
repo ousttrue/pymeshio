@@ -49,6 +49,9 @@ class Vector2(object):
         else:
             assert(False)
 
+    def clone(self):
+        return Vector2(self.x, self.y)
+
     def to_tuple(self):
         return (self.x, self.y)
 
@@ -90,6 +93,9 @@ class Vector3(object):
             return self.z
         else:
             assert(False)
+
+    def clone(self):
+        return Vector3(self.x, self.y, self.z)
 
     def to_tuple(self):
         return (self.x, self.y, self.z)
@@ -262,6 +268,9 @@ class RGB(object):
         else:
             assert(False)
 
+    def clone(self):
+        return RGB(self.r, self.g, self.b)
+
 
 class RGBA(object):
     """
@@ -291,6 +300,9 @@ class RGBA(object):
             return self.a
         else:
             assert(False)
+
+    def clone(self):
+        return RGBA(self.r, self.g, self.b, self.a)
 
 
 """

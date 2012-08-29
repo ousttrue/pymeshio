@@ -30,28 +30,6 @@ class Material(object):
         self.name=name
 
 
-class Vector2(object):
-    __slots__=[
-            'x', 'y',
-            ]
-    def __init__(self, x, y):
-        self.x=x
-        self.y=y
-
-
-class Vector3(object):
-    __slots__=[
-            'x', 'y', 'z'
-            ]
-    def __init__(self, x, y, z):
-        self.x=x
-        self.y=y
-        self.z=z
-
-    def to_tuple(self):
-        return (self.x, self.y, self.z)
-
-
 class Vertex(object):
     __slots__=[
             'pos',
@@ -73,6 +51,17 @@ class Face(object):
         self.material_index=0
 
 
+def convert_coord(xyz):
+    """
+    Left handed y-up to Right handed z-up
+    """
+    # swap y and z
+    tmp=xyz.y
+    xyz.y=xyz.z
+    xyz.z=tmp
+    return xyz
+
+
 class Mesh(object):
     __slots__=[
             'vertices', 'faces',
@@ -82,18 +71,9 @@ class Mesh(object):
         self.faces=[]
 
     def convert_coord(self):
-        """
-        Left handed y-up to Right handed z-up
-        """
         for v in self.vertices:
-            # swap y and z
-            tmp=v.pos.y
-            v.pos.y=v.pos.z
-            v.pos.z=tmp
-
-            tmp=v.normal.y
-            v.normal.y=v.normal.z
-            v.normal.z=tmp
+            v.pos=convert_coord(v.pos)
+            v.normal=convert_coord(v.normal)
 
 
 class GenericModel(object):
@@ -102,6 +82,7 @@ class GenericModel(object):
             'name', 'english_name',
             'comment', 'english_comment',
             'meshes', 'materials', 'textures',
+            'bones',
             ]
 
     def __init__(self):
@@ -112,6 +93,16 @@ class GenericModel(object):
         self.english_comment=None
         self.meshes=[]
         self.materials=[]
+
+
+    def convert_coord(self):
+        for b in self.bones:
+            b.position=convert_coord(b.position)
+            b.tail_position=convert_coord(b.tail_position)
+
+        for m in self.meshes:
+            m.convert_coord()
+
 
     def load_pmx(self, src):
         mesh=Mesh()
@@ -135,9 +126,9 @@ class GenericModel(object):
             else:
                 raise 'unknown deform !'
             vertex=Vertex(
-                    pos=Vector3(v.position.x, v.position.y, v.position.z),
-                    uv=Vector2(v.uv.x, v.uv.y),
-                    normal=Vector3(v.normal.x, v.normal.y, v.normal.z),
+                    pos=v.position.clone(),
+                    uv=v.uv.clone(),
+                    normal=v.normal.clone(),
                     skinning=skinning)
             return vertex
         mesh.vertices=[parse_pmx_vertex(v) for v in src.vertices]
@@ -149,13 +140,13 @@ class GenericModel(object):
         def parse_pmx_material(m):
             material=Material(m.name)
             material.english_name=m.english_name
-            material.diffuse_color=m.diffuse_color
+            material.diffuse_color=m.diffuse_color.clone()
             material.alpha=m.alpha
-            material.specular_color=m.specular_color
+            material.specular_color=m.specular_color.clone()
             material.specular_factor=m.specular_factor
-            material.ambient_color=m.ambient_color
+            material.ambient_color=m.ambient_color.clone()
             material.flag=m.flag
-            material.edge_color=m.edge_color
+            material.edge_color=m.edge_color.clone()
             material.edge_size=m.edge_size
             material.texture_index=m.texture_index
             material.sphere_texture_index=m.sphere_texture_index
@@ -177,7 +168,10 @@ class GenericModel(object):
                 face.indices=[next(it), next(it), next(it)]
                 face.material_index=i
                 mesh.faces.append(face)
-            
+
+        # bones
+        self.bones=src.bones[:]
+
     @staticmethod
     def read_from_file(filepath):
         if not os.path.exists(filepath):
@@ -198,8 +192,7 @@ class GenericModel(object):
                 return
             model.load_pmx(m)
             # left handed Y-up to right handed Z-up
-            for m in model.meshes:
-                m.convert_coord()
+            model.convert_coord()
 
         elif ext==".mqo":
             from . import mqo
