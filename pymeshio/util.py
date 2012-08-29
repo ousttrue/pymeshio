@@ -3,7 +3,8 @@ import sys
 import os
 
 from . import pmx
-import pmx.reader
+from .pmx import reader as pmx_reader
+pmx.reader=pmx_reader
 
 
 class Material(object):
@@ -64,8 +65,8 @@ class Vertex(object):
 
 class Face(object):
     __slots__=['indices', 'material_index']
-    def __init__(self, *indices):
-        self.indices=indices
+    def __init__(self):
+        self.indices=[]
         self.material_index=0
 
 
@@ -77,19 +78,43 @@ class Mesh(object):
         self.vertices=[]
         self.faces=[]
 
+    def convert_coord(self):
+        """
+        Left handed y-up to Right handed z-up
+        """
+        for v in self.vertices:
+            # swap y and z
+            tmp=v.pos.y
+            v.pos.y=v.pos.z
+            v.pos.z=tmp
+
 
 class GenericModel(object):
     __slots__=[
-            'meshes',  'materials', 'textures',
+            'filepath',
+            'name', 'english_name',
+            'comment', 'english_comment',
+            'meshes', 'materials', 'textures',
             ]
 
     def __init__(self):
+        self.filepath=None
+        self.name=None
+        self.english_name=None
+        self.comment=None
+        self.english_comment=None
         self.meshes=[]
         self.materials=[]
 
     def load_pmx(self, src):
         mesh=Mesh()
         self.meshes.append(mesh)
+
+        self.filepath=src.path
+        self.name=src.name
+        self.english_name=src.english_name
+        self.comment=src.english_name
+        self.english_comment=src.english_comment
 
         # vertices
         def parse_pmx_vertex(v):
@@ -135,12 +160,14 @@ class GenericModel(object):
         self.materials=[parse_pmx_material(m) for m in src.materials]
 
         # faces
-        def it():
+        def indices():
             for i in src.indices:
                 yield i
+        it=indices()
         for i, m in enumerate(src.materials):
             for _ in range(0, m.vertex_count, 3):
-                face=Face(it(), it(), it())
+                face=Face()
+                face.indices=[next(it), next(it), next(it)]
                 face.material_index=i
                 mesh.faces.append(face)
             
@@ -163,6 +190,9 @@ class GenericModel(object):
             if not m:
                 return
             model.load_pmx(m)
+            # left handed Y-up to right handed Z-up
+            for m in model.meshes:
+                m.convert_coord()
 
         elif ext==".mqo":
             from . import mqo
