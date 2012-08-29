@@ -57,12 +57,11 @@ def __create_a_material(m, i, textures_and_images):
     material.mirror_color=[
             m.ambient_color.r, m.ambient_color.g, m.ambient_color.b]
     # flag
-    # ToDo:
-    #material[bl.MATERIALFLAG_BOTHFACE]=m.hasFlag(pmx.MATERIALFLAG_BOTHFACE)
-    #material[bl.MATERIALFLAG_GROUNDSHADOW]=m.hasFlag(pmx.MATERIALFLAG_GROUNDSHADOW)
-    #material[bl.MATERIALFLAG_SELFSHADOWMAP]=m.hasFlag(pmx.MATERIALFLAG_SELFSHADOWMAP)
-    #material[bl.MATERIALFLAG_SELFSHADOW]=m.hasFlag(pmx.MATERIALFLAG_SELFSHADOW)
-    #material[bl.MATERIALFLAG_EDGE]=m.hasFlag(pmx.MATERIALFLAG_EDGE)
+    material[bl.MATERIALFLAG_BOTHFACE]=m.hasFlag(pmx.MATERIALFLAG_BOTHFACE)
+    material[bl.MATERIALFLAG_GROUNDSHADOW]=m.hasFlag(pmx.MATERIALFLAG_GROUNDSHADOW)
+    material[bl.MATERIALFLAG_SELFSHADOWMAP]=m.hasFlag(pmx.MATERIALFLAG_SELFSHADOWMAP)
+    material[bl.MATERIALFLAG_SELFSHADOW]=m.hasFlag(pmx.MATERIALFLAG_SELFSHADOW)
+    material[bl.MATERIALFLAG_EDGE]=m.hasFlag(pmx.MATERIALFLAG_EDGE)
     # edge_color
     # edge_size
     # other
@@ -332,7 +331,7 @@ def import_pymeshio_model(model, import_mesh=True):
             # vertices & faces
             ####################
             # 頂点配列
-            vertices=[(v.pos.x, v.pos.y, v.pos.z) for v in m.vertices]
+            vertices=[v.position.to_tuple() for v in m.vertices]
             faces=[(f.indices[0], f.indices[1], f.indices[2]) for f in m.faces]
             #used_indices=set(faces)
 
@@ -358,7 +357,6 @@ def import_pymeshio_model(model, import_mesh=True):
             bl.mesh.useVertexUV(mesh)
             for i, (mvert, v) in enumerate(zip(mesh.vertices, m.vertices)):
                 bl.vertex.setNormal(mvert, v.normal.to_tuple())
-                '''
                 if isinstance(v.deform, pmx.Bdef1):
                     bl.object.assignVertexGroup(mesh_object,
                             model.bones[v.deform.index0].name, i, 1.0)
@@ -369,11 +367,9 @@ def import_pymeshio_model(model, import_mesh=True):
                             model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
                 else:
                     raise Exception("unknown deform: %s" % v.deform)
-                '''
             mesh.update()
 
 
-            '''
             ####################
             # armature
             ####################
@@ -381,6 +377,7 @@ def import_pymeshio_model(model, import_mesh=True):
                 # armature modifirer
                 bl.modifier.addArmature(mesh_object, armature_object)
 
+            '''
             ####################
             # shape keys
             ####################
