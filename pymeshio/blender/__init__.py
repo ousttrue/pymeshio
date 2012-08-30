@@ -340,16 +340,7 @@ def import_pymeshio_model(model, import_mesh=True):
             bl.mesh.addUV(mesh)
             for i, (f, face) in enumerate(zip(m.faces, mesh.tessfaces)):
                 bl.face.setMaterial(face, f.material_index)
-                uv0=m.vertices[f.indices[0]].uv
-                uv1=m.vertices[f.indices[1]].uv
-                uv2=m.vertices[f.indices[2]].uv
-                bl.mesh.setFaceUV(mesh, i, face, [# fix uv
-                    (uv2.x, 1.0-uv2.y),
-                    (uv1.x, 1.0-uv1.y),
-                    (uv0.x, 1.0-uv0.y)
-                    ],
-                    images[f.material_index])
-                # set smooth
+                bl.mesh.setFaceUV(mesh, i, face, f.uv, images[f.material_index])
                 bl.face.setSmooth(face, True)
 
             # set vertex attributes(normal, bone weights)

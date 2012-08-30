@@ -10,12 +10,17 @@ from .pmx import reader as pmx_reader
 pmx.reader=pmx_reader
 from . import converter
 
+from . import mqo
+from .mqo import reader as mqo_reader
+mqo.reader=mqo_reader
+
 
 class Face(object):
-    __slots__=['indices', 'material_index']
+    __slots__=['indices', 'material_index', 'uv']
     def __init__(self):
         self.indices=[]
         self.material_index=0
+        self.uv=[]
 
 
 def convert_coord(xyz):
@@ -44,6 +49,10 @@ class Mesh(object):
             v.normal=convert_coord(v.normal)
         for f in self.faces:
             f.indices=[f.indices[2], f.indices[1], f.indices[0]]
+            # set face uv
+            f.uv=[(self.vertices[i].uv.x, 1.0-self.vertices[i].uv.y) 
+                    for i in f.indices]
+
         for m in self.morphs:
             for o in m.offsets:
                 o.position_offset=convert_coord(o.position_offset)
@@ -71,6 +80,8 @@ class GenericModel(object):
         for b in self.bones:
             b.position=convert_coord(b.position)
             b.tail_position=convert_coord(b.tail_position)
+            if b.tail_index==0:
+                b.tail_index=-1 
 
         for m in self.meshes:
             m.convert_coord()
@@ -119,8 +130,6 @@ class GenericModel(object):
 
         model=GenericModel()
         if ext==".pmd":
-            from . import pmd
-            import pmd.reader
             m=pmd.reader.read_from_file(filepath)
             if not m:
                 return
@@ -139,8 +148,6 @@ class GenericModel(object):
             model.convert_coord()
 
         elif ext==".mqo":
-            from . import mqo
-            import mqo.reader
             m=mqo.reader.read_from_file(filepath)
 
         else:

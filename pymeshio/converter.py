@@ -26,6 +26,7 @@ def pmd_to_pmx(src):
     """
     dst=pmx.Model()
     # model info
+    dst.path=src.path
     dst.name=src.name.decode("cp932")
     dst.english_name=src.english_name.decode("cp932")
     dst.comment=src.comment.replace(
