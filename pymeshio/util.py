@@ -27,16 +27,22 @@ def convert_coord(xyz):
 
 class Mesh(object):
     __slots__=[
-            'vertices', 'faces',
+            'vertices', 'faces', 'morphs',
             ]
     def __init__(self):
         self.vertices=[]
         self.faces=[]
+        self.morphs=[]
 
     def convert_coord(self):
         for v in self.vertices:
             v.position=convert_coord(v.position)
             v.normal=convert_coord(v.normal)
+        for f in self.faces:
+            f.indices=[f.indices[2], f.indices[1], f.indices[0]]
+        for m in self.morphs:
+            for o in m.offsets:
+                o.position_offset=convert_coord(o.position_offset)
 
 
 class GenericModel(object):
@@ -77,15 +83,13 @@ class GenericModel(object):
         self.comment=src.english_name
         self.english_comment=src.english_comment
 
-        # vertices
-        mesh.vertices=src.vertices[:]
-
         # textures
         self.textures=src.textures[:]
-
         # materials
         self.materials=src.materials[:]
 
+        # vertices
+        mesh.vertices=src.vertices[:]
         # faces
         def indices():
             for i in src.indices:
@@ -97,6 +101,8 @@ class GenericModel(object):
                 face.indices=[next(it), next(it), next(it)]
                 face.material_index=i
                 mesh.faces.append(face)
+        # morphs
+        mesh.morphs=src.morphs[:]
 
         # bones
         self.bones=src.bones[:]

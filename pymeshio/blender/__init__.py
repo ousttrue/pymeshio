@@ -333,7 +333,6 @@ def import_pymeshio_model(model, import_mesh=True):
             # 頂点配列
             vertices=[v.position.to_tuple() for v in m.vertices]
             faces=[(f.indices[0], f.indices[1], f.indices[2]) for f in m.faces]
-            #used_indices=set(faces)
 
             bl.mesh.addGeometry(mesh, vertices, faces)
             assert(len(m.vertices)==len(mesh.vertices))
@@ -377,11 +376,10 @@ def import_pymeshio_model(model, import_mesh=True):
                 # armature modifirer
                 bl.modifier.addArmature(mesh_object, armature_object)
 
-            '''
             ####################
             # shape keys
             ####################
-            if len(model.morphs)>0:
+            if len(m.morphs)>0:
                 # set shape_key pin
                 bl.object.pinShape(mesh_object, True)
                 # create base key
@@ -395,15 +393,18 @@ def import_pymeshio_model(model, import_mesh=True):
                 mesh.update()
 
                 # each morph
-                for m in model.morphs:
-                    new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
-                    for o in m.offsets:
+                for morph in m.morphs:
+                    new_shape_key=bl.object.addShapeKey(mesh_object, morph.name)
+                    for o in morph.offsets:
                         if isinstance(o, pmx.VertexMorphOffset):
                             # vertex morph
                             bl.shapekey.assign(new_shape_key, 
                                     o.vertex_index, 
                                     mesh.vertices[o.vertex_index].co+
-                                    bl.createVector(*convert_coord(o.position_offset)))
+                                    bl.createVector(
+                                        o.position_offset.x,
+                                        o.position_offset.y,
+                                        o.position_offset.z))
                         else:
                             raise Exception("unknown morph type: %s" % o)
 
@@ -414,12 +415,10 @@ def import_pymeshio_model(model, import_mesh=True):
             # clean up not used vertices
             # in the material.
             #############################
+            used_indices=set(functools.reduce(lambda a, b: a+b.indices, m.faces, []))
             bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
                 if i not in used_indices])
 
-            # flip
-            #bl.mesh.flipNormals(mesh_object)
-            '''
     bl.enterObjectMode()
     bl.object.activate(root_object)
 
