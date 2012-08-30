@@ -2,9 +2,13 @@
 import sys
 import os
 
+from . import pmd
+from .pmd import reader as pmd_reader
+pmd.reader=pmd_reader
 from . import pmx
 from .pmx import reader as pmx_reader
 pmx.reader=pmx_reader
+from . import converter
 
 
 class Face(object):
@@ -63,7 +67,6 @@ class GenericModel(object):
         self.meshes=[]
         self.materials=[]
 
-
     def convert_coord(self):
         for b in self.bones:
             b.position=convert_coord(b.position)
@@ -71,7 +74,6 @@ class GenericModel(object):
 
         for m in self.meshes:
             m.convert_coord()
-
 
     def load_pmx(self, src):
         mesh=Mesh()
@@ -120,6 +122,13 @@ class GenericModel(object):
             from . import pmd
             import pmd.reader
             m=pmd.reader.read_from_file(filepath)
+            if not m:
+                return
+            # convert to pmx
+            m=converter.pmd_to_pmx(m)
+            model.load_pmx(m)
+            # left handed Y-up to right handed Z-up
+            model.convert_coord()
 
         elif ext==".pmx":
             m=pmx.reader.read_from_file(filepath)
