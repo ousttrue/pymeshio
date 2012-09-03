@@ -25,7 +25,10 @@ class Reader(common.BinaryReader):
         if extended_uv>0:
             raise common.ParseException(
                     "extended uv is not supported", extended_uv)
-        self.read_vertex_index=lambda : self.read_int(vertex_index_size)
+        if vertex_index_size <= 2:
+            self.read_vertex_index=lambda : self.read_uint(vertex_index_size)
+        else:
+            self.read_vertex_index=lambda : self.read_int(vertex_index_size)
         self.read_texture_index=lambda : self.read_int(texture_index_size)
         self.read_material_index=lambda : self.read_int(material_index_size)
         self.read_bone_index=lambda : self.read_int(bone_index_size)
