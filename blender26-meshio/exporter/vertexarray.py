@@ -42,6 +42,27 @@ class VertexKey(object):
     def __eq__(self, rhs):
         return self.obj_index==rhs.obj_index and self.index==rhs.index
 
+class ExtendedWeights:
+    __slots__=[
+        'entries'
+    ]
+
+    def __init__(self):
+        self.entries=[]
+
+    def each_entries(self, filter_func=lambda n, w: True):
+        for ent in self.entries:
+            if filter_func(*ent):
+                yield ent
+    
+    def get_normalized(self, max_count=4, filter_func=lambda n, w: True):
+        import math
+        _entries=sorted(self.each_entries(filter_func), key=lambda ent: ent[1], reverse=True)
+        if len(_entries) > max_count:
+            _entries=_entries[0:max_count]
+            print("WARNING: Too many weights!")
+        total_weights=math.fsum(ent[1] for ent in _entries)
+        return ( (ent[0], ent[1]/total_weights if ent[1]>0.0 else 0.0) for ent in _entries )
 
 class VertexArray(object):
     """
@@ -52,6 +73,7 @@ class VertexArray(object):
             'positions',
             'attributes', # normal and uv
             'b0', 'b1', 'weight',
+            'ext_weight',
             'vertexMap',
             'objectMap',
             ]
@@ -64,6 +86,7 @@ class VertexArray(object):
         self.b0=[]
         self.b1=[]
         self.weight=[]
+        self.ext_weight=[]
 
         self.vertexMap={}
         self.objectMap={}
@@ -76,6 +99,11 @@ class VertexArray(object):
         return zip(
                 self.positions, self.attributes,
                 self.b0, self.b1, self.weight)
+
+    def zip2(self):
+        return zip(
+                self.positions, self.attributes,
+                self.b0, self.b1, self.weight, self.ext_weight)
 
     def each(self):
         keys=[key for key in self.indexArrays.keys()]
@@ -111,11 +139,17 @@ class VertexArray(object):
         self.b0.append(b0)
         self.b1.append(b1)
         self.weight.append(weight0)
+        self.ext_weight.append(ExtendedWeights())
         assert(index<=65535)
         return index
             
     def getMappedIndex(self, obj_name, base_index):
         return self.vertexMap[VertexKey(self.objectMap[obj_name], base_index)]
+
+    def getMappedIndex2(self, obj_name, base_index):
+        if obj_name not in self.objectMap:
+            return [ ] # Empty
+        return self.vertexMap.get(VertexKey(self.objectMap[obj_name], base_index), {}).values()
 
     def addTriangle(self,
             object_name, material,

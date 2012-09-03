@@ -367,6 +367,7 @@ class OneSkinMesh(object):
 
             weightMap, secondWeightMap=self.__getWeightMap(copyObj, copyMesh)
             self.__processFaces(obj.name, copyMesh, weightMap, secondWeightMap)
+            self.__weights(copyObj, copyMesh, obj.name)
             self.__skin(copyObj, obj.name)
         bl.object.delete(copyObj)
 
@@ -467,5 +468,10 @@ class OneSkinMesh(object):
     def getVertexCount(self):
         return len(self.vertexArray.positions)
 
-
+    def __weights(self, obj, mesh, obj_name):
+        for v in mesh.vertices:
+            for i in self.vertexArray.getMappedIndex2(obj_name, v.index):
+                ext_w=self.vertexArray.ext_weight[i]
+                ext_w.entries.extend( filter( lambda ent: not ent[0].startswith("_"), \
+                    ((obj.vertex_groups[vg.group].name, vg.weight) for vg in v.groups) ) )
 
