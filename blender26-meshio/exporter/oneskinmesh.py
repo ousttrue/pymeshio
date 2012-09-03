@@ -434,7 +434,7 @@ class OneSkinMesh(object):
                             continue
                         used.add(i) 
                         morph.add(indexRelativeMap[i], offset)
-            assert(len(morph.offsets)<len(baseMorph.offsets))
+            assert(len(morph.offsets)<=len(baseMorph.offsets))
 
         # sort skinmap
         original=self.morphList[:]
