@@ -442,54 +442,55 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
                 for t in model.textures]
         print(textures_and_images)
 
-        index_generator=(i for i in model.indices)
         # 頂点配列。(Left handed y-up) to (Right handed z-up)
         vertices=[convert_coord(pos)
                 for pos in (v.position for v in model.vertices)]
 
+        ####################
+        # mesh object
+        ####################
+        # object名はutf-8で21byteまで
+        mesh, mesh_object=bl.mesh.create('mesh')
+        # activate object
+        bl.object.deselectAll()
+        bl.object.activate(mesh_object)
+        bl.object.makeParent(root_object, mesh_object)
+
+        ####################
+        # vertices & faces
+        ####################
+        # flip
+        bl.mesh.addGeometry(mesh, vertices,
+                [(model.indices[i+2], model.indices[i+1], model.indices[i])
+                    for i in range(0, len(model.indices), 3)])
+        assert(len(model.vertices)==len(mesh.vertices))
+        bl.mesh.addUV(mesh)
+
+        ####################
+        # material
+        ####################
+        index_gen=(i for i in model.indices)
+        face_gen=(pair for pair in enumerate(mesh.tessfaces))
         for i, m in enumerate(model.materials):
             name=get_object_name("{0:02}:", i, m.name)
-            ####################
-            # material
-            ####################
             material=__create_a_material(m, name, textures_and_images)
-
-            ####################
-            # mesh object
-            ####################
-            # object名はutf-8で21byteまで
-            mesh, mesh_object=bl.mesh.create(name)
             bl.mesh.addMaterial(mesh, material)
-            # activate object
-            bl.object.deselectAll()
-            bl.object.activate(mesh_object)
-            bl.object.makeParent(root_object, mesh_object)
 
-            ####################
-            # vertices & faces
-            ####################
-            indices=[next(index_generator)
-                        for _ in range(m.vertex_count)]
-            used_indices=set(indices)
-            # flip
-            bl.mesh.addGeometry(mesh, vertices,
-                    [(indices[i+2], indices[i+1], indices[i])
-                        for i in range(0, len(indices), 3)])
-            assert(len(model.vertices)==len(mesh.vertices))
-
-            # assign material
-            bl.mesh.addUV(mesh)
-            hasTexture=bl.material.hasTexture(material)
-            index_gen=(i for i in indices)
+            # texture image
             image=(textures_and_images.get[m.texture_index] 
                     if m.texture_index in textures_and_images
                     else None)
-            for i, face in enumerate(mesh.tessfaces):
-                bl.face.setMaterial(face, 0)
+
+            # face params
+            for _ in range(0, m.vertex_count, 3):
+                face_index, face=next(face_gen)
+                # assign material
+                bl.face.setMaterial(face, i)
+                # assign uv
                 uv0=model.vertices[next(index_gen)].uv
                 uv1=model.vertices[next(index_gen)].uv
                 uv2=model.vertices[next(index_gen)].uv
-                bl.mesh.setFaceUV(mesh, i, face, [# fix uv
+                bl.mesh.setFaceUV(mesh, face_index, face, [# fix uv
                     (uv2.x, 1.0-uv2.y),
                     (uv1.x, 1.0-uv1.y),
                     (uv0.x, 1.0-uv0.y)
@@ -499,78 +500,70 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
                 # set smooth
                 bl.face.setSmooth(face, True)
 
+        # fix mesh
+        mesh.update()
 
-            ####################
-            # armature
-            ####################
-            if armature_object:
-                # armature modifirer
-                bl.modifier.addArmature(mesh_object, armature_object)
-                # set vertex attributes(normal, bone weights)
-                bl.mesh.useVertexUV(mesh)
-                for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
-                    bl.vertex.setNormal(mvert, convert_coord(v.normal))
-                    if isinstance(v.deform, pmx.Bdef1):
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index0].name, i, 1.0)
-                    elif isinstance(v.deform, pmx.Bdef2):
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index0].name, i, v.deform.weight0)
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
-                    elif isinstance(v.deform, pmx.Bdef4):
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index0].name, i, v.deform.weight0)
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index1].name, i, v.deform.weight1)
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index2].name, i, v.deform.weight2)
-                        bl.object.assignVertexGroup(mesh_object,
-                                model.bones[v.deform.index3].name, i, v.deform.weight3)
-                    else:
-                        raise Exception("unknown deform: %s" % v.deform)
-
-            ####################
-            # shape keys
-            ####################
-            if len(model.morphs)>0:
-                # set shape_key pin
-                bl.object.pinShape(mesh_object, True)
-                # create base key
-                bl.object.addVertexGroup(mesh_object, bl.MMD_SHAPE_GROUP_NAME)
-                # assign all vertext to group
-                for i, v in enumerate(mesh.vertices):
+        ####################
+        # armature
+        ####################
+        if armature_object:
+            # armature modifirer
+            bl.modifier.addArmature(mesh_object, armature_object)
+            # set vertex attributes(normal, bone weights)
+            bl.mesh.useVertexUV(mesh)
+            for i, (v,  mvert) in enumerate(zip(model.vertices, mesh.vertices)):
+                bl.vertex.setNormal(mvert, convert_coord(v.normal))
+                if isinstance(v.deform, pmx.Bdef1):
                     bl.object.assignVertexGroup(mesh_object,
-                            bl.MMD_SHAPE_GROUP_NAME, i, 0);
-                # create base key
-                baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
-                mesh.update()
+                            model.bones[v.deform.index0].name, i, 1.0)
+                elif isinstance(v.deform, pmx.Bdef2):
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, v.deform.weight0)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
+                elif isinstance(v.deform, pmx.Bdef4):
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, v.deform.weight0)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index1].name, i, v.deform.weight1)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index2].name, i, v.deform.weight2)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index3].name, i, v.deform.weight3)
+                else:
+                    raise Exception("unknown deform: %s" % v.deform)
 
-                # each morph
-                for m in model.morphs:
-                    new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
-                    for o in m.offsets:
-                        if isinstance(o, pmx.VertexMorphOffset):
-                            # vertex morph
-                            bl.shapekey.assign(new_shape_key, 
-                                    o.vertex_index, 
-                                    mesh.vertices[o.vertex_index].co+
-                                    bl.createVector(*convert_coord(o.position_offset)))
-                        else:
-                            raise Exception("unknown morph type: %s" % o)
+        ####################
+        # shape keys
+        ####################
+        if len(model.morphs)>0:
+            # set shape_key pin
+            bl.object.pinShape(mesh_object, True)
+            # create base key
+            bl.object.addVertexGroup(mesh_object, bl.MMD_SHAPE_GROUP_NAME)
+            # assign all vertext to group
+            for i, v in enumerate(mesh.vertices):
+                bl.object.assignVertexGroup(mesh_object,
+                        bl.MMD_SHAPE_GROUP_NAME, i, 0);
+            # create base key
+            baseShapeBlock=bl.object.addShapeKey(mesh_object, bl.BASE_SHAPE_NAME)
+            mesh.update()
 
-                # select base shape
-                bl.object.setActivateShapeKey(mesh_object, 0)
+            # each morph
+            for m in model.morphs:
+                new_shape_key=bl.object.addShapeKey(mesh_object, m.name)
+                for o in m.offsets:
+                    if isinstance(o, pmx.VertexMorphOffset):
+                        # vertex morph
+                        bl.shapekey.assign(new_shape_key, 
+                                o.vertex_index, 
+                                mesh.vertices[o.vertex_index].co+
+                                bl.createVector(*convert_coord(o.position_offset)))
+                    else:
+                        raise Exception("unknown morph type: %s" % o)
 
-            #############################
-            # clean up not used vertices
-            # in the material.
-            #############################
-            bl.mesh.vertsDelete(mesh, [i for i in range(len(mesh.vertices))
-                if i not in used_indices])
-
-            # flip
-            #bl.mesh.flipNormals(mesh_object)
+            # select base shape
+            bl.object.setActivateShapeKey(mesh_object, 0)
 
     if import_physics:
         # import rigid bodies
