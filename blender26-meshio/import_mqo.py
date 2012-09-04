@@ -170,7 +170,9 @@ def __createObjects(mqo, root, materials, imageMap, scale):
  
         # set face params
         assert(len(o.faces)==len(mesh.tessfaces))
+
         bl.mesh.addUV(mesh)
+
         for i, (f, face) in enumerate(zip(o.faces, mesh.tessfaces)):
             uv_array=[]
             # ToDo FIX
@@ -182,6 +184,9 @@ def __createObjects(mqo, root, materials, imageMap, scale):
             if f.material_index in materialMap:
                 bl.face.setMaterial(face, materialMap[f.material_index])
             bl.face.setSmooth(face, True)
+
+        # fix mesh
+        mesh.update()
 
         # mirror modifier
         if o.mirror:
