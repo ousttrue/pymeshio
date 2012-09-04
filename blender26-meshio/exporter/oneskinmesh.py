@@ -383,6 +383,8 @@ class OneSkinMesh(object):
 
         # shape keys
         vg=bl.object.getVertexGroup(obj, bl.MMD_SHAPE_GROUP_NAME)
+        if len(vg)==0:
+            vg=list(range(len(blenderMesh.vertices)))
 
         # base
         used=set()
