@@ -169,9 +169,9 @@ def __createObjects(mqo, root, materials, imageMap, scale):
             materialMap[material_index]=i
  
         # set face params
-        assert(len(o.faces)==len(mesh.faces))
+        assert(len(o.faces)==len(mesh.tessfaces))
         bl.mesh.addUV(mesh)
-        for i, (f, face) in enumerate(zip(o.faces, mesh.faces)):
+        for i, (f, face) in enumerate(zip(o.faces, mesh.tessfaces)):
             uv_array=[]
             # ToDo FIX
             # flip face
