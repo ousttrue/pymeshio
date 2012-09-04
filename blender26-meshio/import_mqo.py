@@ -159,12 +159,8 @@ def __createObjects(mqo, root, materials, imageMap, scale):
             materialMap[f.material_index]=True
         bl.mesh.addGeometry(mesh, vertices, faces)
 
-        # blender limits 16 materials per mesh
+        # add materials
         for i, material_index in enumerate(materialMap.keys()):
-            if i>=16:
-                # split a mesh ?
-                print("over 16 materials!")
-                break
             bl.mesh.addMaterial(mesh, materials[material_index])
             materialMap[material_index]=i
  
