@@ -342,6 +342,82 @@ def read(ios, base_dir):
         index=reader.read_int(4)
         read_lightframe(index)
  
+
+    # light panel
+    light_color=reader.read_vector3()
+    light_xyz=reader.read_vector3()
+
+    print reader
+
+    ############################################################
+    reader.read_text(35)
+
+    name=reader.read_text(256)
+    print name
+
+    reader.read_text(12)
+    name=reader.read_text(256)
+    print name
+
+    reader.read_text(16)
+    name=reader.read_text(256)
+    print name
+
+    print reader
+
+    # flags ? x 6
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
+
+    n=reader.read_uint(1)
+    assert(n==0x70)
+    n=reader.read_uint(1)
+    assert(n==0x42)
+
+    n=reader.read_int(4)
+    n=reader.read_int(4)
+    assert(n==1)
+
+    f=reader.read_float()
+    assert(f==1)
+
+    for i in range(model_count):
+        n=reader.read_uint(1)
+
+    print reader
+    f=reader.read_float()
+    assert(f==1)
+
+    n=reader.read_uint(1)
+    assert(n==1)
+    n=reader.read_uint(1)
+    assert(n==1)
+
+    for i in range(model_count):
+        reader.read_float()
+
+    n=reader.read_uint(1)
+    assert(n==1)
+    n=reader.read_uint(1)
+    assert(n==2)
+
+    p.gravity=reader.read_float()
+    reader.read_float()
+    p.gravity_orientation=reader.read_vector3()
+
+    n=reader.read_uint(1)
+    assert(n==0)
+    n=reader.read_uint(1)
+    assert(n==1)
+    n=reader.read_uint(1)
+    assert(n==1)
+
+    print reader.read_float()
+
     print reader
 
     return p

@@ -112,6 +112,7 @@ class Project(common.Diff):
             'timelineview_width',
             'is_camera_mode',
             'models',
+            'gravity',
             ]
     def __init__(self):
         self.models=[]
