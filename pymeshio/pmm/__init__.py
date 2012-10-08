@@ -12,23 +12,31 @@ http://v-nyappon.net/?m=diary&a=page_detail&target_c_diary_id=979053
 from .. import common
 
 
-class BoneFrame(common.Diff):
+class BaseFrame(common.Diff):
     __slots__=[
             'next_frame_index',
             'prev_frame_index',
             'frame_number',
             'frame_index',
-            'pos',
-            'rot',
             ]
     def __init__(self, frame_index):
         self.frame_index=frame_index
 
     def __str__(self):
-        return "<BoneFrame [%d] %d frame, [%d]<- ->[%d]>" % (
+        return "<%s [%d] %d frame, [%d]<- ->[%d]>" % (
+                self.__class__.__name__,
                 self.frame_index, self.frame_number, 
                 self.prev_frame_index, 
                 self.next_frame_index)
+
+
+class BoneFrame(BaseFrame):
+    __slots__=[
+            'pos',
+            'rot',
+            ]
+    def __init__(self, frame_index):
+        super(BoneFrame, self).__init__(frame_index)
 
 
 class Bone(common.Diff):
@@ -44,60 +52,28 @@ class Bone(common.Diff):
         return "<Bone "+",".join((str(f) for f in self.frames))+">"
 
 
-class MorphFrame(common.Diff):
-    __slots__=[
-            'next_frame_index',
-            'prev_frame_index',
-            'frame_number',
-            'frame_index',
-            ]
+class MorphFrame(BaseFrame):
     def __init__(self, frame_index):
-        self.frame_index=frame_index
-
-    def __str__(self):
-        return "<MorphFrame [%d] %d frame, [%d]<- ->[%d]>" % (
-                self.frame_index, self.frame_number, 
-                self.prev_frame_index, 
-                self.next_frame_index)
+        super(MorphFrame, self).__init__(frame_index)
 
 
-class StateFrame(common.Diff):
+class StateFrame(BaseFrame):
     __slots__=[
-            'next_frame_index',
-            'prev_frame_index',
-            'frame_number',
-            'frame_index',
             'is_visible',
             'ik_enables',
             'is_selected',
             ]
     def __init__(self, frame_index):
-        self.frame_index=frame_index
-
-    def __str__(self):
-        return "<StateFrame [%d] %d frame, [%d]<- ->[%d]>" % (
-                self.frame_index, self.frame_number, 
-                self.prev_frame_index, 
-                self.next_frame_index)
+        super(StateFrame, self).__init__(frame_index)
 
 
-class CameraFrame(common.Diff):
+class CameraFrame(BaseFrame):
     __slots__=[
-            'next_frame_index',
-            'prev_frame_index',
-            'frame_number',
-            'frame_index',
             'pos',
             'rot',
             ]
     def __init__(self, frame_index):
-        self.frame_index=frame_index
-
-    def __str__(self):
-        return "<CameraFrame [%d] %d frame, [%d]<- ->[%d]>" % (
-                self.frame_index, self.frame_number, 
-                self.prev_frame_index, 
-                self.next_frame_index)
+        super(CameraFrame, self).__init__(frame_index)
 
 
 class Model(common.Diff):
