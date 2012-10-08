@@ -18,6 +18,8 @@ class BoneFrame(common.Diff):
             'prev_frame_index',
             'frame_number',
             'frame_index',
+            'pos',
+            'rot',
             ]
     def __init__(self, frame_index):
         self.frame_index=frame_index
@@ -40,6 +42,62 @@ class Bone(common.Diff):
 
     def __str__(self):
         return "<Bone "+",".join((str(f) for f in self.frames))+">"
+
+
+class MorphFrame(common.Diff):
+    __slots__=[
+            'next_frame_index',
+            'prev_frame_index',
+            'frame_number',
+            'frame_index',
+            ]
+    def __init__(self, frame_index):
+        self.frame_index=frame_index
+
+    def __str__(self):
+        return "<MorphFrame [%d] %d frame, [%d]<- ->[%d]>" % (
+                self.frame_index, self.frame_number, 
+                self.prev_frame_index, 
+                self.next_frame_index)
+
+
+class StateFrame(common.Diff):
+    __slots__=[
+            'next_frame_index',
+            'prev_frame_index',
+            'frame_number',
+            'frame_index',
+            'is_visible',
+            'ik_enables',
+            'is_selected',
+            ]
+    def __init__(self, frame_index):
+        self.frame_index=frame_index
+
+    def __str__(self):
+        return "<StateFrame [%d] %d frame, [%d]<- ->[%d]>" % (
+                self.frame_index, self.frame_number, 
+                self.prev_frame_index, 
+                self.next_frame_index)
+
+
+class CameraFrame(common.Diff):
+    __slots__=[
+            'next_frame_index',
+            'prev_frame_index',
+            'frame_number',
+            'frame_index',
+            'pos',
+            'rot',
+            ]
+    def __init__(self, frame_index):
+        self.frame_index=frame_index
+
+    def __str__(self):
+        return "<CameraFrame [%d] %d frame, [%d]<- ->[%d]>" % (
+                self.frame_index, self.frame_number, 
+                self.prev_frame_index, 
+                self.next_frame_index)
 
 
 class Model(common.Diff):
