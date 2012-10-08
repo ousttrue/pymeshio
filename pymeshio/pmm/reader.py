@@ -320,5 +320,29 @@ def read(ios, base_dir):
  
     print reader
 
+    ############################################################
+    # light
+    reader.read_text(37)
+    print reader
+
+    def read_lightframe(frame_index):
+        f=pmm.LightFrame(frame_index)
+        f.frame_number=reader.read_int(4)
+        f.prev_frame_index=reader.read_int(4)
+        f.next_frame_index=reader.read_int(4)
+
+        reader.read_text(25)
+        print f
+
+    read_lightframe(0)
+
+    light_frame_count=reader.read_int(4)
+    print 'light_frame_count', light_frame_count
+    for i in range(light_frame_count):
+        index=reader.read_int(4)
+        read_lightframe(index)
+ 
+    print reader
+
     return p
 
