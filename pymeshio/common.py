@@ -330,6 +330,9 @@ class BinaryReader(object):
         ios.seek(current)
         self.ios=ios
 
+    def __str__(self):
+        return "<BinaryReader %d/%d>" % (self.ios.tell(), self.end)
+
     def is_end(self):
         #print(self.ios.tell(), self.end)
         return self.ios.tell()>=self.end
@@ -372,6 +375,14 @@ class BinaryReader(object):
         return Vector3(
                 self.read_float(), 
                 self.read_float(), 
+                self.read_float()
+                )
+
+    def read_quaternion(self):
+        return Quaternion(
+                self.read_float(), 
+                self.read_float(), 
+                self.read_float(),
                 self.read_float()
                 )
 

@@ -217,7 +217,9 @@ class Bone(common.Diff):
     IK_ROTATE_INFL = 4
     ROTATE_INFL = 5
     IK_TARGET = 6
+    # typo
     UNVISIBLE = 7
+    INVISIBLE = 7
     # since v4.0
     ROLLING=8 # ?
     TWEAK=9
