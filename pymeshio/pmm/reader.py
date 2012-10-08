@@ -350,7 +350,28 @@ def read(ios, base_dir):
     print reader
 
     ############################################################
-    reader.read_text(35)
+    # accessory
+    n=reader.read_uint(1)
+    assert(n==0)
+    n=reader.read_int(4)
+    assert(n==3)
+
+    accessory_count=reader.read_uint(1)
+    for i in range(accessory_count):
+        accessory=reader.read_text(100)
+        print accessory
+        n=reader.read_uint(1)
+        assert(n==0)
+        name=reader.read_text(100)
+        print name
+        path=reader.read_text(256)
+        print path
+
+        reader.read_text(149)
+
+    reader.read_text(30)
+    ############################################################
+    print reader
 
     name=reader.read_text(256)
     print name
@@ -371,7 +392,6 @@ def read(ios, base_dir):
     n=reader.read_uint(1)
     n=reader.read_uint(1)
     n=reader.read_uint(1)
-    n=reader.read_uint(1)
 
     n=reader.read_uint(1)
     assert(n==0x70)
@@ -385,7 +405,7 @@ def read(ios, base_dir):
     f=reader.read_float()
     assert(f==1)
 
-    for i in range(model_count):
+    for i in range(model_count+accessory_count):
         n=reader.read_uint(1)
 
     print reader
