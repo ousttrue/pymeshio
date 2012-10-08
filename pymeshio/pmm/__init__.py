@@ -76,6 +76,13 @@ class CameraFrame(BaseFrame):
         super(CameraFrame, self).__init__(frame_index)
 
 
+class LightFrame(BaseFrame):
+    __slots__=[
+            ]
+    def __init__(self, frame_index):
+        super(LightFrame, self).__init__(frame_index)
+
+
 class Model(common.Diff):
     __slots__=[
             'name',
