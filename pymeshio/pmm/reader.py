@@ -25,6 +25,7 @@ class Reader(common.BinaryReader):
         else:
             return src[:pos]
 
+
 def read_from_file(path):
     """
     read from file path
@@ -90,9 +91,12 @@ def read(ios, base_dir):
     model_count=reader.read_uint(1)
     model_names=[reader.read_text(20).decode('cp932') for _ in range(model_count)]
     for i in range(model_count):
+        print 'model', reader
+
         reader.read_uint(1)
         model=pmm.Model()
         model.name=reader.read_text(20).decode('cp932')
+        print 'name', model.name
         model.path=reader.read_text(256).decode('cp932')
         # path - base_dir
         pos=model.path.index("\\UserFile\\")
@@ -108,7 +112,7 @@ def read(ios, base_dir):
         # unknown
         reader.read_int(4)
         n=reader.read_int(4)
-        assert(n==1)
+        #assert(n==1)
         reader.read_int(4)
         reader.read_int(4)
         reader.read_int(4)
@@ -128,6 +132,7 @@ def read(ios, base_dir):
         max_frame_number=reader.read_uint(4)
         print 'max_frame_number', max_frame_number, reader
 
+        ############################################################
         # ボーン情報
         model.bones=[pmm.Bone(i) for i, b in enumerate(pmd_model.bones)]
 
@@ -136,7 +141,7 @@ def read(ios, base_dir):
 
             # 57 byte
             f.frame_number=reader.read_int(4)
-            f.prev_frame_index=reader.read_uint(4)
+            f.prev_frame_index=reader.read_int(4)
             f.next_frame_index=reader.read_int(4)
             # next_frame_index!=0の場合次のフレームがある
 
@@ -181,105 +186,139 @@ def read(ios, base_dir):
             frame_index=reader.read_int(4)
             f=read_boneframe(frame_index)
 
-        return p
 
-        # 51 byte
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(4)
-        reader.read_int(2)
-        reader.read_int(1)
-
+        ############################################################
         # morph(init)
-        morph_frame_count=reader.read_int(4)
-        print 'morph_frame_count', morph_frame_count, reader
-        for i, m in enumerate(pmd_model.morphs):
+        def read_morphframe(frame_index):
+            f=pmm.MorphFrame(frame_index)
+
             # 17byte
-            flag=reader.read_uint(1)
-            print 'morph(init)', i, flag, reader
-            reader.read_uint(1)
-            reader.read_uint(1)
-            reader.read_uint(1)
+            f.frame_number=reader.read_int(4)
+            f.prev_frame_index=reader.read_int(4)
+            f.next_frame_index=reader.read_int(4)
+            # next_frame_index!=0の場合次のフレームがある
+            f.expression=reader.read_float()
+            f.is_selected=reader.read_uint(1)
 
-            reader.read_uint(1)
-            reader.read_uint(1)
-            reader.read_uint(1)
-            reader.read_uint(1)
+            print f
 
-            reader.read_uint(1)
-            reader.read_uint(1)
-            reader.read_uint(1)
-            reader.read_uint(1)
-            expression=reader.read_float()
-            is_selected=reader.read_uint(1)
+        for i, m in enumerate(pmd_model.morphs):
+            # morph(frames)
+            read_morphframe(i)
 
-        # morph(frames)
+        remain_morph_frame_count=reader.read_int(4)
+        print 'remain_morph_frame_count', remain_morph_frame_count
+
+        for i in range(remain_morph_frame_count):
+            index=reader.read_int(4)
+            read_morphframe(index)
+
+        ############################################################
+        # model state
         print reader
-        for i in range(morph_frame_count):
-            print 'morph(frame)'
-            reader.read_int(4)
-            frame_number=reader.read_int(4)
-            morph_index=reader.read_int(4)
-            reader.read_int(4)
-            expression=reader.read_float()
-            is_selected=reader.read_uint(1)
 
-        # frame state
-        print reader
-        #reader.read_int(4)
-        #reader.read_int(4)
-        #reader.read_int(2)
-        #reader.read_int(4)
-        #reader.read_int(4)
-        #is_visible=reader.read_uint(1)
-        [reader.read_uint(1) for ik in pmd_model.ik_list]
-        #is_selected=reader.read_uint(1)
+        def read_stateframe(frame_index):
+            f=pmm.StateFrame(frame_index)
+            f.frame_number=reader.read_int(4)
+            f.prev_frame_index=reader.read_int(4)
+            f.next_frame_index=reader.read_int(4)
 
-        #model_state_count=reader.read_int(4)
-        #print 'model_state_count', model_state_count
-        #for i in range(model_state_count):
-        #    print 'state', i
-        #    index=reader.read_int(4)
-        #    frame_number=reader.read_int(4)
-        #    reader.read_int(4)
-        #    reader.read_int(4)
-        #    is_visible=reader.read_uint(1)
-        #    [reader.read_uint(1) for ik in pmd_model.ik_list]
-        #    is_selected=reader.read_uint(1)
+            f.is_visible=reader.read_uint(1)
+            f.ik_enables=[reader.read_uint(1) for ik in pmd_model.ik_list]
+            f.is_selected=reader.read_uint(1)
+
+            print f
+
+        read_stateframe(0)
+
+        model_state_frame_count=reader.read_int(4)
+        print 'model_state_frame_count', model_state_frame_count
+        for i in range(model_state_frame_count):
+            index=reader.read_int(4)
+            read_stateframe(index)
         
+        ############################################################
         # edit
         # pose
-        print reader
+        print 'bone', reader
         for i, b in enumerate(pmd_model.bones):
             # 34 byte
-            flag=reader.read_uint(1)
-            print 'edit(bone)', i, flag, reader
             edit_pos=reader.read_vector3()
             edit_rot=reader.read_quaternion()
-            reader.read_uint(1)
-            reader.read_uint(1)
-            reader.read_uint(1)
+            reader.read_int(4)
             is_changed=reader.read_uint(1)
             is_selected=reader.read_uint(1)
+
         # morph
-        print reader
+        print 'morph', reader
         for i, m in enumerate(pmd_model.morphs):
+            #print i, m
             expression=reader.read_float()
-            print 'edit(morph)', i, expression
+
         # ik
-        print reader
+        print 'ik', reader
         for i, ik in enumerate(pmd_model.ik_list):
             is_enable=reader.read_uint(1)
-            print 'edit(ik)', i, is_enable
-            
+
+        print reader
+        print
+
+    ############################################################
+    # camera
+    def read_cameraframe(frame_index):
+        f=pmm.CameraFrame(frame_index)
+        f.frame_number=reader.read_int(4)
+        f.prev_frame_index=reader.read_int(4)
+        f.next_frame_index=reader.read_int(4)
+        f.pos=reader.read_vector3()
+        f.rot=reader.read_quaternion()
+        # icrv1
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        # icrv2
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        # icrv3
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        # icrv4
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        # icrv5
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        # icrvr
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+        reader.read_uint(1)
+
+        is_selected=reader.read_uint(1)
+        fovy=reader.read_uint(1)
+
+        reader.read_int(4)
+
+        print f
+
+    read_cameraframe(0)
+
+    camera_frame_count=reader.read_int(4)
+    print 'camera_frame_count', camera_frame_count
+    for i in range(camera_frame_count):
+        index=reader.read_int(4)
+        read_cameraframe(index)
+ 
+    print reader
+
     return p
 
