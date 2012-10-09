@@ -357,20 +357,27 @@ def read(ios, base_dir):
     assert(n==3)
 
     accessory_count=reader.read_uint(1)
+    print 'accessory_count', accessory_count
     for i in range(accessory_count):
-        accessory=reader.read_text(100)
-        print accessory
+        name=reader.read_text(100).decode('cp932')
+        print i, name
+    print reader
+    for i in range(accessory_count):
+        # 451 byte
         n=reader.read_uint(1)
-        assert(n==0)
-        name=reader.read_text(100)
-        print name
-        path=reader.read_text(256)
-        print path
+        name=reader.read_text(100).decode('cp932')
+        #print i, name
+        path=reader.read_text(256).decode('cp932')
+        print i, path
+        reader.read_text(94)
 
-        reader.read_text(149)
+    print reader
+
+    reader.read_text(55)
+
+    ############################################################
 
     reader.read_text(30)
-    ############################################################
     print reader
 
     name=reader.read_text(256)
