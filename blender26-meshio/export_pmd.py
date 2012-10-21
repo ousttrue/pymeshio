@@ -89,7 +89,7 @@ def write(ex, path):
         try:
             m=bl.material.get(material_name)
         except KeyError as e:
-            m=DefaultMatrial()
+            m=exporter.oneskinmesh.DefaultMaterial()
         def get_texture_name(texture):
             pos=texture.replace("\\", "/").rfind("/")
             if pos==-1:

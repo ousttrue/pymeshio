@@ -167,9 +167,13 @@ def create_pmx(ex, enable_bdef4=True):
             return texture
         else:
             return texture[pos+1:]
-    for m in ex.oneSkinMesh.vertexArray.indexArrays.keys():
-        for path in bl.material.eachEnalbeTexturePath(bl.material.get(m)):
-            textures.add(get_texture_name(path))
+    try:
+        for m in ex.oneSkinMesh.vertexArray.indexArrays.keys():
+            for path in bl.material.eachEnalbeTexturePath(bl.material.get(m)):
+                textures.add(get_texture_name(path))
+    except KeyError as e:
+        # no material
+        pass
     model.textures=list(textures)
 
     # texture pathからtexture indexを逆引き
@@ -237,7 +241,7 @@ def create_pmx(ex, enable_bdef4=True):
         try:
             m=bl.material.get(material_name)
         except KeyError as e:
-            m=DefaultMatrial()
+            m=exporter.oneskinmesh.DefaultMaterial()
         (
                 texture_index, 
                 toon_texture_index, toon_sharing_flag, 
