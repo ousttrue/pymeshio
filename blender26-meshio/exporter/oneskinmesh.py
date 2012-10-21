@@ -27,7 +27,7 @@ class SSS(object):
         self.use=1
 
 
-class DefaultMatrial(object):
+class DefaultMaterial(dict):
     def __init__(self):
         self.name='default'
         # diffuse
@@ -38,7 +38,7 @@ class DefaultMatrial(object):
         self.specular_hardness=5
         self.specular_color=[1, 1, 1]
         # ambient
-        self.mirror_color=[1, 1, 1]
+        self.mirror_color=[0, 0, 0]
         # flag
         self.subsurface_scattering=SSS()
         # texture
@@ -139,7 +139,7 @@ class OneSkinMesh(object):
         return weightMap, secondWeightMap
 
     def __processFaces(self, obj_name, mesh, weightMap, secondWeightMap):
-        default_material=DefaultMatrial()
+        default_material=DefaultMaterial()
         # 各面の処理
         for i, face in enumerate(mesh.tessfaces):
             faceVertexCount=bl.face.getVertexCount(face)

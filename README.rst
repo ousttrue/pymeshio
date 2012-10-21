@@ -98,6 +98,10 @@ Usage as python module
 
 New
 ---
+2.7.1 (2012-10-21)
+~~~~~~~~~~~~~~~~~~
+* fix pmd/pmx export mesh without material  
+
 2.7.0 (2012-09-05)
 ~~~~~~~~~~~~~~~~~~
 * merge griffon-9's pmx bdef4 export implementation
