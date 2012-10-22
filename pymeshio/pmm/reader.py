@@ -71,13 +71,7 @@ def read(ios, base_dir):
     p.screen_width=reader.read_int(4)
     p.screen_height=reader.read_int(4)
     p.timeline_view_width=reader.read_int(4)
-
-    # unknown
-    reader.read_uint(1)
-    reader.read_uint(1)
-    reader.read_uint(1)
-    reader.read_uint(1)
-
+    p.fovy=reader.read_float()
     p.is_camera_mode=reader.read_uint(1)
 
     # unknown
@@ -93,7 +87,8 @@ def read(ios, base_dir):
     for i in range(model_count):
         print 'model', reader
 
-        reader.read_uint(1)
+        n=reader.read_uint(1)
+
         model=pmm.Model()
         model.name=reader.read_text(20).decode('cp932')
         print 'name', model.name
@@ -377,40 +372,67 @@ def read(ios, base_dir):
 
     ############################################################
 
-    reader.read_text(30)
+    reader.read_text(15)
+
+    # 視点
+    # 0(none), 1(model), 2(bone)
+    p.view_flag=reader.read_uint(1)
+    # play info
+    p.use_repeat=reader.read_uint(1)
+    p.use_end=reader.read_uint(1)
+    p.use_start=reader.read_uint(1)
+    p.start=reader.read_uint(4)
+    p.end=reader.read_uint(4)
+    print "playinfo: repeat(%d) start: %d(%d) -> end: %d(%d)" % (p.use_repeat, 
+            p.start, p.use_start, p.end, p.use_end)
+    reader.read_text(2)
     print reader
 
-    name=reader.read_text(256)
-    print name
-
+    ############################################################
+    # Wav
+    p.use_wav=reader.read_uint(1)
+    p.wav_path=reader.read_text(256)
+    print 'wav', p.use_wav, p.wav_path
     reader.read_text(12)
-    name=reader.read_text(256)
-    print name
 
-    reader.read_text(16)
-    name=reader.read_text(256)
-    print name
+    ############################################################
+    # 背景動画
+    p.bgmovie_path=reader.read_text(256)
+    p.use_bgmovie=reader.read_uint(1)
+    print 'bgmovie', p.use_bgmovie, p.bgmovie_path
+    reader.read_text(15)
+
+    ############################################################
+    # 背景画像
+    p.bgimage_path=reader.read_text(256)
+    p.use_bgimage=reader.read_uint(1)
+    print 'bgimage', p.use_bgimage, p.bgimage_path
+    ############################################################
 
     print reader
 
-    # flags ? x 6
+    p.show_info=reader.read_uint(1)
+    p.show_grid=reader.read_uint(1)
+    p.show_groundshadow=reader.read_uint(1)
     n=reader.read_uint(1)
-    n=reader.read_uint(1)
-    n=reader.read_uint(1)
-    n=reader.read_uint(1)
-    n=reader.read_uint(1)
+    print '情報: %d, グリッド: %d, 地面影: %d' % (
+            p.show_info, p.show_grid, p.show_groundshadow)
 
     n=reader.read_uint(1)
     assert(n==0x70)
     n=reader.read_uint(1)
     assert(n==0x42)
 
-    n=reader.read_int(4)
+    p.screencapture_flag=reader.read_uint(1)
+    print 'screencapture_flag', p.screencapture_flag
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
+    n=reader.read_uint(1)
     n=reader.read_int(4)
     assert(n==1)
 
-    f=reader.read_float()
-    assert(f==1)
+    p.groundshadow_color=reader.read_float()
+    print p.groundshadow_color
 
     for i in range(model_count+accessory_count):
         n=reader.read_uint(1)
@@ -419,8 +441,8 @@ def read(ios, base_dir):
     f=reader.read_float()
     assert(f==1)
 
-    n=reader.read_uint(1)
-    assert(n==1)
+    p.use_groundshadow_transparency=reader.read_uint(1)
+    print p.use_groundshadow_transparency
     n=reader.read_uint(1)
     assert(n==1)
 
@@ -429,22 +451,56 @@ def read(ios, base_dir):
 
     n=reader.read_uint(1)
     assert(n==1)
-    n=reader.read_uint(1)
-    assert(n==2)
 
+    print 'Gravity', reader
+    p.physics_flag=reader.read_uint(1)
     p.gravity=reader.read_float()
-    reader.read_float()
+    p.physics_noise=reader.read_uint(4)
     p.gravity_orientation=reader.read_vector3()
+    p.physics_use_noise=reader.read_uint(1)
+    print p.physics_flag, p.gravity_orientation, p.gravity, p.physics_noise, p.physics_use_noise
+
+    n=reader.read_uint(1)
+    assert(n==1)
+    n=reader.read_uint(1)
+    assert(n==1)
+
+    ############################################################
+    # self shadow
+    f=reader.read_float()
+    print f
+
+    reader.read_text(14)
+    for j in range(model_count):
+        n=reader.read_uint(1)
+
+    f=reader.read_float()
+    print f
 
     n=reader.read_uint(1)
     assert(n==0)
-    n=reader.read_uint(1)
-    assert(n==1)
+
+    selfshadow_frame_count=reader.read_uint(4)
+    print selfshadow_frame_count
+    for i in range(selfshadow_frame_count):
+        n=reader.read_uint(1)
+        for j in range(model_count):
+            n=reader.read_uint(1)
+        reader.read_text(21)
+    ############################################################
+
     n=reader.read_uint(1)
     assert(n==1)
 
-    print reader.read_float()
+    p.edge_color=[reader.read_uint(4) for _ in range(3)]
+    print p.edge_color
 
+    # unknown
+    n=reader.read_uint(1)
+    assert(n==1)
+
+    p.use_black_background=reader.read_uint(1)
+    print 'use_black_background', p.use_black_background
     print reader
 
     return p
