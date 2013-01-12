@@ -62,16 +62,26 @@ import os
 import sys
 import math
 
-from .pymeshio import pmd
-from .pymeshio.pmd import reader
-from .pymeshio import englishmap
+if "bpy" in locals():
+    import imp
+    imp.reload(bl)
+    imp.reload(pmd)
+    imp.reload(reader)
+    imp.reload(englishmap)
+    print("reloaded modules: "+__name__)
+else:
+    from .pymeshio import pmd
+    from .pymeshio.pmd import reader
+    from .pymeshio import englishmap
 
-# for 2.5
-import bpy
-import mathutils
+    # for 2.5
+    import bpy
+    import mathutils
 
-# wrapper
-from . import bl
+    # wrapper
+    from . import bl
+    print("imported modules: "+__name__)
+
 
 xrange=range
 

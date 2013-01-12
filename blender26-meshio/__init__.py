@@ -13,23 +13,21 @@ bl_info={
         }
 
 
-# To support reload properly, try to access a package var, if it's there, reload everything
 if 'bpy' in locals():
     import imp
-    def reload_module(name):
-        if name in locals():
-            imp.reaload(locals()[name])
-    reload_module('import_pmx')
-    reload_module('export_pmx')
-    reload_module('import_pmd')
-    reload_module('export_pmd')
-    reload_module('import_mqo')
-    reload_module('export_mqo')
-   
-
-import bpy
-import bpy_extras.io_utils
-from . import bl
+    imp.reload(bl)
+    imp.reload(import_pmx)
+    imp.reload(export_pmx)
+    imp.reload(import_pmd)
+    imp.reload(export_pmd)
+    imp.reload(import_mqo)
+    imp.reload(export_mqo)
+    print("reloaded modules: "+__name__)
+else:
+    import bpy
+    import bpy_extras.io_utils
+    from . import bl
+    print("imported modules: "+__name__)
 
 
 class ImportPmd(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):

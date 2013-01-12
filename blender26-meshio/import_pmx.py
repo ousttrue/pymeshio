@@ -5,10 +5,18 @@ PMXモデルをインポートする。
 1マテリアル、1オブジェクトで作成する。
 PMDはPMXに変換してからインポートする。
 """
-from . import bl
-from .pymeshio import pmx
-import bpy
-import os
+
+if "bpy" in locals():
+    import imp
+    imp.reload(bl)
+    imp.reload(pmx)
+    print("reloaded modules: "+__name__)
+else:
+    from . import bl
+    from .pymeshio import pmx
+    import bpy
+    import os
+    print("imported modules: "+__name__)
 
 
 def convert_coord(pos):
