@@ -1,0 +1,7 @@
+ADDON_DIR="PATH_TO_BLENDER_SCRIPT_ADDON"
+
+
+all:
+	python setup.py build
+	cp -rp blender26-meshio $(ADDON_DIR)
+
