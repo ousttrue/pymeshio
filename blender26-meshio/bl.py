@@ -617,8 +617,8 @@ class armature:
         armature.show_names=True
         #armature.draw_type='OCTAHEDRAL'
         armature.draw_type='STICK'
-        armature.use_deform_envelopes=False
-        armature.use_deform_vertex_groups=True
+        #armature.use_deform_envelopes=False
+        #armature.use_deform_vertex_groups=True
         #armature.use_mirror_x=True
 
         return armature, armature_object
