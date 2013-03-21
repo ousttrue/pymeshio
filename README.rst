@@ -98,6 +98,10 @@ Usage as python module
 
 New
 ---
+2.7.2 (2013-01-13)
+~~~~~~~~~~~~~~~~~~
+* fix for blender-2.65
+
 2.7.1 (2012-10-21)
 ~~~~~~~~~~~~~~~~~~
 * fix pmd/pmx export mesh without material  
