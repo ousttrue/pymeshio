@@ -98,6 +98,12 @@ Usage as python module
 
 New
 ---
+2.7.3 (2013-03-2)
+~~~~~~~~~~~~~~~~~~
+* add vmd writer
+* add x reader
+* add x writer
+
 2.7.2 (2013-01-13)
 ~~~~~~~~~~~~~~~~~~
 * fix for blender-2.65

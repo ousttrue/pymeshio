@@ -163,7 +163,7 @@ class Bone(common.Diff):
 
     def __str__(self):
         return ("<pmx.Bone {name}>".format(
-            name=self.english_name
+            name=self.name
             ))
 
     def __eq__(self, rhs):
