@@ -161,6 +161,11 @@ class Bone(common.Diff):
         self.ik=ik
         self.index=-1
 
+    def __str__(self):
+        return ("<pmx.Bone {name}>".format(
+            name=self.english_name
+            ))
+
     def __eq__(self, rhs):
         return (
                 self.name==rhs.name

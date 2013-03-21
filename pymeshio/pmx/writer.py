@@ -70,7 +70,7 @@ class Writer(common.BinaryWriter):
             self.write_float(deform.weight2)
             self.write_float(deform.weight3)
         else:
-            raise pymeshio.common.WriteException(
+            raise common.WriteException(
                     "unknown deform type: {0}".format(deform.type))
 
     def write_indices(self, indices):
@@ -124,7 +124,7 @@ class Writer(common.BinaryWriter):
             elif bone.getConnectionFlag():
                 self.write_bone_index(bone.tail_index)
             else:
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "unknown bone conenction flag: {0}".format(
                             bone.getConnectionFlag()))
 
@@ -162,7 +162,7 @@ class Writer(common.BinaryWriter):
             self.write_vector3(link.limit_min)
             self.write_vector3(link.limit_max)
         else:
-            raise pymeshio.common.WriteException(
+            raise common.WriteException(
                     "invalid ik link limit_angle: {0}".format(
                         link.limit_angle))
  
@@ -175,7 +175,7 @@ class Writer(common.BinaryWriter):
             self.write_int(m.morph_type, 1)
             if m.morph_type==0:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented GroupMorph")
             elif m.morph_type==1:
                 self.write_int(len(m.offsets), 4)
@@ -184,34 +184,34 @@ class Writer(common.BinaryWriter):
                     self.write_vector3(o.position_offset)
             elif m.morph_type==2:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented BoneMorph")
             elif m.morph_type==3:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented UvMorph")
             elif m.morph_type==4:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented extended UvMorph1")
             elif m.morph_type==5:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented extended UvMorph2")
             elif m.morph_type==6:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented extended UvMorph3")
             elif m.morph_type==7:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented extended UvMorph4")
             elif m.morph_type==8:
                 # todo
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "not implemented extended MaterialMorph")
             else:
-                raise pymeshio.common.WriteException(
+                raise common.WriteException(
                         "unknown morph type: {0}".format(m.morph_type))
 
     def write_display_slots(self, display_slots):
@@ -228,7 +228,7 @@ class Writer(common.BinaryWriter):
                 elif r[0]==1:
                     self.write_morph_index(r[1])
                 else:
-                    raise pymeshio.common.WriteException(
+                    raise common.WriteException(
                             "unknown display_type: {0}".format(r[0]))
 
     def write_rigidbodies(self, rigidbodies):
