@@ -81,6 +81,9 @@ class Vector3(object):
     def __ne__(self, rhs):
         return not self.__eq__(rhs)
 
+    def __neg__(self):
+        return Vector3(-self.x, -self.y, -self.z)
+
     def __getitem__(self, key):
         if key==0:
             return self.x

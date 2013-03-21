@@ -103,17 +103,17 @@ def write(ios, model):
     ios.write(" }\r\n")
 
     # uv
-    ios.write(" MeshTextureCoords {\r\n")
-    ios.write("  %d;\r\n" % len(model.uvs))
-    last_index=len(model.uvs)-1
-    for i, uv in enumerate(model.uvs):
-        if i!=last_index:
-            ios.write("  %.6f;%.6f;,\r\n" % (uv.x, uv.y))
-        else:
-            ios.write("  %.6f;%.6f;;\r\n" % (uv.x, uv.y))
-    ios.write(" }\r\n")
+    if len(model.uvs)>0:
+        ios.write(" MeshTextureCoords {\r\n")
+        ios.write("  %d;\r\n" % len(model.uvs))
+        last_index=len(model.uvs)-1
+        for i, uv in enumerate(model.uvs):
+            if i!=last_index:
+                ios.write("  %.6f;%.6f;,\r\n" % (uv.x, uv.y))
+            else:
+                ios.write("  %.6f;%.6f;;\r\n" % (uv.x, uv.y))
+        ios.write(" }\r\n")
 
 
     ios.write("}\r\n")
-    ios.write("\r\n")
 
