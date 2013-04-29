@@ -98,7 +98,11 @@ Usage as python module
 
 New
 ---
-2.7.3 (2013-03-2)
+2.7.4 (2013-04-29)
+~~~~~~~~~~~~~~~~~~
+* fix pmx_importer. https://github.com/ousttrue/pymeshio/issues/15 
+
+2.7.3 (2013-03-02)
 ~~~~~~~~~~~~~~~~~~
 * add vmd writer
 * add x reader

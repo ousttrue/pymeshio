@@ -306,6 +306,11 @@ def __create_armature(bones, display_slots):
                 # connect with tail
                 bl.bone.setConnected(tail_bone)
 
+        if bone.head==bone.tail:
+            # no size bone...
+            print(bone)
+            bone.tail.z-=0.00001
+
     bl.armature.update(armature)
 
     # pose bone construction
