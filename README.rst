@@ -92,6 +92,11 @@ Usage as python module
 
 New
 ---
+2.7.5 (2013-07-06)
+~~~~~~~~~~~~~~~~~~
+* implement read pmx BoneMorph
+* implement read pmx GroupMorph
+
 2.7.4 (2013-04-29)
 ~~~~~~~~~~~~~~~~~~
 * fix pmx_importer. https://github.com/ousttrue/pymeshio/issues/15 
