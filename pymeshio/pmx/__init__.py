@@ -696,6 +696,20 @@ class MaterialMorphData(common.Diff):
         self.toon_texture_factor=toon_texture_factor
 
 
+class GroupMorphData(common.Diff):
+    """pmx group morph data
+
+    Attributes:
+    """
+    __slots__=[
+            'morph_index',
+            'value',
+            ]
+    def __init__(self, morph_index, value):
+        self.morph_index=morph_index
+        self.value=value
+
+
 class DisplaySlot(common.Diff):
     """pmx display slot
 

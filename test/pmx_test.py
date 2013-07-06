@@ -9,6 +9,7 @@ import pymeshio.pmx.writer
 
 PMX_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmx')
 PMX_FILE_WITH_BONEMORPH=pymeshio.common.unicode('resources/bonemorph.pmx')
+PMX_FILE_WITH_GROUPMORPH=pymeshio.common.unicode('resources/groupmorph.pmx')
 
 
 class TestPmx(unittest.TestCase):
@@ -62,4 +63,10 @@ class TestPmx(unittest.TestCase):
     def test_bonemorph(self):
         model=pymeshio.pmx.reader.read_from_file(
                 PMX_FILE_WITH_BONEMORPH)
+        print(model)
+
+    def test_groupmorph(self):
+        model=pymeshio.pmx.reader.read_from_file(
+                PMX_FILE_WITH_GROUPMORPH)
+        print(model)
 

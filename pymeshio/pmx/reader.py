@@ -196,14 +196,12 @@ class Reader(common.BinaryReader):
         morph=pmx.Morph(name, english_name, 
                 panel, morph_type)
         if morph_type==0:
-            # todo
-            raise common.ParseException(
-                    "not implemented GroupMorph")
+            morph.offsets=[self.read_group_morph_data() 
+                    for _ in range(offset_size)]
         elif morph_type==1:
             morph.offsets=[self.read_vertex_position_morph_offset() 
                     for _ in range(offset_size)]
         elif morph_type==2:
-            # todo
             morph.offsets=[self.read_bone_morph_data()
                     for _ in range(offset_size)]
         elif morph_type==3:
@@ -233,6 +231,12 @@ class Reader(common.BinaryReader):
             raise common.ParseException(
                     "unknown morph type: {0}".format(morph_type))
         return morph
+
+    def read_group_morph_data(self):
+        return pmx.GroupMorphData(
+                self.read_morph_index(), 
+                self.read_float()
+                )
 
     def read_vertex_position_morph_offset(self):
         return pmx.VertexMorphOffset(
