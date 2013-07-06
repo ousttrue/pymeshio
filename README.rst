@@ -3,16 +3,10 @@ create for blender import/expoert plugin backend.
 
 URL
 ---
-* http://meshio.sourceforge.jp/
 * http://pypi.python.org/pypi/pymeshio/
-
-API
-~~~
-* http://packages.python.org/pymeshio/
-
-Source
-~~~~~~
 * https://github.com/ousttrue/pymeshio
+
+* http://meshio.sourceforge.jp/
 
 Requirements
 ------------

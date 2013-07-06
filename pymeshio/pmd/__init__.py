@@ -258,12 +258,12 @@ class Bone(common.Diff):
     def diff(self, rhs):
         self._diff(rhs, "name")
         if (
-                self.english_name.endswith("_t") 
-                or rhs.english_name.endswith("_t")):
+                self.english_name.endswith(b"_t") 
+                or rhs.english_name.endswith(b"_t")):
             pass
         elif (
-                self.english_name.startswith("arm twist") 
-                or rhs.english_name.startswith("arm twist")):
+                self.english_name.startswith(b"arm twist") 
+                or rhs.english_name.startswith(b"arm twist")):
             pass
         else:
             self._diff(rhs, "english_name")
