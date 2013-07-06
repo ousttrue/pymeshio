@@ -375,6 +375,14 @@ class BinaryReader(object):
                 self.read_float()
                 )
 
+    def read_quaternion(self):
+        return Quaternion(
+                self.read_float(), 
+                self.read_float(), 
+                self.read_float(),
+                self.read_float()
+                )
+
     def read_rgba(self):
         return RGBA(
                 self.read_float(), 
@@ -487,4 +495,7 @@ class Diff(object):
                     print(l)
                     print(r)
                     raise DifferenceException("{0}".format(key))
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
 

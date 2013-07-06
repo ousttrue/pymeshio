@@ -8,6 +8,7 @@ import pymeshio.pmx.writer
 
 
 PMX_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmx')
+PMX_FILE_WITH_BONEMORPH=pymeshio.common.unicode('resources/bonemorph.pmx')
 
 
 class TestPmx(unittest.TestCase):
@@ -57,4 +58,8 @@ class TestPmx(unittest.TestCase):
         # read out buffer again
         model2=pymeshio.pmx.reader.read(io.BytesIO(out.getvalue()))
         self.assertEqual(model, model2)
+
+    def test_bonemorph(self):
+        model=pymeshio.pmx.reader.read_from_file(
+                PMX_FILE_WITH_BONEMORPH)
 
