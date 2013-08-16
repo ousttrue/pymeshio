@@ -92,6 +92,10 @@ Usage as python module
 
 New
 ---
+2.7.7 (2013-09-19)
+~~~~~~~~~~~~~~~~~~
+* implement morph for vmd.writer
+
 2.7.6 (2013-09-18)
 ~~~~~~~~~~~~~~~~~~
 * fix empty tessfaces when modifier_apply(from blender 2.66?)

@@ -16,6 +16,7 @@ def write(ios, motion):
     # 20 bytes
     writer.write_bytes(b"", 20)
 
+    # bone motions
     print(len(motion.motions))
     writer.write_uint(len(motion.motions), 4)
     for m in motion.motions:
@@ -33,8 +34,14 @@ def write(ios, motion):
         writer.write_float(m.q.w)
         writer.write_bytes(m.complement, 64)
 
+    # shape motions
+    writer.write_uint(len(motion.shapes), 4)
+    for s in motion.shapes:
+        writer.write_bytes(s.name, 15)
+        writer.write_uint(s.frame, 4)
+        writer.write_float(s.ratio)
+
     # ToDo
-    writer.write_uint(0, 4)
     writer.write_uint(0, 4)
     writer.write_uint(0, 4)
 
