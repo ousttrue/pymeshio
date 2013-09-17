@@ -365,6 +365,9 @@ class OneSkinMesh(object):
                 else:
                     print(m.type)
 
+            # fix empty tessfaces(from blender2.66?)
+            copyMesh.update(calc_tessface=True)
+
             weightMap, secondWeightMap=self.__getWeightMap(copyObj, copyMesh)
             self.__processFaces(obj.name, copyMesh, weightMap, secondWeightMap)
             self.__weights(copyObj, copyMesh, obj.name)
