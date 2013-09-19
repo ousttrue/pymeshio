@@ -4,34 +4,22 @@ mqo reader
 """
 import io
 from .. import mqo
+from .. import common
 
-class Reader(object):
+
+class Reader(common.TextReader):
     """mqo reader
     """
     __slots__=[
             "has_mikoto",
-            "eof", "ios", "lines",
             "materials", "objects",
             ]
     def __init__(self, ios):
-        self.ios=ios
-        self.eof=False
-        self.lines=0
+        super(Reader, self).__init__(ios)
 
     def __str__(self):
         return "<MQO %d lines, %d materials, %d objects>" % (
                 self.lines, len(self.materials), len(self.objects))
-
-    def getline(self):
-        line=self.ios.readline()
-        self.lines+=1
-        if line==b"":
-            self.eof=True
-            return None
-        return line.strip()
-
-    def printError(self, method, msg):
-        print("%s:%s:%d" % (method, msg, self.lines))
 
     def readObject(self, name):
         obj=mqo.Obj(name)

@@ -510,3 +510,26 @@ class Diff(object):
     def __ne__(self, rhs):
         return not self.__eq__(rhs)
 
+
+class TextReader(object):
+    """ base class for text format
+    """
+    __slots__=[
+            "eof", "ios", "lines",
+            ]
+    def __init__(self, ios):
+        self.ios=ios
+        self.eof=False
+        self.lines=0
+
+    def getline(self):
+        line=self.ios.readline()
+        self.lines+=1
+        if line==b"":
+            self.eof=True
+            return None
+        return line.strip()
+
+    def printError(self, method, msg):
+        print("%s:%s:%d" % (method, msg, self.lines))
+

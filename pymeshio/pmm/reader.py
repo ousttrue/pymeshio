@@ -165,7 +165,7 @@ def read(ios, base_dir):
             f.rot=reader.read_quaternion()
             f.is_selected=reader.read_uint(1)
 
-            print(f)
+            #print(f)
             return f
 
         # ボーンの初期位置
@@ -195,7 +195,7 @@ def read(ios, base_dir):
             f.expression=reader.read_float()
             f.is_selected=reader.read_uint(1)
 
-            print(f)
+            #print(f)
 
         for i, m in enumerate(pmd_model.morphs):
             # morph(frames)

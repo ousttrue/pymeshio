@@ -55,7 +55,7 @@ class Reader(object):
         body=[]        
         while not self.eof:
             line=self.getline()
-            if line.strip()==b"":
+            if not line or line.strip()==b"":
                 continue
 
             if line.strip()=="}":
@@ -63,7 +63,7 @@ class Reader(object):
 
             body.append(line)
 
-        return "\r\n".join(body)
+        return b"\r\n".join(body)
 
     def readHeaderChunkBody(self):
         # serach close }
@@ -80,7 +80,7 @@ class Reader(object):
     def readMeshChunkBody(self):
         # vertices
         vertex_count=int(self.getline().split(";")[0].strip())
-        print vertex_count
+        print(vertex_count)
         def get_vertex(line):
             splited=line.split(";")
             return common.Vector3(
@@ -95,7 +95,7 @@ class Reader(object):
 
         # faces
         face_count=int(self.getline().split(";")[0].strip())
-        print face_count
+        print(face_count)
         def get_face(line):
             splited=line.split(";")
             face_vertex_count=int(splited[0])
@@ -165,13 +165,13 @@ class Reader(object):
             if line=="}":
                 break
 
-            print line
+            print(line)
 
 
     def readNormalChunkBody(self):
         # normals
         normal_count=int(self.getline().split(";")[0].strip())
-        print normal_count
+        print(normal_count)
         def get_normal(line):
             splited=line.split(";")
             return common.Vector3(
@@ -184,7 +184,7 @@ class Reader(object):
 
         # face normals
         face_count=int(self.getline().split(";")[0].strip())
-        print face_count
+        print(face_count)
         def get_face(line):
             splited=line.split(";")
             face_vertex_count=int(splited[0])
@@ -203,12 +203,12 @@ class Reader(object):
             if line=="}":
                 break
 
-            print line
+            print(line)
 
 
     def readUVChunkBody(self):
         uv_count=int(self.getline().split(";")[0].strip())
-        print uv_count
+        print(uv_count)
         def get_uv(line):
             splited=line.split(";")
             return common.Vector2(
@@ -227,7 +227,7 @@ class Reader(object):
             if line=="}":
                 break
 
-            print line
+            print(line)
 
 
     def getline(self):
@@ -250,13 +250,13 @@ class Reader(object):
             if not chunk:
                 break
 
-            print chunk
+            print(chunk)
             if chunk.startswith(b"template "):
                 body=self.readChunkBody()
                 self.model.templates.append(
-                        chunk+" {\r\n"+
-                        body+"\r\n"+
-                        "}\r\n"
+                        chunk+b" {\r\n"+
+                        body+b"\r\n"+
+                        b"}\r\n"
                         )
             elif chunk==b"Header":
                 self.readHeaderChunkBody()
@@ -267,7 +267,7 @@ class Reader(object):
             elif chunk==b"MeshTextureCoords":
                 self.readUVChunkBody()
             else:
-                print "["+chunk+"]"
+                print("["+chunk+"]")
                 raise "unknown chunk !: "+chunk
 
         return self.model
