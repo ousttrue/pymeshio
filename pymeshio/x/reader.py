@@ -8,7 +8,7 @@ from .. import common
 from .. import x
 
 
-class Reader(object):
+class Reader(common.TextReader):
     """x reader
     """
     __slots__=[
@@ -18,9 +18,7 @@ class Reader(object):
             'model',
             ]
     def __init__(self, ios):
-        self.ios=ios
-        self.eof=False
-        self.lines=0
+        super(Reader, self).__init__(ios)
 
     def readHeader(self):
         magic=self.ios.read(4)
@@ -229,14 +227,6 @@ class Reader(object):
 
             print(line)
 
-
-    def getline(self):
-        line=self.ios.readline()
-        self.lines+=1
-        if line==b"":
-            self.eof=True
-            return None
-        return line.rstrip()
 
     def read(self):
         magic, major, minor, type, float_size=self.readHeader()
