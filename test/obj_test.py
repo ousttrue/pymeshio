@@ -5,7 +5,7 @@ import unittest
 import pymeshio.common
 import pymeshio.obj
 import pymeshio.obj.reader
-import pymeshio.obj.writer
+#import pymeshio.obj.writer
 
 
 OBJ_FILE=pymeshio.common.unicode('resources/cube.obj')
