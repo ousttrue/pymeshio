@@ -2,7 +2,11 @@
 
 
 class Model(object):
+    __slots__=[
+            "vertices",
+            "uv",
+            ]
     def __init__(self):
-        self.materials=[]
-        self.groups=[]
+        self.vertices=[]
+        self.uv=[]
 

@@ -18,12 +18,9 @@ class TestObj(unittest.TestCase):
 
     def test_read(self):
         model=pymeshio.obj.reader.read_from_file(OBJ_FILE)
+        print(model)
         self.assertEqual(pymeshio.obj.Model,  model.__class__)
-        self.assertEqual(17,  len(model.materials))
-        self.assertEqual(140,  len(model.bones))
-        self.assertEqual(31,  len(model.morphs))
-        self.assertEqual(45,  len(model.rigidbodies))
-        self.assertEqual(27,  len(model.joints))
+        self.assertEqual(8,  len(model.vertices))
 
     def test_write(self):
         pass
