@@ -93,8 +93,8 @@ class Model(common.Diff):
         self.bones=[]
 
     def __str__(self):
-        print self.name, len(self.name)
-        print self.path, len(self.path)
+        print(self.name, len(self.name))
+        print(self.path, len(self.path))
         return u"<pmm.Model %s:%s>" % (self.name, self.path)
 
     def get_next_bone_by_next_frame_index(self, frame_index):

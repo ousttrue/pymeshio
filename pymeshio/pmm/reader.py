@@ -39,7 +39,7 @@ def read_from_file(path):
     >>> print(m)
 
     """
-    assert(isinstance(path, unicode))
+    #assert(isinstance(path, unicode))
     pmm=read(io.BytesIO(common.readall(path)), os.path.dirname(path))
     pmm.path=path
     return pmm
@@ -85,13 +85,13 @@ def read(ios, base_dir):
     model_count=reader.read_uint(1)
     model_names=[reader.read_text(20).decode('cp932') for _ in range(model_count)]
     for i in range(model_count):
-        print 'model', reader
+        print('model', reader)
 
         n=reader.read_uint(1)
 
         model=pmm.Model()
         model.name=reader.read_text(20).decode('cp932')
-        print 'name', model.name
+        print('name', model.name)
         model.path=reader.read_text(256).decode('cp932')
         # path - base_dir
         pos=model.path.index("\\UserFile\\")
@@ -114,9 +114,9 @@ def read(ios, base_dir):
 
         # nazo
         nazo_count=reader.read_uint(1)
-        print 'nazo_count', nazo_count
+        print('nazo_count', nazo_count)
         nazo=[reader.read_uint(1) for _ in range(nazo_count)]
-        print nazo
+        print(nazo)
 
         # ?
         reader.read_uint(1)
@@ -125,7 +125,7 @@ def read(ios, base_dir):
         reader.read_uint(1)
 
         max_frame_number=reader.read_uint(4)
-        print 'max_frame_number', max_frame_number, reader
+        print('max_frame_number', max_frame_number, reader)
 
         ############################################################
         # ボーン情報
@@ -165,16 +165,16 @@ def read(ios, base_dir):
             f.rot=reader.read_quaternion()
             f.is_selected=reader.read_uint(1)
 
-            print f
+            print(f)
             return f
 
         # ボーンの初期位置
         # ボーンの数だけある
-        b.frames=[read_boneframe(i) for i, b in enumerate(model.bones)]
+        boneframes=[read_boneframe(i) for i, b in enumerate(model.bones)]
 
         # 後続のボーンフレーム数
         remain_bone_frame_count=reader.read_int(4)
-        print 'remain_bone_frame_count', remain_bone_frame_count
+        print('remain_bone_frame_count', remain_bone_frame_count)
 
         # ボーンのフレーム情報
         for i in range(remain_bone_frame_count):
@@ -195,14 +195,14 @@ def read(ios, base_dir):
             f.expression=reader.read_float()
             f.is_selected=reader.read_uint(1)
 
-            print f
+            print(f)
 
         for i, m in enumerate(pmd_model.morphs):
             # morph(frames)
             read_morphframe(i)
 
         remain_morph_frame_count=reader.read_int(4)
-        print 'remain_morph_frame_count', remain_morph_frame_count
+        print('remain_morph_frame_count', remain_morph_frame_count)
 
         for i in range(remain_morph_frame_count):
             index=reader.read_int(4)
@@ -210,7 +210,7 @@ def read(ios, base_dir):
 
         ############################################################
         # model state
-        print reader
+        print(reader)
 
         def read_stateframe(frame_index):
             f=pmm.StateFrame(frame_index)
@@ -222,12 +222,12 @@ def read(ios, base_dir):
             f.ik_enables=[reader.read_uint(1) for ik in pmd_model.ik_list]
             f.is_selected=reader.read_uint(1)
 
-            print f
+            print(f)
 
         read_stateframe(0)
 
         model_state_frame_count=reader.read_int(4)
-        print 'model_state_frame_count', model_state_frame_count
+        print('model_state_frame_count', model_state_frame_count)
         for i in range(model_state_frame_count):
             index=reader.read_int(4)
             read_stateframe(index)
@@ -235,7 +235,7 @@ def read(ios, base_dir):
         ############################################################
         # edit
         # pose
-        print 'bone', reader
+        print('bone', reader)
         for i, b in enumerate(pmd_model.bones):
             # 34 byte
             edit_pos=reader.read_vector3()
@@ -245,18 +245,18 @@ def read(ios, base_dir):
             is_selected=reader.read_uint(1)
 
         # morph
-        print 'morph', reader
+        print('morph', reader)
         for i, m in enumerate(pmd_model.morphs):
             #print i, m
             expression=reader.read_float()
 
         # ik
-        print 'ik', reader
+        print('ik', reader)
         for i, ik in enumerate(pmd_model.ik_list):
             is_enable=reader.read_uint(1)
 
-        print reader
-        print
+        print(reader)
+        print()
 
     ############################################################
     # camera
@@ -303,22 +303,22 @@ def read(ios, base_dir):
 
         reader.read_int(4)
 
-        print f
+        print(f)
 
     read_cameraframe(0)
 
     camera_frame_count=reader.read_int(4)
-    print 'camera_frame_count', camera_frame_count
+    print('camera_frame_count', camera_frame_count)
     for i in range(camera_frame_count):
         index=reader.read_int(4)
         read_cameraframe(index)
  
-    print reader
+    print(reader)
 
     ############################################################
     # light
     reader.read_text(37)
-    print reader
+    print(reader)
 
     def read_lightframe(frame_index):
         f=pmm.LightFrame(frame_index)
@@ -327,12 +327,12 @@ def read(ios, base_dir):
         f.next_frame_index=reader.read_int(4)
 
         reader.read_text(25)
-        print f
+        print(f)
 
     read_lightframe(0)
 
     light_frame_count=reader.read_int(4)
-    print 'light_frame_count', light_frame_count
+    print('light_frame_count', light_frame_count)
     for i in range(light_frame_count):
         index=reader.read_int(4)
         read_lightframe(index)
@@ -342,7 +342,7 @@ def read(ios, base_dir):
     light_color=reader.read_vector3()
     light_xyz=reader.read_vector3()
 
-    print reader
+    print(reader)
 
     ############################################################
     # accessory
@@ -352,21 +352,21 @@ def read(ios, base_dir):
     assert(n==3)
 
     accessory_count=reader.read_uint(1)
-    print 'accessory_count', accessory_count
+    print('accessory_count', accessory_count)
     for i in range(accessory_count):
         name=reader.read_text(100).decode('cp932')
-        print i, name
-    print reader
+        print(i, name)
+    print(reader)
     for i in range(accessory_count):
         # 451 byte
         n=reader.read_uint(1)
         name=reader.read_text(100).decode('cp932')
         #print i, name
         path=reader.read_text(256).decode('cp932')
-        print i, path
+        print(i, path)
         reader.read_text(94)
 
-    print reader
+    print(reader)
 
     reader.read_text(55)
 
@@ -383,40 +383,40 @@ def read(ios, base_dir):
     p.use_start=reader.read_uint(1)
     p.start=reader.read_uint(4)
     p.end=reader.read_uint(4)
-    print "playinfo: repeat(%d) start: %d(%d) -> end: %d(%d)" % (p.use_repeat, 
-            p.start, p.use_start, p.end, p.use_end)
+    print("playinfo: repeat(%d) start: %d(%d) -> end: %d(%d)" % (p.use_repeat, 
+            p.start, p.use_start, p.end, p.use_end))
     reader.read_text(2)
-    print reader
+    print(reader)
 
     ############################################################
     # Wav
     p.use_wav=reader.read_uint(1)
     p.wav_path=reader.read_text(256)
-    print 'wav', p.use_wav, p.wav_path
+    print('wav', p.use_wav, p.wav_path)
     reader.read_text(12)
 
     ############################################################
     # 背景動画
     p.bgmovie_path=reader.read_text(256)
     p.use_bgmovie=reader.read_uint(1)
-    print 'bgmovie', p.use_bgmovie, p.bgmovie_path
+    print('bgmovie', p.use_bgmovie, p.bgmovie_path)
     reader.read_text(15)
 
     ############################################################
     # 背景画像
     p.bgimage_path=reader.read_text(256)
     p.use_bgimage=reader.read_uint(1)
-    print 'bgimage', p.use_bgimage, p.bgimage_path
+    print('bgimage', p.use_bgimage, p.bgimage_path)
     ############################################################
 
-    print reader
+    print(reader)
 
     p.show_info=reader.read_uint(1)
     p.show_grid=reader.read_uint(1)
     p.show_groundshadow=reader.read_uint(1)
     n=reader.read_uint(1)
-    print '情報: %d, グリッド: %d, 地面影: %d' % (
-            p.show_info, p.show_grid, p.show_groundshadow)
+    print('情報: %d, グリッド: %d, 地面影: %d' % (
+            p.show_info, p.show_grid, p.show_groundshadow))
 
     n=reader.read_uint(1)
     assert(n==0x70)
@@ -424,7 +424,7 @@ def read(ios, base_dir):
     assert(n==0x42)
 
     p.screencapture_flag=reader.read_uint(1)
-    print 'screencapture_flag', p.screencapture_flag
+    print('screencapture_flag', p.screencapture_flag)
     n=reader.read_uint(1)
     n=reader.read_uint(1)
     n=reader.read_uint(1)
@@ -432,17 +432,17 @@ def read(ios, base_dir):
     assert(n==1)
 
     p.groundshadow_color=reader.read_float()
-    print p.groundshadow_color
+    print(p.groundshadow_color)
 
     for i in range(model_count+accessory_count):
         n=reader.read_uint(1)
 
-    print reader
+    print(reader)
     f=reader.read_float()
     assert(f==1)
 
     p.use_groundshadow_transparency=reader.read_uint(1)
-    print p.use_groundshadow_transparency
+    print(p.use_groundshadow_transparency)
     n=reader.read_uint(1)
     assert(n==1)
 
@@ -452,13 +452,13 @@ def read(ios, base_dir):
     n=reader.read_uint(1)
     assert(n==1)
 
-    print 'Gravity', reader
+    print('Gravity', reader)
     p.physics_flag=reader.read_uint(1)
     p.gravity=reader.read_float()
     p.physics_noise=reader.read_uint(4)
     p.gravity_orientation=reader.read_vector3()
     p.physics_use_noise=reader.read_uint(1)
-    print p.physics_flag, p.gravity_orientation, p.gravity, p.physics_noise, p.physics_use_noise
+    print(p.physics_flag, p.gravity_orientation, p.gravity, p.physics_noise, p.physics_use_noise)
 
     n=reader.read_uint(1)
     assert(n==1)
@@ -468,20 +468,20 @@ def read(ios, base_dir):
     ############################################################
     # self shadow
     f=reader.read_float()
-    print f
+    print(f)
 
     reader.read_text(14)
     for j in range(model_count):
         n=reader.read_uint(1)
 
     f=reader.read_float()
-    print f
+    print(f)
 
     n=reader.read_uint(1)
     assert(n==0)
 
     selfshadow_frame_count=reader.read_uint(4)
-    print selfshadow_frame_count
+    print(selfshadow_frame_count)
     for i in range(selfshadow_frame_count):
         n=reader.read_uint(1)
         for j in range(model_count):
@@ -493,15 +493,15 @@ def read(ios, base_dir):
     assert(n==1)
 
     p.edge_color=[reader.read_uint(4) for _ in range(3)]
-    print p.edge_color
+    print(p.edge_color)
 
     # unknown
     n=reader.read_uint(1)
     assert(n==1)
 
     p.use_black_background=reader.read_uint(1)
-    print 'use_black_background', p.use_black_background
-    print reader
+    print('use_black_background', p.use_black_background)
+    print(reader)
 
     return p
 

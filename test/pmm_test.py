@@ -18,5 +18,5 @@ class TestPmm(unittest.TestCase):
 
     def test_read(self):
         project=pymeshio.pmm.reader.read_from_file(PMM_FILE)
-        print project
+        print(project)
 
