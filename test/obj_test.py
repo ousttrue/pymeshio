@@ -18,7 +18,6 @@ class TestObj(unittest.TestCase):
 
     def test_read(self):
         model=pymeshio.obj.reader.read_from_file(OBJ_FILE)
-        print(model)
         self.assertEqual(pymeshio.obj.Model,  model.__class__)
         self.assertEqual(8,  len(model.vertices))
 

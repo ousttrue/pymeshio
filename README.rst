@@ -92,8 +92,9 @@ Usage as python module
 
 New
 ---
-2.7.7 (2013-09-19)
+2.7.7 (2013-09-20)
 ~~~~~~~~~~~~~~~~~~
+* implement obj reader
 * implement morph for vmd.writer
 
 2.7.6 (2013-09-18)
