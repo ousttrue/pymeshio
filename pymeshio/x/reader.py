@@ -56,7 +56,7 @@ class Reader(common.TextReader):
             if not line or line.strip()==b"":
                 continue
 
-            if line.strip()=="}":
+            if line.strip()==b"}":
                 break
 
             body.append(line)
@@ -70,17 +70,17 @@ class Reader(common.TextReader):
             if line.strip()==b"":
                 continue
 
-            if line=="}":
+            if line==b"}":
                 break
 
             #print line
 
     def readMeshChunkBody(self):
         # vertices
-        vertex_count=int(self.getline().split(";")[0].strip())
-        print(vertex_count)
+        vertex_count=int(self.getline().split(b";")[0].strip())
+        #print(vertex_count)
         def get_vertex(line):
-            splited=line.split(";")
+            splited=line.split(b";")
             return common.Vector3(
                     float(splited[0]),
                     float(splited[1]),
@@ -92,12 +92,12 @@ class Reader(common.TextReader):
         self.getline().strip()==b""
 
         # faces
-        face_count=int(self.getline().split(";")[0].strip())
-        print(face_count)
+        face_count=int(self.getline().split(b";")[0].strip())
+        #print(face_count)
         def get_face(line):
-            splited=line.split(";")
+            splited=line.split(b";")
             face_vertex_count=int(splited[0])
-            face=[int(i) for i in splited[1].split(",")]
+            face=[int(i) for i in splited[1].split(b",")]
             assert(face_vertex_count==len(face))
             return face
         for _ in range(face_count):
@@ -107,10 +107,10 @@ class Reader(common.TextReader):
         # mesh material list
         line=self.getline().strip()
         assert(line==b"MeshMaterialList {")
-        material_count=int(self.getline().split(";")[0].strip())
-        face_material_count=int(self.getline().split(";")[0].strip())
+        material_count=int(self.getline().split(b";")[0].strip())
+        face_material_count=int(self.getline().split(b";")[0].strip())
 
-        num_p=re.compile("\d+")
+        num_p=re.compile(b"\d+")
         def get_face_material(line):
             m=num_p.search(line)
             return int(m.group(0))
@@ -123,7 +123,7 @@ class Reader(common.TextReader):
 
             material=x.Material()
 
-            splited=self.getline().strip().split(";")
+            splited=self.getline().strip().split(b";")
             material.diffuse=common.RGBA(
                     float(splited[0]),
                     float(splited[1]),
@@ -131,17 +131,17 @@ class Reader(common.TextReader):
                     float(splited[3]),
                     )
 
-            splited=self.getline().strip().split(";")
+            splited=self.getline().strip().split(b";")
             material.shininess=float(splited[0])
 
-            splited=self.getline().strip().split(";")
+            splited=self.getline().strip().split(b";")
             material.specular=common.RGB(
                     float(splited[0]),
                     float(splited[1]),
                     float(splited[2])
                     )
 
-            splited=self.getline().strip().split(";")
+            splited=self.getline().strip().split(b";")
             material.emit=common.RGB(
                     float(splited[0]),
                     float(splited[1]),
@@ -149,7 +149,7 @@ class Reader(common.TextReader):
                     )
             
             line=self.getline().strip()
-            assert(line=='}')
+            assert(line==b'}')
             return material
         for _ in range(material_count):
             self.model.materials.append(read_material())
@@ -160,7 +160,7 @@ class Reader(common.TextReader):
             if line.strip()==b"":
                 continue
 
-            if line=="}":
+            if line==b"}":
                 break
 
             print(line)
@@ -168,10 +168,10 @@ class Reader(common.TextReader):
 
     def readNormalChunkBody(self):
         # normals
-        normal_count=int(self.getline().split(";")[0].strip())
-        print(normal_count)
+        normal_count=int(self.getline().split(b";")[0].strip())
+        #print(normal_count)
         def get_normal(line):
-            splited=line.split(";")
+            splited=line.split(b";")
             return common.Vector3(
                     float(splited[0]),
                     float(splited[1]),
@@ -181,12 +181,12 @@ class Reader(common.TextReader):
             self.model.normals.append(get_normal(self.getline()))
 
         # face normals
-        face_count=int(self.getline().split(";")[0].strip())
-        print(face_count)
+        face_count=int(self.getline().split(b";")[0].strip())
+        #print(face_count)
         def get_face(line):
-            splited=line.split(";")
+            splited=line.split(b";")
             face_vertex_count=int(splited[0])
-            face=[int(i) for i in splited[1].split(",")]
+            face=[int(i) for i in splited[1].split(b",")]
             assert(face_vertex_count==len(face))
             return face
         for _ in range(face_count):
@@ -198,17 +198,17 @@ class Reader(common.TextReader):
             if line.strip()==b"":
                 continue
 
-            if line=="}":
+            if line==b"}":
                 break
 
             print(line)
 
 
     def readUVChunkBody(self):
-        uv_count=int(self.getline().split(";")[0].strip())
-        print(uv_count)
+        uv_count=int(self.getline().split(b";")[0].strip())
+        #print(uv_count)
         def get_uv(line):
-            splited=line.split(";")
+            splited=line.split(b";")
             return common.Vector2(
                     float(splited[0]),
                     float(splited[1])
@@ -222,7 +222,7 @@ class Reader(common.TextReader):
             if line.strip()==b"":
                 continue
 
-            if line=="}":
+            if line==b"}":
                 break
 
             print(line)
@@ -240,7 +240,6 @@ class Reader(common.TextReader):
             if not chunk:
                 break
 
-            print(chunk)
             if chunk.startswith(b"template "):
                 body=self.readChunkBody()
                 self.model.templates.append(
