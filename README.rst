@@ -92,6 +92,10 @@ Usage as python module
 
 New
 ---
+2.7.8 (2013-10-16)
+~~~~~~~~~~~~~~~~~~
+* import obj reader(face)
+ 
 2.7.7 (2013-09-20)
 ~~~~~~~~~~~~~~~~~~
 * implement obj reader

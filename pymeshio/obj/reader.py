@@ -3,8 +3,10 @@
 obj reader
 """
 import io
+import sys
 from .. import obj
 from .. import common
+
 
 
 class Reader(common.TextReader):
@@ -32,7 +34,7 @@ class Reader(common.TextReader):
             if line==b"":
                 break
 
-            if line[0]==b"#":
+            if line[0]==ord("#"):
                 if model.comment=="":
                     model.comment=line[1:].strip()
                 continue
@@ -58,15 +60,21 @@ class Reader(common.TextReader):
             elif token[0]==b"g":
                 pass
             elif token[0]==b"f":
-                pass
+                model.faces.append(self.parseFace(*token[1:]))
             elif token[0]==b"mtllib":
                 pass
             elif token[0]==b"usemtl":
                 pass
             else:
-                print(b"unknown key: "+token[0])
+                print(b"unknown key: "+line)
 
         return model
+    
+    def parseFace(self, *faces):
+        face=obj.Face()
+        for f in faces:
+            face.push(f.split(b"/"))
+        return face
 
 
 def read_from_file(path):
