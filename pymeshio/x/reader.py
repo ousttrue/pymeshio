@@ -20,6 +20,19 @@ class Reader(common.TextReader):
     def __init__(self, ios):
         super(Reader, self).__init__(ios)
 
+    def getline(self):
+        while not self.eof:
+            line=super(Reader, self).getline()
+            if not line:
+                continue
+            if line.startswith(b"//"):
+                # skip comment line
+                continue
+            if line==b"":
+                # skip empty line
+                continue
+            return line
+
     def readHeader(self):
         magic=self.ios.read(4)
         if magic!=b'xof ':
@@ -32,29 +45,11 @@ class Reader(common.TextReader):
         self.lines+=1
         return magic, major, minor, type, float_size
 
-    def readChunkHeader(self):
-        open_p=re.compile(b"(.*?)\s*{")
-
-        # search open {
-        while not self.eof:
-            line=self.getline()
-            if not line:
-                continue
-            line=line.strip()
-            if line==b"":
-                continue
-
-            m=open_p.match(line)
-            if m:
-                return m.group(1)
-
     def readChunkBody(self):
         # serach close }
         body=[]        
         while not self.eof:
             line=self.getline()
-            if not line or line.strip()==b"":
-                continue
 
             if line.strip()==b"}":
                 break
@@ -67,18 +62,17 @@ class Reader(common.TextReader):
         # serach close }
         while not self.eof:
             line=self.getline().strip()
-            if line.strip()==b"":
-                continue
 
             if line==b"}":
                 break
 
-            #print line
 
     def readMeshChunkBody(self):
+        ####################
         # vertices
+        ####################
         vertex_count=int(self.getline().split(b";")[0].strip())
-        #print(vertex_count)
+        print("vertex_count: %d" % vertex_count)
         def get_vertex(line):
             splited=line.split(b";")
             return common.Vector3(
@@ -89,11 +83,12 @@ class Reader(common.TextReader):
 
         for _ in range(vertex_count):
             self.model.vertices.append(get_vertex(self.getline()))
-        self.getline().strip()==b""
 
+        ####################
         # faces
+        ####################
         face_count=int(self.getline().split(b";")[0].strip())
-        #print(face_count)
+        print("face_count: %d" % face_count)
         def get_face(line):
             splited=line.split(b";")
             face_vertex_count=int(splited[0])
@@ -102,12 +97,38 @@ class Reader(common.TextReader):
             return face
         for _ in range(face_count):
             self.model.faces.append(get_face(self.getline()))
-        self.getline().strip()==b""
 
-        # mesh material list
-        line=self.getline().strip()
-        assert(line==b"MeshMaterialList {")
+        # nested chunks
+        while not self.eof:
+            line=self.getline()
+            if not line:
+                continue
+            line=line.strip()
+
+            if line==b"}":
+                return
+
+            assert(line.endswith(b"{"))
+            # drop {
+            line=line[0:-1].strip()
+
+            splited=line.split()
+            print(splited)
+            chunk=splited[0]
+
+            if chunk==b"MeshMaterialList":
+                self.readMeshMaterialListChunkBody()
+            elif chunk==b"MeshNormals":
+                self.readNormalChunkBody()
+            elif chunk==b"MeshTextureCoords":
+                self.readUVChunkBody()
+            else:
+                raise "unknown chunk !: [%s]" % chunk
+
+
+    def readMeshMaterialListChunkBody(self):
         material_count=int(self.getline().split(b";")[0].strip())
+        print(material_count)
         face_material_count=int(self.getline().split(b";")[0].strip())
 
         num_p=re.compile(b"\d+")
@@ -119,7 +140,11 @@ class Reader(common.TextReader):
 
         def read_material():
             line=self.getline().strip()
-            assert(line==b"Material {")
+            splited=line.split()
+            chunk=splited[0]
+            
+            assert(chunk==b"Material")
+            print(splited[1])
 
             material=x.Material()
 
@@ -149,21 +174,28 @@ class Reader(common.TextReader):
                     )
             
             line=self.getline().strip()
+            if line.startswith(b"TextureFilename "):
+                # todo
+                line=self.getline().strip()
+                line=self.getline().strip()
+                line=self.getline().strip()
+
+                line=self.getline().strip()
+
             assert(line==b'}')
             return material
+
         for _ in range(material_count):
             self.model.materials.append(read_material())
 
         # serach close }
         while not self.eof:
             line=self.getline().strip()
-            if line.strip()==b"":
-                continue
 
             if line==b"}":
                 break
 
-            print(line)
+            #print(line)
 
 
     def readNormalChunkBody(self):
@@ -181,7 +213,8 @@ class Reader(common.TextReader):
             self.model.normals.append(get_normal(self.getline()))
 
         # face normals
-        face_count=int(self.getline().split(b";")[0].strip())
+        line=self.getline()
+        face_count=int(line.split(b";")[0].strip())
         #print(face_count)
         def get_face(line):
             splited=line.split(b";")
@@ -195,8 +228,6 @@ class Reader(common.TextReader):
         # serach close }
         while not self.eof:
             line=self.getline().strip()
-            if line.strip()==b"":
-                continue
 
             if line==b"}":
                 break
@@ -219,13 +250,11 @@ class Reader(common.TextReader):
         # serach close }
         while not self.eof:
             line=self.getline().strip()
-            if line.strip()==b"":
-                continue
 
             if line==b"}":
                 break
 
-            print(line)
+            #print(line)
 
 
     def read(self):
@@ -235,12 +264,22 @@ class Reader(common.TextReader):
             return
 
         self.model=x.Model()
-        while True:
-            chunk=self.readChunkHeader()
-            if not chunk:
-                break
+        while not self.eof:
+            line=self.getline()
+            if not line:
+                continue
+            line=line.strip()
 
-            if chunk.startswith(b"template "):
+            print(line)
+            assert(line.endswith(b"{"))
+            # drop {
+            line=line[0:-1].strip()
+
+            splited=line.split()
+            print(splited)
+            chunk=splited[0]
+
+            if chunk==b"template":
                 body=self.readChunkBody()
                 self.model.templates.append(
                         chunk+b" {\r\n"+
@@ -251,13 +290,8 @@ class Reader(common.TextReader):
                 self.readHeaderChunkBody()
             elif chunk==b"Mesh":
                 self.readMeshChunkBody()
-            elif chunk==b"MeshNormals":
-                self.readNormalChunkBody()
-            elif chunk==b"MeshTextureCoords":
-                self.readUVChunkBody()
             else:
-                print("["+chunk+"]")
-                raise "unknown chunk !: "+chunk
+                raise "unknown chunk !: [%s]" % chunk
 
         return self.model
 

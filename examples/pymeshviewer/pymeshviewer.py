@@ -11,6 +11,9 @@ Togl install on Windows
 """
 
 import sys
+sys.path.insert(0, ".")
+print(sys.path)
+
 import os
 try:
     import tkinter
@@ -24,6 +27,7 @@ import opengl.rokuro
 import mqobuilder
 import pmdbuilder
 import pmxbuilder
+import xbuilder
 
 
 class Frame(tkinter.Frame):
@@ -54,7 +58,7 @@ class Frame(tkinter.Frame):
     def onOpen(self):
         path=tkinter_filedialog.askopenfilename(
                 filetypes=[
-                    ('poloygon model files', '*.mqo;*.pmd;*.pmx'),
+                    ('poloygon model files', '*.x;*.mqo;*.pmd;*.pmx'),
                     ], 
                 initialdir=self.current)
         self.current=os.path.dirname(path)
@@ -80,6 +84,8 @@ class Frame(tkinter.Frame):
             return pmdbuilder.build(path)
         elif path.lower().endswith(".pmx"):
             return pmxbuilder.build(path)
+        elif path.lower().endswith(".x"):
+            return xbuilder.build(path)
         else:
             print("unknown file format: {0}".format(path))
 
