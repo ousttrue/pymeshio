@@ -179,11 +179,9 @@ class Reader(common.TextReader):
                 line=self.getline().strip()
                 line=self.getline().strip()
                 line=self.getline().strip()
-
-                line=self.getline().strip()
+                #line=self.getline().strip()
 
             assert(line==b'}')
-            return material
 
         for _ in range(material_count):
             self.model.materials.append(read_material())
