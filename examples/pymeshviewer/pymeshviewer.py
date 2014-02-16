@@ -24,6 +24,7 @@ except ImportError as e:
 import togl
 import opengl
 import opengl.rokuro
+import opengl.shader
 import mqobuilder
 import pmdbuilder
 import pmxbuilder
@@ -47,7 +48,23 @@ class Frame(tkinter.Frame):
 
         # setup opengl widget
         self.view=opengl.rokuro.RokuroView()
-        self.glworld=opengl.BaseController(self.view)
+
+        # 頂点シェーダ
+        vs_src="""
+        void main(){
+        gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+        }
+        """ 
+
+        # フラグメントシェーダ
+        fs_src="""
+        void main(){
+        gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+        }
+        """
+
+        self.shader=opengl.shader.Shader(vs_src, fs_src)
+        self.glworld=opengl.BaseController(self.view, self.shader)
         self.glwidget=togl.Widget(self, self.glworld, width=width, height=height)
         self.glwidget.pack(fill=tkinter.BOTH, expand=True)
 

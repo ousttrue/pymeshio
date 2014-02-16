@@ -9,9 +9,10 @@ from .baseview import *
 DELEGATE_PATTERN=re.compile('^on[A-Z]')
 
 class BaseController(object):
-    def __init__(self, view):
+    def __init__(self, view, shader):
         self.isInitialized=False
         self.setView(view)
+        self.shader=shader
         self.root=None
 
     def setRoot(self, root):
@@ -54,6 +55,9 @@ class BaseController(object):
             self.isInitialized=True
         # OpenGLバッファのクリア
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        self.shader.draw()
+
         # 投影行列のクリア
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
