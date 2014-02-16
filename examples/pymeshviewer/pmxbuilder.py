@@ -15,6 +15,7 @@ def build(path):
     if not model:
         return
     print(time.time()-t, "sec")
+
     # build
     basedir=os.path.dirname(path)
     indexedVertexArray=opengl.vertexarray.IndexedVertexArray()

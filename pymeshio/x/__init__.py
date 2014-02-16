@@ -39,8 +39,9 @@ class Model(object):
         self.uvs=[]
 
     def __str__(self):
-        return ('<x {vertices} vertices, {faces} faces>'.format(
+        return ('<x vertices: {vertices}, faces: {faces}, materials: {materials}>'.format(
             vertices=len(self.vertices),
-            faces=len(self.faces)
+            faces=len(self.faces),
+            materials=len(self.materials)
             ))
 
