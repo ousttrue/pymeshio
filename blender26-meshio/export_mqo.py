@@ -217,7 +217,7 @@ class MqoExporter(object):
 
         # depth
         io.write("\tdepth %d\r\n" % info.depth)
-
+        io.write("\tvisible %d\r\n" % 15)
         # mirror
         if not self.apply_modifier:
             if bl.modifier.hasType(obj, 'MIRROR'):
@@ -267,8 +267,8 @@ class MqoExporter(object):
         io.write("\t}\r\n")
 
         # faces
-        io.write("\tface %d {\r\n" % len(mesh.faces))
-        for i, face in enumerate(mesh.faces):
+        io.write("\tface %d {\r\n" % len(mesh.polygons))
+        for i, face in enumerate(mesh.polygons):
             count=bl.face.getVertexCount(face)
             # V
             io.write("\t\t%d V(" % count)
