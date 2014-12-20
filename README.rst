@@ -92,6 +92,10 @@ Usage as python module
 
 New
 ---
+2.7.9 (2014-12-20)
+~~~~~~~~~~~~~~~~~~
+* fix mqo export(from blender 2.63?). thanks to sapper-trle
+
 2.7.8 (2013-10-16)
 ~~~~~~~~~~~~~~~~~~
 * import obj reader(face)
