@@ -103,7 +103,7 @@ def write(ex, path):
         model.materials.append(pmd.Material(
                 # diffuse_color
                 common.RGB(m.diffuse_color[0], m.diffuse_color[1], m.diffuse_color[2]),
-                m.alpha,
+                m.use_transparency and m.alpha or 1.0,
                 # specular_factor
                 0 if m.specular_toon_size<1e-5 else m.specular_toon_size * 10,
                 # specular_color
