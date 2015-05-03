@@ -63,12 +63,6 @@ select (Add-Ons) tab.
 
 find "meshio. (.pmd)(.mqo)" and check.
 
-Packaging
----------
-::
-
-   $ python setup.py sdist
-
 Usage as python module
 ----------------------
 ::
@@ -246,4 +240,10 @@ New
 ~~~~~~~~~~~~~~~~~~
 * bug fix(__init__ param)
 * fix blender-2.5 plugin for blender-2.6
+
+Upload to pypy
+---------
+::
+
+   $ python setup.py sdist --formats=zip upload
 
