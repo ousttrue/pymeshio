@@ -92,6 +92,12 @@ Usage as python module
 
 New
 ---
+
+2.7.10 (2015-05-04)
+~~~~~~~~~~~~~~~~~~
+* fix exporter. https://github.com/ousttrue/pymeshio/issues/20
+* fix material alpha(pmd export, pmx export)  
+
 2.7.9 (2014-12-20)
 ~~~~~~~~~~~~~~~~~~
 * fix mqo export(from blender 2.63?). thanks to sapper-trle
