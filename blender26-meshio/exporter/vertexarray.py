@@ -146,9 +146,15 @@ class VertexArray(object):
     def getMappedIndex(self, obj_name, base_index):
         return self.vertexMap[VertexKey(self.objectMap[obj_name], base_index)]
 
+    def getMappedIndex(self, obj_name, base_index):
+        key=VertexKey(self.objectMap[obj_name], base_index)
+        if key not in self.vertexMap:
+            return {}
+        return self.vertexMap[key]
+
     def getMappedIndex2(self, obj_name, base_index):
         if obj_name not in self.objectMap:
-            return [ ] # Empty
+            return []
         return self.vertexMap.get(VertexKey(self.objectMap[obj_name], base_index), {}).values()
 
     def addTriangle(self,
