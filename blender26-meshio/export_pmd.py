@@ -213,7 +213,7 @@ def write(ex, path):
     for i, m in enumerate(ex.oneSkinMesh.morphList):
         v=englishmap.getUnicodeSkinName(m.name)
         if not v:
-            v=[m.name, m.name, 0]
+            v=[m.name, m.name, 4]
         assert(v)
         # morph
         morph=pmd.Morph(v[1].encode("cp932"))
