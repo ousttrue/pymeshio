@@ -225,7 +225,7 @@ class BoneBuilder(object):
         ####################
 
         # boneのsort
-        self._sortBy()
+        #self._sortBy()
         self._fix()
         self._build_hierarchy()
         # IKのsort
