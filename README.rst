@@ -87,6 +87,10 @@ Usage as python module
 New
 ---
 
+2.7.11 (2015-06-03)
+~~~~~~~~~~~~~~~~~~
+* fix exporter. https://github.com/ousttrue/pymeshio/issues/23, https://github.com/ousttrue/pymeshio/issues/25
+
 2.7.10 (2015-05-04)
 ~~~~~~~~~~~~~~~~~~
 * fix exporter. https://github.com/ousttrue/pymeshio/issues/20
