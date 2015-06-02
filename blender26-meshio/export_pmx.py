@@ -295,7 +295,7 @@ def create_pmx(ex, enable_bdef4=True):
     for i, m in enumerate(ex.oneSkinMesh.morphList[1:]):
         # name
         english_name="morph: %d" % i
-        panel=0
+        panel=4
         for en, n, p in englishmap.skinMap:
             if n==m.name:
                 english_name=en
