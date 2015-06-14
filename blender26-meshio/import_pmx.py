@@ -573,7 +573,9 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
                                 mesh.vertices[o.vertex_index].co+
                                 bl.createVector(*convert_coord(o.position_offset)))
                     else:
-                        raise Exception("unknown morph type: %s" % o)
+                        print("unknown morph type: %s. drop" % o)
+                        #raise Exception("unknown morph type: %s" % o)
+                        break
 
             # select base shape
             bl.object.setActivateShapeKey(mesh_object, 0)
