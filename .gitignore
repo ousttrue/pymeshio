@@ -5,3 +5,5 @@ pymeshio.egg-info
 *.pyc
 __pycache__/*
 blender26-meshio/pymeshio
+PKG-INFO
+setup.cfg

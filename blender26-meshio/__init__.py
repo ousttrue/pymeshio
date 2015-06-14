@@ -4,11 +4,12 @@ bl_info={
         'category': 'Import-Export',
         'name': 'meshio. (.pmd)(.pmx)(.mqo)',
         'author': 'ousttrue',
+        'version': (2, 7, 12),
         'blender': (2, 6, 0),
         'location': 'File > Import-Export',
         'description': 'Import-Export PMD/PMX/MQO meshes',
         #'warning': 'pmx importer/exporter is under development', 
-        'wiki_url': 'http://meshio.sourceforge.jp/',
+        'wiki_url': 'https://github.com/ousttrue/pymeshio',
         'support': 'COMMUNITY',
         }
 

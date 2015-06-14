@@ -74,7 +74,7 @@ def pmd_to_pmx(src):
         elif path.find(b'*')==-1:
             return None
         else:
-            return b'*'.split(path)[1]
+            return path.split(b'*')[1]
     def get_texture_index(path):
         try:
             return texture_map[get_texture_file(path)]
@@ -88,9 +88,9 @@ def pmd_to_pmx(src):
     def get_sphere_texture_flag(path):
         sphere_texture=get_sphere_texture_file(path)
         if sphere_texture:
-            if sphere_texture.endswith('.sph'):
+            if sphere_texture.endswith(b'.sph'):
                 return 1
-            elif sphere_texture.endswith('.spa'):
+            elif sphere_texture.endswith(b'.spa'):
                 return 2
             else:
                 raise ConvertException(

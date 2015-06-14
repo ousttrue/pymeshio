@@ -17,7 +17,7 @@ shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER26)
 
 setup(
         name='pymeshio',
-        version='2.7.11',
+        version='2.7.12',
         description='3d model io library for mqo, pmd, pmx, vmd and vpd',
         long_description=open('README.rst').read(),
         classifiers=[
@@ -28,7 +28,7 @@ setup(
         keywords=['mqo', 'pmd', 'pmx', 'vmd', 'vpd', 'mmd', 'blender'],
         author='ousttrue',
         author_email='ousttrue@gmail.com',
-        url='http://pypi.python.org/pypi/pymeshio/',
+        url='https://pypi.python.org/pypi/pymeshio/',
         license='zlib',
         packages=find_packages(),
         test_suite='nose.collector',
