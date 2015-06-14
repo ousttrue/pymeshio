@@ -661,6 +661,32 @@ class BoneMorphData(common.Diff):
         self._diff(rhs, 'rotation')
 
 
+class UVMorphData(common.Diff):
+    """pmx uv morph data
+
+    Attributes:
+        vertex_index:
+        position: Vector4
+    """
+    __slots__=[
+            'vertex_index',
+            'uv',
+            ]
+    def __init__(self, vertex_index, uv):
+        self.vertex_index=vertex_index
+        self.uv=uv
+
+    def __eq__(self, rhs):
+        return (
+                self.vertex_index==rhs.vertex_index 
+                and self.uv==rhs.uv
+                )
+
+    def diff(self, rhs):
+        self._diff(rhs, 'vertex_index')
+        self._diff(rhs, 'uv')
+
+
 class MaterialMorphData(common.Diff):
     """pmx mateerial morph data
 

@@ -132,6 +132,78 @@ class Vector3(object):
                 )
 
 
+class Vector4(object):
+    """
+    4D coordinate for vertex position, normal direction
+    """
+    __slots__=['x', 'y', 'z', 'w']
+    def __init__(self, x=0, y=0, z=0, w=0):
+        self.x=x
+        self.y=y
+        self.z=z
+        self.w=w
+
+    def __str__(self):
+        return "<%f %.32f %f %f>" % (self.x, self.y, self.z, self.w)
+
+    def __eq__(self, rhs):
+        #return self.x==rhs.x and self.y==rhs.y and self.z==rhs.z
+        return (
+                abs(self.x-rhs.x)<11e-3
+                and abs(self.y-rhs.y)<11e-3
+                and abs(self.z-rhs.z)<11e-3
+                and abs(self.w-rhs.w)<11e-3
+                )
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
+    def __neg__(self):
+        return Vector4(-self.x, -self.y, -self.z, -self.w)
+
+    def __getitem__(self, key):
+        if key==0:
+            return self.x
+        elif key==1:
+            return self.y
+        elif key==2:
+            return self.z
+        elif key==3:
+            return self.w
+        else:
+            assert(False)
+
+    def to_tuple(self):
+        return (self.x, self.y, self.z, self.w)
+
+    def __add__(self, r):
+        return Vector4(self.x+r.x, self.y+r.y, self.z+r.z, self.w+r.w)
+
+    def __sub__(self, rhs):
+        return Vector4(self.x-rhs.x, self.y-rhs.y, self.z-rhs.z, self.w-rhs.w)
+
+    def getSqNorm(self):
+        return self.x*self.x + self.y*self.y + self.z*self.z + self.w*self.w
+
+    def getNorm(self):
+        return math.sqrt(self.getSqNorm())
+
+    def normalize(self):
+        factor=1.0/self.getNorm()
+        self.x*=factor
+        self.y*=factor
+        self.z*=factor
+        self.w*=factor
+        return self
+
+    def to_a(self):
+        return [self.x, self.y, self.z, self.w]
+
+    def dot(self, rhs):
+        """dot(inner) product"""
+        return self.x*rhs.x + self.y*rhs.y + self.z*rhs.z + self.w*rhs.w
+
+
 class Quaternion(object):
     """
     rotation representation in vmd motion
@@ -375,6 +447,14 @@ class BinaryReader(object):
         return Vector3(
                 self.read_float(), 
                 self.read_float(), 
+                self.read_float()
+                )
+
+    def read_vector4(self):
+        return Vector4(
+                self.read_float(), 
+                self.read_float(), 
+                self.read_float(),
                 self.read_float()
                 )
 

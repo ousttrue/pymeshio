@@ -90,6 +90,9 @@ New
 2.7.12 (2015-06-14)
 ~~~~~~~~~~~~~~~~~~~
 * fix converter bug.
+* fix importer. https://github.com/ousttrue/pymeshio/issues/32. uv morph will not cause crash, but drop data.
+* fix importer. https://github.com/ousttrue/pymeshio/issues/31. sdef as bdef2.
+* blender addon. https://github.com/ousttrue/pymeshio/issues/30. auto enable international font.
 
 2.7.11 (2015-06-03)
 ~~~~~~~~~~~~~~~~~~~

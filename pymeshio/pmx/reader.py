@@ -196,35 +196,39 @@ class Reader(common.BinaryReader):
         morph=pmx.Morph(name, english_name, 
                 panel, morph_type)
         if morph_type==0:
+            # group
             morph.offsets=[self.read_group_morph_data() 
                     for _ in range(offset_size)]
         elif morph_type==1:
+            # vertex
             morph.offsets=[self.read_vertex_position_morph_offset() 
                     for _ in range(offset_size)]
         elif morph_type==2:
+            # bone
             morph.offsets=[self.read_bone_morph_data()
                     for _ in range(offset_size)]
         elif morph_type==3:
-            # todo
-            raise common.ParseException(
-                    "not implemented UvMorph")
+            # uv
+            morph.offsets=[self.read_uv_morph_data()
+                    for _ in range(offset_size)]
         elif morph_type==4:
-            # todo
-            raise common.ParseException(
-                    "not implemented extended UvMorph1")
+            # uv extended1
+            morph.offsets=[self.read_uv_morph_data()
+                    for _ in range(offset_size)]
         elif morph_type==5:
-            # todo
-            raise common.ParseException(
-                    "not implemented extended UvMorph2")
+            # uv extended2
+            morph.offsets=[self.read_uv_morph_data()
+                    for _ in range(offset_size)]
         elif morph_type==6:
-            # todo
-            raise common.ParseException(
-                    "not implemented extended UvMorph3")
+            # uv extended3
+            morph.offsets=[self.read_uv_morph_data()
+                    for _ in range(offset_size)]
         elif morph_type==7:
-            # todo
-            raise common.ParseException(
-                    "not implemented extended UvMorph4")
+            # uv extended4
+            morph.offsets=[self.read_uv_morph_data()
+                    for _ in range(offset_size)]
         elif morph_type==8:
+            # material
             morph.data=[self.read_material_morph_data()
                     for _ in range(offset_size)]
         else:
@@ -247,6 +251,12 @@ class Reader(common.BinaryReader):
                 self.read_bone_index(), 
                 self.read_vector3(),
                 self.read_quaternion()
+                )
+
+    def read_uv_morph_data(self):
+        return pmx.UVMorphData(
+                self.read_vertex_index(), 
+                self.read_vector4(),
                 )
 
     def read_material_morph_data(self):
