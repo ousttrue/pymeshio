@@ -30,6 +30,10 @@ else:
     from . import bl
     print("imported modules: "+__name__)
 
+if not bpy.context.user_preferences.system.use_international_fonts:
+    print("enable use_international_fonts")
+    bpy.context.user_preferences.system.use_international_fonts = True
+    #bpy.context.user_preferences.system.language = 'ja_JP'
 
 class ImportPmd(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
     '''Import from PMD file format (.pmd)'''
