@@ -543,6 +543,12 @@ def import_pmx_model(filepath, model, import_mesh, import_physics, **kwargs):
                             model.bones[v.deform.index2].name, i, v.deform.weight2)
                     bl.object.assignVertexGroup(mesh_object,
                             model.bones[v.deform.index3].name, i, v.deform.weight3)
+                elif isinstance(v.deform, pmx.Sdef):
+                    # fail safe
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index0].name, i, v.deform.weight0)
+                    bl.object.assignVertexGroup(mesh_object,
+                            model.bones[v.deform.index1].name, i, 1.0-v.deform.weight0)
                 else:
                     raise Exception("unknown deform: %s" % v.deform)
 
