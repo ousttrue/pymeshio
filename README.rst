@@ -65,6 +65,7 @@ find "meshio. (.pmd)(.mqo)" and check.
 
 Usage as python module
 ----------------------
+
 ::
 
     >>> import pymeshio.pmd.reader
@@ -259,6 +260,7 @@ New
 
 Upload to pypy
 ---------
+
 ::
 
    $ python setup.py sdist --formats=zip upload

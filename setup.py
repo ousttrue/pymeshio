@@ -5,6 +5,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 import shutil
+import codecs
 
 
 # copy pymeshio dir for blender26 plugin
@@ -19,7 +20,7 @@ setup(
         name='pymeshio',
         version='2.7.13',
         description='3d model io library for mqo, pmd, pmx, vmd and vpd',
-        long_description=open('README.rst').read(),
+        long_description=codecs.open('README.rst', 'r', 'utf-8').read(),
         classifiers=[
             'Programming Language :: Python :: 3',
             'License :: OSI Approved :: zlib/libpng License',
