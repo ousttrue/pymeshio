@@ -87,6 +87,10 @@ Usage as python module
 New
 ---
 
+2.7.13 (2015-06-15)
+~~~~~~~~~~~~~~~~~~~
+* fix converter bug.
+
 2.7.12 (2015-06-14)
 ~~~~~~~~~~~~~~~~~~~
 * fix converter bug.
