@@ -139,7 +139,7 @@ def pmd_to_pmx(src):
             return False
         if isinstance(b, pmd.Bone_Tweak):
             return False
-        return True
+        return len(b.children)>0
     def is_rotatable(b):
         if isinstance(b, pmd.Bone_Rotate):
             return True

@@ -1,0 +1,42 @@
+pymeshio=C:\Users\oustt\dev\pymeshio CD=. filter="*" {
+ ChangeLog
+ Makefile.dev
+ MANIFEST.in
+ msbuild.proj
+ PKG-INFO
+ README.rst
+ setup.cfg
+ setup.cfg.py2
+ setup.py
+ tmp.pmx
+
+ pymeshio=./blender26-meshio CD=. filter="*.py" {
+ }
+
+ pymeshio=./pymeshio CD=. filter="**/*.py" {
+  common.py
+  converter.py
+  englishmap.py
+  main.py
+  mqo\reader.py
+  mqo\__init__.py
+  obj\reader.py
+  obj\__init__.py
+  pmd\reader.py
+  pmd\writer.py
+  pmd\__init__.py
+  pmm\reader.py
+  pmm\__init__.py
+  pmx\reader.py
+  pmx\writer.py
+  pmx\__init__.py
+  vmd\reader.py
+  vmd\writer.py
+  vmd\__init__.py
+  vpd.py
+  x\reader.py
+  x\writer.py
+  x\__init__.py
+  __init__.py
+ }
+}

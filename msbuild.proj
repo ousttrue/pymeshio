@@ -1,0 +1,11 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Target Name="Build">
+        <Exec Command="C:\python33\python setup.py build" />
+    </Target>
+    <Target Name="CopyToAddOn" DependsOnTargets="Build">
+        <!-- set security on binaries-->
+        <Exec Command="robocopy blender26-meshio $(BLENDER_ADDON_DIR)\blender26-meshio *.py /S  /XD __pycache__ /X"
+            IgnoreExitCode="true"
+            />
+    </Target>
+</Project>
