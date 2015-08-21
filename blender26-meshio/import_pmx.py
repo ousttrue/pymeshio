@@ -239,7 +239,8 @@ def __create_a_material(m, name, textures_and_images):
         else:
             spa_texture=textures_and_images[m.sphere_texture_index][0]
             spa_texture[bl.TEXTURE_TYPE]='SPA'
-            bl.material.addTexture(material, spa_texture)
+            bl.material.addTexture(material, spa_texture, True, 'ADD')
+
             material[bl.MATERIAL_SPHERE_MODE]=m.sphere_mode
     else:
         print("unknown sphere mode:", m.sphere_mode)

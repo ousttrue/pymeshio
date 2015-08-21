@@ -339,7 +339,7 @@ class material:
         return bpy.data.materials[material_name]
 
     @staticmethod
-    def addTexture(material, texture, enable=True):
+    def addTexture(material, texture, enable=True, blend_type='MULTIPLY'):
         # search free slot
         index=None
         for i, slot in enumerate(material.texture_slots):
@@ -354,7 +354,7 @@ class material:
         slot=material.texture_slots.create(index)
         slot.texture=texture
         slot.texture_coords='UV'
-        slot.blend_type='MULTIPLY'
+        slot.blend_type=blend_type
         slot.use_map_alpha=True
         slot.use=enable
         return index
