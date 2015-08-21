@@ -348,9 +348,8 @@ class material:
                 break
         if index==None:
             return
+        material.use_shadeless=True
         #
-        #material.add_texture(texture, "UV", "COLOR")
-        #slot=material.texture_slots.add()
         slot=material.texture_slots.create(index)
         slot.texture=texture
         slot.texture_coords='UV'
