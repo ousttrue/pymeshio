@@ -1079,20 +1079,54 @@ class Model(common.Diff):
             'rigidbodies',
             'joints',
             ]
-    def __init__(self, version=2.0):
+    def __init__(self, version=2.0
+            , name=u'空モデル'
+            , english_name=u'empty model'
+            , comment=u'pymeshioで生成'
+            , english_comment=u'created by pymeshio'
+            ):
         self.path=''
         self.version=version
-        self.name=''
-        self.english_name=''
-        self.comment=''
-        self.english_comment=''
+        self.name=name
+        self.english_name=english_name
+        self.comment=comment
+        self.english_comment=english_comment
         self.vertices=[]
         self.indices=[]
         self.textures=[]
-        self.materials=[]
-        self.bones=[]
+        self.materials=[
+                Material(u'マテリアル'
+                    , u'material'
+                    , common.RGB(0.5, 0.5, 1)
+                    , 1.0
+                    , 1
+                    , common.RGB(1, 1, 1)
+                    , common.RGB(0, 0, 0)
+                    , 0
+                    , common.RGBA(0, 0, 0, 1)
+                    , 0
+                    , -1
+                    , -1
+                    , MATERIALSPHERE_NONE
+                    , 1
+                    , 0
+                    , u"comment"
+                    , 0
+                    )
+                ]
+        self.bones=[
+                Bone(u'センター'
+                    , u'center'
+                    , common.Vector3()
+                    , -1
+                    , 0
+                    , 0
+                    )
+                ]
         self.morphs=[]
-        self.display_slots=[]
+        self.display_slots=[
+                DisplaySlot(u'Root', u'Root', 1, [(0, 0)])
+                ]
         self.rigidbodies=[]
         self.joints=[]
 

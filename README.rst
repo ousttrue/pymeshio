@@ -78,7 +78,8 @@ Usage as python module
     <pmx-2.0 "Miku Hatsune" 12354vertices>
     >>> import pymeshio.pmx.writer
     >>> import io
-    >>> pymeshio.pmx.writer.write(io.open("out.pmx", "wb"), pmx_model)
+    >>> with io.open("out.pmx", "wb") as f:
+    >>>    pymeshio.pmx.writer.write(f, pmx_model)
     True
     >>> import pymeshio.vmd.reader
     >>> pymeshio.vmd.reader.read_from_file('resources/motion.vmd')
@@ -87,6 +88,9 @@ Usage as python module
 
 New
 ---
+2.7.14(2015-10-08)
+~~~~~~~~~~~~~~~~~~~
+* fix pymeshio.pmx.Model() default value
 
 2.7.13 (2015-06-15)
 ~~~~~~~~~~~~~~~~~~~
