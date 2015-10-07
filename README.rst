@@ -88,7 +88,7 @@ Usage as python module
 
 New
 ---
-2.7.14(2015-10-08)
+2.7.14.1(2015-10-08)
 ~~~~~~~~~~~~~~~~~~~
 * fix pymeshio.pmx.Model() default value
 
@@ -263,7 +263,7 @@ New
 * fix blender-2.5 plugin for blender-2.6
 
 Upload to pypy
----------
+--------------
 
 ::
 
