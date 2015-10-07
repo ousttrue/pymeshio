@@ -18,7 +18,7 @@ shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER26)
 
 setup(
         name='pymeshio',
-        version='2.7.14.1',
+        version='2.7.14.2',
         description='3d model io library for mqo, pmd, pmx, vmd and vpd',
         long_description=codecs.open('README.rst', 'r', 'utf-8').read(),
         classifiers=[
