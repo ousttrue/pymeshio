@@ -84,7 +84,7 @@ Usage as python module
 New
 ---
 2.8.1(2015-10-08)
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 * add pymeshio.pmx.writer.write_to_file
 * update pymeshio.obj.reader.read_from_file
 * add pymeshio.converter.obj_to_pmx
