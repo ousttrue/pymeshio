@@ -8,31 +8,25 @@ from .. import obj
 from .. import common
 
 
-
 class Reader(common.TextReader):
-    """mqo reader
+    """obj reader
     """
     __slots__=[
-            "has_mikoto",
-            "materials", "objects",
             ]
     def __init__(self, ios):
         super(Reader, self).__init__(ios)
 
-    def __str__(self):
-        return "<Obj %d lines, %d vertices, %d materials>" % (
-                self.lines, len(self.vertices), len(self.materials))
-
     def read(self):
         model=obj.Model()
+        material=model.get_or_create_material(b"default")
         while True:
             line=self.getline()
-            if not line:
+            if line==None:
                 break
 
             line=line.strip()
             if line==b"":
-                break
+                continue
 
             if line[0]==ord("#"):
                 if model.comment=="":
@@ -41,18 +35,18 @@ class Reader(common.TextReader):
 
             token=line.split()
             if token[0]==b"v":
-                model.vertices.append(common.Vector3(
+                model.add_v(common.Vector3(
                     float(token[1]),
                     float(token[2]),
                     float(token[3])
                     ))
             elif token[0]==b"vt":
-                model.uv.append(common.Vector2(
+                model.add_vt(common.Vector2(
                     float(token[1]),
                     float(token[2]),
                     ))
             elif token[0]==b"vn":
-                model.normals.append(common.Vector3(
+                model.add_vn(common.Vector3(
                     float(token[1]),
                     float(token[2]),
                     float(token[3])
@@ -60,20 +54,27 @@ class Reader(common.TextReader):
             elif token[0]==b"g":
                 pass
             elif token[0]==b"f":
-                model.faces.append(self.parseFace(*token[1:]))
+                material.faces.append(self.parseFace(*token[1:]))
             elif token[0]==b"mtllib":
-                pass
+                model.mtl=token[1]
             elif token[0]==b"usemtl":
-                pass
+                material=model.get_or_create_material(token[1])
+            elif token[0]==b"s":
+                material.s=token[1]
             else:
                 print(b"unknown key: "+line)
+
+        if len(model.materials[0].faces)==0:
+            del model.materials[0]
 
         return model
     
     def parseFace(self, *faces):
         face=obj.Face()
         for f in faces:
-            face.push(f.split(b"/"))
+            vertex_reference=[(len(t)>0 and int(t) or None) for t in f.split(b"/")]
+            #print(vertex_reference)
+            face.vertex_references.append(vertex_reference)
         return face
 
 
@@ -102,4 +103,66 @@ def read(ios):
     """
     assert(isinstance(ios, io.IOBase))
     return Reader(ios).read()
+
+
+class MaterialReader(common.TextReader):
+    """obj reader
+    """
+    __slots__=[
+            ]
+    def __init__(self, ios):
+        super(MaterialReader, self).__init__(ios)
+
+    def read(self, obj_model):
+        material=None
+        while True:
+            line=self.getline()
+            if line==None:
+                break
+
+            line=line.strip()
+            if line==b"":
+                continue
+
+            if line[0]==ord("#"):
+                continue
+
+            token=line.split()
+            #print(token)
+            if token[0]==b"newmtl":
+                material=obj_model.get_or_create_material(token[1])
+
+            elif token[0]==b'Ns':
+                material.Ns=token[1]
+
+            elif token[0]==b'Ka':
+                material.Ka=common.RGB(*(float(t) for t in token[1:]))
+
+            elif token[0]==b'Kd':
+                material.Kd=common.RGB(*(float(t) for t in token[1:]))
+
+            elif token[0]==b'Ks':
+                material.Ks=common.RGB(*(float(t) for t in token[1:]))
+
+            elif token[0]==b'Ni':
+                material.Ni=token[1]
+
+            elif token[0]==b'd':
+                material.d=token[1]
+
+            elif token[0]==b'illum':
+                material.illum=token[1]
+
+            else:
+                print("unknown line: "+line)
+
+
+def material_from_file(path, obj_model):
+    with io.open(path, 'rb') as ios:
+        return read_material(ios, obj_model)
+
+
+def read_material(ios, obj_model):
+    assert(isinstance(ios, io.IOBase))
+    return MaterialReader(ios).read(obj_model)
 

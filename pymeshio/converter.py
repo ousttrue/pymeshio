@@ -383,3 +383,85 @@ def pmd_to_pmx(src):
             for i, j in enumerate(src.joints)]
     return dst
 
+
+def obj_to_pmx(obj_model, name, scale):
+    """
+    return pymeshio.pmx.Model.
+
+    :Parameters:
+        obj_model
+            pymeshio.obj.Model
+    """
+    dst=pmx.Model()
+    # model info
+    dst.english_name=name
+    dst.name=name
+    dst.english_comment=obj_model.comment.decode("cp932")
+    dst.comment=dst.comment
+
+    def each_triangle(src):
+        for material in src.materials:
+            for face in material.faces:
+                face_vertex_count=len(face.vertex_references)
+                if face_vertex_count==3:
+                    yield face.vertex_references[0]
+                    yield face.vertex_references[1]
+                    yield face.vertex_references[2]
+                elif face_vertex_count==4:
+                    yield face.vertex_references[0]
+                    yield face.vertex_references[1]
+                    yield face.vertex_references[2]
+
+                    yield face.vertex_references[2]
+                    yield face.vertex_references[3]
+                    yield face.vertex_references[0]
+                else:
+                    raise ConvertException(
+                            "invalid face vertex count: {0}".format(face_vertex_count))
+
+    def create_vertex(v):
+        return pmx.Vertex(v[0],
+            v[2] or common.Vector3(), 
+            v[1] or common.Vector3(), 
+            pmx.Bdef1(0),
+            0)
+
+    def get_vertex_count(faces):
+        vertex_count=0
+        for f in faces:
+            face_vertex_count=len(f.vertex_references)
+            if face_vertex_count==3:
+                vertex_count+=face_vertex_count
+            elif face_vertex_count==4:
+                vertex_count+=6
+            else:
+                raise ConvertException(
+                        "invalid face vertex count: {0}".format(face_vertex_count))
+        return vertex_count
+
+    def create_material(i, m):
+        return pmx.Material(m.name.decode("ascii")
+                , m.name.decode("ascii")
+                , m.Kd or common.RGB(0.5, 0.5, 1)
+                , 1.0
+                , 1
+                , common.RGB(1, 1, 1)
+                , common.RGB(0, 0, 0)
+                , 0
+                , common.RGBA(0, 0, 0, 1)
+                , 0
+                , -1
+                , -1
+                , pmx.MATERIALSPHERE_NONE
+                , 1
+                , 0
+                , u"comment"
+                , get_vertex_count(m.faces)
+                )
+
+    dst.vertices=[create_vertex(obj_model.get_vertex(ref)) for ref in each_triangle(obj_model)]
+    dst.indices=[i for i in range(len(dst.vertices))]
+    dst.materials=[create_material(i, m) for i, m in enumerate(obj_model.materials)]
+
+    return dst
+

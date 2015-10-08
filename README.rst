@@ -6,8 +6,6 @@ URL
 * http://pypi.python.org/pypi/pymeshio/
 * https://github.com/ousttrue/pymeshio
 
-* http://meshio.sourceforge.jp/
-
 Requirements
 ------------
 * Python 3
@@ -77,17 +75,21 @@ Usage as python module
     >>> print(pmx_model)
     <pmx-2.0 "Miku Hatsune" 12354vertices>
     >>> import pymeshio.pmx.writer
-    >>> import io
-    >>> with io.open("out.pmx", "wb") as f:
-    >>>    pymeshio.pmx.writer.write(f, pmx_model)
+    >>> pymeshio.pmx.writer.write_to_file(pmx_model, "out.pmx")
     True
     >>> import pymeshio.vmd.reader
     >>> pymeshio.vmd.reader.read_from_file('resources/motion.vmd')
     <VMDLoader model: "初音ミク", motion: 16897, shape: 997, camera: 0, light: 0>
 
-
 New
 ---
+2.8(2015-10-08)
+~~~~~~~~~~~~~~~
+* add pymeshio.pmx.writer.write_to_file
+* update pymeshio.obj.reader.read_from_file
+* add pymeshio.obj.reader.material_from_file
+* add pymeshio.converter.obj_to_pmx
+
 2.7.14.2(2015-10-08)
 ~~~~~~~~~~~~~~~~~~~~
 * fix pymeshio.pmx.Model() default value
@@ -262,10 +264,11 @@ New
 * bug fix(__init__ param)
 * fix blender-2.5 plugin for blender-2.6
 
-Upload to pypy
+Upload to pypi
 --------------
 
 ::
 
+   $ python setup.py check -r
    $ python setup.py sdist --formats=zip upload
 

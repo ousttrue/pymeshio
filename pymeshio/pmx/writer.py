@@ -349,3 +349,7 @@ def write(ios, model, text_encoding=0):
     writer.write_joints(model.joints)
     return True
 
+def write_to_file(pmx_model, path):
+    with io.open(path, "wb") as f:
+        return write(f, pmx_model)
+

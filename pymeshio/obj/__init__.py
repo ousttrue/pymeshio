@@ -3,45 +3,42 @@
 
 class Face(object):
     __slots__=[
-            "position",
-            "uv",
-            "normal",
+            "vertex_references"
             ]
     def __init__(self):
-        self.position=[]
-        self.uv=[]
-        self.normal=[]
+        self.vertex_references=[]
 
     def __str__(self):
-        return ("<obj.Face: pos{pos}, uv{uv}, normal{normal}>".format(
-            pos=self.position,
-            uv=self.uv,
-            normal=self.normal
+        return ("<obj.Face: {vertex_count}>".format(
+            vertex_count=len(self.vertex_references)
             ))
 
-    def push(self, args):
-        # position
-        self.position.append(int(args[0]))
 
-        # uv
-        try:
-            self.uv.append(int(args[1]))
-        except ValueError:
-            self.uv.append(0)
+class Material(object):
+    __slots__=[
+            "name",
+            "faces",
+            "s",
 
-        # normal
-        try:
-            self.normal.append(int(args[2]))
-        except IndexError:
-            self.normal.append(0)
-
-    def to_zero_origin(self):
-        """
-        1 origin を 0 originに修正する
-        """
-        self.position=[n-1 if n>0 else 0 for n in self.position]
-        self.uv=[n-1 if n>0 else 0 for n in self.uv]
-        self.normal=[n-1 if n>0 else 0 for n in self.normal]
+            "Ns",
+            "Ka",
+            "Kd",
+            "Ks",
+            "Ni",
+            "d",
+            "illum",
+            ]
+    def __init__(self, name):
+        self.name=name
+        self.faces=[]
+        self.s=None
+        self.Ns=None
+        self.Ka=None
+        self.Kd=None
+        self.Ks=None
+        self.Ni=None
+        self.d=None
+        self.illum=None
 
 
 class Model(object):
@@ -51,7 +48,9 @@ class Model(object):
             "vertices",
             "uv",
             "normals",
-            "faces",
+            "materials",
+            "mtl",
+            "order",
             ]
     def __init__(self):
         self.path=""
@@ -59,12 +58,46 @@ class Model(object):
         self.vertices=[]
         self.uv=[]
         self.normals=[]
-        self.faces=[]
+        self.materials=[]
+        self.mtl=None
+        self.order=[]
 
     def __str__(self):
-        return ('<obj %s: %d vertices, %d faces>' % (
+        return ('<obj %s: %s %d vertices, %d materials %s>' % (
             self.comment.decode("cp932"),
+            self.order,
             len(self.vertices),
-            len(self.faces)
+            len(self.materials),
+            (self.mtl)
             ))
+
+    def add_v(self, v):
+        if len(self.vertices)==0:
+            self.order.append("v")
+        self.vertices.append(v)
+
+    def add_vt(self, vt):
+        if len(self.uv)==0:
+            self.order.append("vt")
+        self.uv.append(v)
+
+    def add_vn(self, vn):
+        if len(self.normals)==0:
+            self.order.append("vn")
+        self.normals.append(vn)
+
+    def get_or_create_material(self, name):
+        for material in self.materials:
+            if material.name==name:
+                return material
+
+        material=Material(name)
+        self.materials.append(material)
+        return material
+
+    def get_vertex(self, ref):
+        return (self.vertices[ref[0]-1], 
+                ref[1] and self.uv[ref[1]-1],
+                ref[2] and self.normals[ref[2]-1]
+                )
 
