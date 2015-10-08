@@ -3,6 +3,7 @@
 obj reader
 """
 import io
+import os
 import sys
 from .. import obj
 from .. import common
@@ -90,6 +91,12 @@ def read_from_file(path):
         model=read(ios)
         if model:
             model.path=path
+            if model.mtl:
+                obj_dir=os.path.dirname(model.path)
+                path=os.path.join(
+                    obj_dir, model.mtl.decode("utf-8"))
+                #print(path)
+                material_from_file(path, model)
             return model
 
 
