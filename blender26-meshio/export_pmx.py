@@ -236,6 +236,7 @@ def create_pmx(ex, enable_bdef4=True):
 
     # 面とマテリアル
     vertexCount=ex.oneSkinMesh.getVertexCount()
+    model.materials=[]
     for material_name, indices in ex.oneSkinMesh.vertexArray.each():
         #print('material:', material_name)
         try:

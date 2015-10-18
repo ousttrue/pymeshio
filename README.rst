@@ -83,6 +83,10 @@ Usage as python module
 
 New
 ---
+2.8.2(2015-10-18)
+~~~~~~~~~~~~~~~~~
+* fix pmx_export bug.(not empty material)
+
 2.8.1(2015-10-08)
 ~~~~~~~~~~~~~~~~~
 * add pymeshio.pmx.writer.write_to_file
