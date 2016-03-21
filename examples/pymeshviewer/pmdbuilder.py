@@ -53,6 +53,6 @@ def build(path):
             material.texture=textureMap[texturepath]
         indices=indexedVertexArray.addMaterial(material)
         indices+=[next(indexGen) for n in range(m.vertex_count)]
-    indexedVertexArray.optimize()
+    #indexedVertexArray.optimize()
     return indexedVertexArray
 

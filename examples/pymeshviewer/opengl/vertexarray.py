@@ -2,7 +2,7 @@
 # coding: utf-8
 
 from OpenGL.GL import *
-import numpy
+
 
 '''
 頂点配列

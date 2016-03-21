@@ -34,12 +34,12 @@ class Texture(object):
             print("RGBA")
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 
-                    0, GL_RGBA, GL_UNSIGNED_BYTE, self.image.tostring())
+                    0, GL_RGBA, GL_UNSIGNED_BYTE, self.image.tobytes())
         elif channels==3:
             print("RGB")
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 
-                    0, GL_RGB, GL_UNSIGNED_BYTE, self.image.tostring())
+                    0, GL_RGB, GL_UNSIGNED_BYTE, self.image.tobytes())
 
     def begin(self):
         if not self.isInitialized:

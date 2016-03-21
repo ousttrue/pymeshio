@@ -46,26 +46,26 @@ class BaseController(object):
     def initialize(self):
         self.view.onResize()
         glEnable(GL_DEPTH_TEST)
-        # ‰Šú‰»‚ÌŒÄ‚Ño‚µ
+        # åˆæœŸåŒ–æ™‚ã®å‘¼ã³å‡ºã—
         self.onInitialize()
 
     def draw(self):
         if not self.isInitialized:
             self.initialize()
             self.isInitialized=True
-        # OpenGLƒoƒbƒtƒ@‚ÌƒNƒŠƒA
+        # OpenGLãƒãƒƒãƒ•ã‚¡ã®ã‚¯ãƒªã‚¢
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         self.shader.draw()
 
-        # “Š‰es—ñ‚ÌƒNƒŠƒA
+        # æŠ•å½±è¡Œåˆ—ã®ã‚¯ãƒªã‚¢
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         self.view.updateProjection()
-        # ƒ‚ƒfƒ‹ƒrƒ…[s—ñ‚ÌƒNƒŠƒA
+        # ãƒ¢ãƒ‡ãƒ«ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã®ã‚¯ãƒªã‚¢
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        # OpenGL•`‰æ
+        # OpenGLæç”»
         self.view.updateView()
         if self.root:
             self.root.draw()

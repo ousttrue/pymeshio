@@ -2,14 +2,13 @@
 # coding: utf-8
 
 from OpenGL.GL import *
-from glew import *
 
 
 # Checks for GL posted errors after appropriate calls
 def printOpenGLError():
     err = glGetError()
     if (err != GL_NO_ERROR):
-        print 'GLERROR: ', gluErrorString(err)
+        print('GLERROR: ', gluErrorString(err))
         #sys.exit()
 
 
@@ -21,26 +20,17 @@ class Shader(object):
         self.is_initialized=False
 
     def initialize(self):
-        err = glewInit()
-        if (err != GLEW_OK):
-            print 'Error loading glew:', glewGetErrorString(err)
-            return
-
-        print 'GLEW Version:', glewGetString(GLEW_VERSION)
-        print(glewInit())
-
         self.initShader(self.vs_src, self.fs_src)
-
         self.is_initialized=True
 
     def initShader(self, vertex_shader_source, fragment_shader_source):
         # create program
         self.program=glCreateProgram()
-        print 'create program'
+        print('create program')
         printOpenGLError()
 
         # vertex shader
-        print 'vertex shader'
+        print('vertex shader')
         self.vs = glCreateShader(GL_VERTEX_SHADER)
         glShaderSource(self.vs, [vertex_shader_source])
         glCompileShader(self.vs)
@@ -48,14 +38,14 @@ class Shader(object):
         printOpenGLError()
 
         # fragment shader
-        print 'fragment shader'
+        print('fragment shader')
         self.fs = glCreateShader(GL_FRAGMENT_SHADER)
         glShaderSource(self.fs, [fragment_shader_source])
         glCompileShader(self.fs)
         glAttachShader(self.program, self.fs)
         printOpenGLError()
 
-        print 'link...use...'
+        print('link...')
         glLinkProgram(self.program)
         printOpenGLError()
 
@@ -67,4 +57,3 @@ class Shader(object):
             printOpenGLError()
 
         pass
-
