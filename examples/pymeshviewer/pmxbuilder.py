@@ -28,7 +28,10 @@ def build(path):
                     (v.uv[0], v.uv[1]), 
                     (1, 1, 1, 1),
                     v.deform.index0, 0, 1.0)
-        elif v.deform.__class__ is pymeshio.pmx.Bdef2:
+        elif (v.deform.__class__ is pymeshio.pmx.Bdef2 or 
+            isinstance(v.deform, pymeshio.pmx.Sdef) or
+            isinstance(v.deform, pymeshio.pmx.Bdef4)
+            ):
             indexedVertexArray.addVertex(
                     (v.position[0], v.position[1], -v.position[2], 1), 
                     (v.normal[0], v.normal[1], -v.normal[2]), 
@@ -37,14 +40,11 @@ def build(path):
                     v.deform.index0, v.deform.index1, v.deform.weight0)
         else:
             print("unknown deform: {0}".format(v.deform))
+
+    indexedVertexArray.setIndices(model.indices)
     
     # material
     textureMap={}
-    faceIndex=0
-    def indices():
-        for i in model.indices:
-            yield i
-    indexGen=indices()
     for i, m in enumerate(model.materials):
         material=opengl.material.MQOMaterial()
         material.vcol=True
@@ -53,6 +53,7 @@ def build(path):
                 m.diffuse_color[1], 
                 m.diffuse_color[2], 
                 m.alpha)
+        material.vertex_count=m.vertex_count
         if m.texture_index!=255:
             texturepath=os.path.join(basedir, model.textures[m.texture_index])
             if os.path.isfile(texturepath):
@@ -60,8 +61,7 @@ def build(path):
                     texture=opengl.texture.Texture(texturepath)
                     textureMap[texturepath]=texture
                 material.texture=textureMap[texturepath]
-        indices=indexedVertexArray.addMaterial(material)
-        indices+=[next(indexGen) for n in range(m.vertex_count)]
+        indexedVertexArray.addMaterial(material)
+
     #indexedVertexArray.optimize()
     return indexedVertexArray
-

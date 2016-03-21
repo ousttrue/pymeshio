@@ -11,6 +11,7 @@ import opengl.vertexarray
 
 def build(path):
     # load scenee
+    print('read %s...' % path)
     t=time.time()
     model=pymeshio.pmd.reader.read_from_file(path)
     if not model:
@@ -18,6 +19,8 @@ def build(path):
     print(time.time()-t, "sec")
 
     # build
+    print('build vertexarray...')
+    t=time.time()
     basedir=os.path.dirname(path)
     indexedVertexArray=opengl.vertexarray.IndexedVertexArray()
     for v in model.vertices:
@@ -29,13 +32,10 @@ def build(path):
                 (1, 1, 1, 1),
                 v.bone0, v.bone1, v.weight0)
     
+    indexedVertexArray.setIndices(model.indices)
+
     # material
     textureMap={}
-    faceIndex=0
-    def indices():
-        for i in model.indices:
-            yield i
-    indexGen=indices()
     for i, m in enumerate(model.materials):
         material=opengl.material.MQOMaterial()
         material.vcol=True
@@ -44,6 +44,7 @@ def build(path):
                 m.diffuse_color[1], 
                 m.diffuse_color[2], 
                 m.alpha)
+        material.vertex_count=m.vertex_count
         texturefile=m.texture_file.decode('cp932')
         texturepath=os.path.join(basedir, texturefile)
         if os.path.isfile(texturepath):
@@ -51,8 +52,8 @@ def build(path):
                 texture=opengl.texture.Texture(texturepath)
                 textureMap[texturepath]=texture
             material.texture=textureMap[texturepath]
-        indices=indexedVertexArray.addMaterial(material)
-        indices+=[next(indexGen) for n in range(m.vertex_count)]
-    #indexedVertexArray.optimize()
-    return indexedVertexArray
+        indexedVertexArray.addMaterial(material)
 
+    #indexedVertexArray.optimize()
+    indexedVertexArray.create_vbo()
+    return indexedVertexArray

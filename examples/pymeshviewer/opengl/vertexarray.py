@@ -2,7 +2,7 @@
 # coding: utf-8
 
 from OpenGL.GL import *
-
+import ctypes
 
 '''
 頂点配列
@@ -106,7 +106,8 @@ class IndexedVertexArray(object):
         self.w0=[]
         # indices
         self.materials=[]
-        self.indicesMap={}
+        self.indices=[]
+        self.buffers=[]
 
     def addVertex(self, pos, normal, uv, color, b0, b1, w0):
         self.vertices+=pos
@@ -117,29 +118,69 @@ class IndexedVertexArray(object):
         self.b1.append(b1)
         self.w0.append(w0)
 
+    def setIndices(self, indices):
+        self.indices=indices
+
     def addMaterial(self, material):
         self.materials.append(material)
-        indices=[]
-        self.indicesMap[material]=indices
-        return indices
+
+    def create_array_buffer(self, buffer_id, floats):
+        print('create_array_buuffer', buffer_id)
+        glBindBuffer(GL_ARRAY_BUFFER, buffer_id)
+        glBufferData(GL_ARRAY_BUFFER, 
+                len(floats)*4,  # byte size
+                (ctypes.c_float*len(floats))(*floats), # 謎のctypes
+                GL_STATIC_DRAW)
+
+    def create_vbo(self):
+        self.buffers = glGenBuffers(4+1)
+        #print("create_vbo", self.buffers)
+
+        self.create_array_buffer(self.buffers[0], self.vertices)
+        self.create_array_buffer(self.buffers[1], self.normal)
+        self.create_array_buffer(self.buffers[2], self.colors)
+        self.create_array_buffer(self.buffers[3], self.uvlist)
+
+        # indices
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.buffers[4])
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+                len(self.indices)*4, # byte size
+                (ctypes.c_uint*len(self.indices))(*self.indices),  # 謎のctypes
+                GL_STATIC_DRAW)
 
     def draw(self):
-        # 位置属性
-        glEnableClientState(GL_VERTEX_ARRAY)
-        glVertexPointer(4, GL_FLOAT, 0, self.vertices)
-        # UV属性
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
-        glTexCoordPointer(2, GL_FLOAT, 0, self.uvlist)
-        # マテリアル毎の描画
-        for m in self.materials:
+        if len(self.buffers)==0:
+            self.create_vbo()
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glBindBuffer(GL_ARRAY_BUFFER, self.buffers[0]);
+        glVertexPointer(4, GL_FLOAT, 0, None);
+
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glBindBuffer(GL_ARRAY_BUFFER, self.buffers[1]);
+        glNormalPointer(GL_FLOAT, 0, None);
+
+        #glEnableClientState(GL_COLOR_ARRAY);
+        #glBindBuffer(GL_ARRAY_BUFFER, self.buffers[2]);
+        #glColorPointer(4, GL_FLOAT, 0, None);
+
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glBindBuffer(GL_ARRAY_BUFFER, self.buffers[3]);
+        glTexCoordPointer(2, GL_FLOAT, 0, None);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.buffers[4]);
+        index_offset=0
+        for i, m in enumerate(self.materials):
+            # submesh
             m.begin()
-            # 順序維持
-            indices=self.indicesMap[m]
-            # indexによる描画
-            glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, indices)
+            glDrawElements(GL_TRIANGLES, m.vertex_count, GL_UNSIGNED_INT, ctypes.c_void_p(index_offset));
+            index_offset+=m.vertex_count * 4 # byte size
             m.end()
-        # 後始末
+
+        # cleanup
         glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        glDisableClientState(GL_COLOR_ARRAY)
+        glDisableClientState(GL_NORMAL_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY)
 
     def optimize(self):
@@ -177,4 +218,3 @@ class IndexedVertexArray(object):
             if v[2]>max_v[2]:
                 max_v[2]=v[2]
         return (min_v, max_v)
-

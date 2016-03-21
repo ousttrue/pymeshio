@@ -25,10 +25,21 @@ import togl
 import opengl
 import opengl.rokuro
 import opengl.shader
+import opengl.coord
 import mqobuilder
 import pmdbuilder
 import pmxbuilder
 import xbuilder
+
+
+class Scene:
+    def __init__(self, *args):
+        self.items=[]
+        self.coord=opengl.coord.Coord(50)
+
+    def draw(self):
+        self.coord.draw()
+        for item in self.items: item.draw()
 
 
 class Frame(tkinter.Frame):
@@ -63,10 +74,13 @@ class Frame(tkinter.Frame):
         }
         """
 
-        self.shader=opengl.shader.Shader(vs_src, fs_src)
-        self.glworld=opengl.BaseController(self.view, self.shader)
+        #self.shader=opengl.shader.Shader(vs_src, fs_src)
+        self.glworld=opengl.BaseController(self.view)#, self.shader)
         self.glwidget=togl.Widget(self, self.glworld, width=width, height=height)
         self.glwidget.pack(fill=tkinter.BOTH, expand=True)
+
+        self.scene=Scene()
+        self.glworld.setRoot(self.scene)
 
         # event binding
         self.bind('<Key>', self.onKeyDown)
@@ -86,11 +100,12 @@ class Frame(tkinter.Frame):
         if not model:
             print('fail to load %s' % path)
             return
-        print('load %s' % path)
+        #print('load %s' % path)
         print(model)
-        self.glworld.setRoot(model)
+        self.scene.items=[model]
+        #self.glworld.setRoot(model)
         bb=model.get_boundingbox()
-        print(bb)
+        #print(bb)
         self.view.look_bb(*bb)
         self.glwidget.onDraw()
 
