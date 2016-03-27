@@ -6,10 +6,10 @@ import pymeshio.pmd.reader
 import pymeshio.pmx.reader
 import pymeshio.pmx.writer
 import pymeshio.converter
+from fixture import PYMESHIO_TEST_RESOURCES
 
-
-PMD_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmd')
-PMX_FILE=pymeshio.common.unicode('resources/初音ミクVer2.pmx')
+PMD_FILE=pymeshio.common.unicode(PYMESHIO_TEST_RESOURCES+'/初音ミクVer2.pmd')
+PMX_FILE=pymeshio.common.unicode(PYMESHIO_TEST_RESOURCES+'/初音ミクVer2.pmx')
 
 
 class TestConvert(unittest.TestCase):

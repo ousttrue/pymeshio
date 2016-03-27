@@ -45,6 +45,8 @@ class Reader(common.TextReader):
                         return False
                 elif key==b"depth":
                     obj.depth=int(tokens[1])
+                elif key==b"visible":
+                    obj.visible=int(tokens[1])
                 else:
                     print(
                             "%s#readObject" % name,

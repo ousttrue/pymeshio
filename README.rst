@@ -1,3 +1,9 @@
+Pymeshio
+========
+
+.. image:: https://img.shields.io/pypi/v/pymeshio.svg   
+    :target: https://pypi.python.org/pypi/pymeshio/
+
 `pymeshio` is a package for 3d model io.
 create for blender import/expoert plugin backend.
 
@@ -8,8 +14,7 @@ URL
 
 Requirements
 ------------
-* Python 3
-* Python 2.7
+* Python 3.4
 
 Features
 --------
@@ -21,22 +26,6 @@ Features
 * convert    MikuMikuDance pmd format to MikuMikuDance pmx format
 * blender-2.6 import/export plugin
 
-
-Install as python module
-------------------------
-from internet
-~~~~~~~~~~~~~
-::
-
-   $ easy_install pymeshio
-
-from archive
-~~~~~~~~~~~~
-::
-
-   $ unzip pymeshio-x.x.x.zip
-   $ cd pymeshio-x.x.x
-   $ python setup.py install
 
 Install as blender-2.6x addon
 -------------------------------
@@ -61,8 +50,25 @@ select (Add-Ons) tab.
 
 find "meshio. (.pmd)(.mqo)" and check.
 
+
+Install as python module
+------------------------
+from internet
+~~~~~~~~~~~~~
+::
+
+   $ pip install pymeshio
+
+from archive
+~~~~~~~~~~~~
+::
+
+   $ unzip pymeshio-x.x.x.zip
+   $ cd pymeshio-x.x.x
+   $ python setup.py install
+
 Usage as python module
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -83,6 +89,11 @@ Usage as python module
 
 New
 ---
+3.0.0(2016)
+~~~~~~~~~~~
+* fix tests
+* for python3.4 or later
+
 2.8.2(2015-10-18)
 ~~~~~~~~~~~~~~~~~
 * fix pmx_export bug.(not empty material)

@@ -1,0 +1,3 @@
+import os
+PYMESHIO_TEST_RESOURCES=os.environ['PYMESHIO_TEST_RESOURCES']
+

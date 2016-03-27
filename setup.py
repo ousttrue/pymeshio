@@ -4,6 +4,7 @@
 from setuptools import setup, find_packages
 import sys
 import os
+import re
 import shutil
 import codecs
 
@@ -16,9 +17,17 @@ print("copy pymeshio to %s" % PYMESHIO_DIR_IN_BLENDER26)
 shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER26)
 
 
+version = ''
+with open('pymeshio/__init__.py', 'r') as fd:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        fd.read(), re.MULTILINE).group(1)
+if not version:
+    raise RuntimeError('Cannot find version information')
+
+
 setup(
         name='pymeshio',
-        version='2.8.2',
+        version=version,
         description='3d model io library for mqo, pmd, pmx, vmd and vpd',
         long_description=codecs.open('README.rst', 'r', 'utf-8').read(),
         classifiers=[
@@ -34,7 +43,7 @@ setup(
         packages=find_packages(),
         test_suite='nose.collector',
         tests_require=['Nose'],
-        zip_safe = (sys.version>="2.5"),   # <2.5 needs unzipped for -m to work
+        zip_safe = (sys.version>="3.4"),   # <2.5 needs unzipped for -m to work
         entry_points = {
             'console_scripts': [
                 'pmd2pmx = pymeshio.main:pmd_to_pmx',

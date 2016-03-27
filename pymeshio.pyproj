@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{fdbb4f5b-4739-494d-9a30-474d98addb63}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>examples\pymeshviewer\pymeshviewer.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
+    <InterpreterVersion>3.3</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="blender26-meshio\bl.py" />
+    <Compile Include="blender26-meshio\exporter\bonebuilder.py" />
+    <Compile Include="blender26-meshio\exporter\oneskinmesh.py" />
+    <Compile Include="blender26-meshio\exporter\vertexarray.py" />
+    <Compile Include="blender26-meshio\exporter\__init__.py" />
+    <Compile Include="blender26-meshio\export_mqo.py" />
+    <Compile Include="blender26-meshio\export_pmd.py" />
+    <Compile Include="blender26-meshio\export_pmx.py" />
+    <Compile Include="blender26-meshio\import_mqo.py" />
+    <Compile Include="blender26-meshio\import_pmd.py" />
+    <Compile Include="blender26-meshio\import_pmx.py" />
+    <Compile Include="blender26-meshio\pymeshio\common.py" />
+    <Compile Include="blender26-meshio\pymeshio\converter.py" />
+    <Compile Include="blender26-meshio\pymeshio\englishmap.py" />
+    <Compile Include="blender26-meshio\pymeshio\main.py" />
+    <Compile Include="blender26-meshio\pymeshio\mqo\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\mqo\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\obj\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\obj\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmd\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmd\writer.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmd\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmm\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmm\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmx\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmx\writer.py" />
+    <Compile Include="blender26-meshio\pymeshio\pmx\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\vmd\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\vmd\writer.py" />
+    <Compile Include="blender26-meshio\pymeshio\vmd\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\vpd.py" />
+    <Compile Include="blender26-meshio\pymeshio\x\reader.py" />
+    <Compile Include="blender26-meshio\pymeshio\x\writer.py" />
+    <Compile Include="blender26-meshio\pymeshio\x\__init__.py" />
+    <Compile Include="blender26-meshio\pymeshio\__init__.py" />
+    <Compile Include="blender26-meshio\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\bl.py" />
+    <Compile Include="build\lib\blender26-meshio\exporter\bonebuilder.py" />
+    <Compile Include="build\lib\blender26-meshio\exporter\oneskinmesh.py" />
+    <Compile Include="build\lib\blender26-meshio\exporter\vertexarray.py" />
+    <Compile Include="build\lib\blender26-meshio\exporter\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\export_mqo.py" />
+    <Compile Include="build\lib\blender26-meshio\export_pmd.py" />
+    <Compile Include="build\lib\blender26-meshio\export_pmx.py" />
+    <Compile Include="build\lib\blender26-meshio\import_mqo.py" />
+    <Compile Include="build\lib\blender26-meshio\import_pmd.py" />
+    <Compile Include="build\lib\blender26-meshio\import_pmx.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\common.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\converter.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\englishmap.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\main.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\mqo\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\mqo\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\obj\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\obj\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmd\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmd\writer.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmd\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmm\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmm\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmx\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmx\writer.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\pmx\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\vmd\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\vmd\writer.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\vmd\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\vpd.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\x\reader.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\x\writer.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\x\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\pymeshio\__init__.py" />
+    <Compile Include="build\lib\blender26-meshio\__init__.py" />
+    <Compile Include="build\lib\pymeshio\common.py" />
+    <Compile Include="build\lib\pymeshio\converter.py" />
+    <Compile Include="build\lib\pymeshio\englishmap.py" />
+    <Compile Include="build\lib\pymeshio\main.py" />
+    <Compile Include="build\lib\pymeshio\mqo\reader.py" />
+    <Compile Include="build\lib\pymeshio\mqo\__init__.py" />
+    <Compile Include="build\lib\pymeshio\obj\reader.py" />
+    <Compile Include="build\lib\pymeshio\obj\__init__.py" />
+    <Compile Include="build\lib\pymeshio\pmd\reader.py" />
+    <Compile Include="build\lib\pymeshio\pmd\writer.py" />
+    <Compile Include="build\lib\pymeshio\pmd\__init__.py" />
+    <Compile Include="build\lib\pymeshio\pmm\reader.py" />
+    <Compile Include="build\lib\pymeshio\pmm\__init__.py" />
+    <Compile Include="build\lib\pymeshio\pmx\reader.py" />
+    <Compile Include="build\lib\pymeshio\pmx\writer.py" />
+    <Compile Include="build\lib\pymeshio\pmx\__init__.py" />
+    <Compile Include="build\lib\pymeshio\vmd\reader.py" />
+    <Compile Include="build\lib\pymeshio\vmd\writer.py" />
+    <Compile Include="build\lib\pymeshio\vmd\__init__.py" />
+    <Compile Include="build\lib\pymeshio\vpd.py" />
+    <Compile Include="build\lib\pymeshio\x\reader.py" />
+    <Compile Include="build\lib\pymeshio\x\writer.py" />
+    <Compile Include="build\lib\pymeshio\x\__init__.py" />
+    <Compile Include="build\lib\pymeshio\__init__.py" />
+    <Compile Include="examples\pymeshviewer\mqobuilder.py" />
+    <Compile Include="examples\pymeshviewer\opengl\baseview.py" />
+    <Compile Include="examples\pymeshviewer\opengl\coord.py" />
+    <Compile Include="examples\pymeshviewer\opengl\material.py" />
+    <Compile Include="examples\pymeshviewer\opengl\rokuro.py" />
+    <Compile Include="examples\pymeshviewer\opengl\shader.py" />
+    <Compile Include="examples\pymeshviewer\opengl\texture.py" />
+    <Compile Include="examples\pymeshviewer\opengl\triangle.py" />
+    <Compile Include="examples\pymeshviewer\opengl\vertexarray.py" />
+    <Compile Include="examples\pymeshviewer\opengl\vertexarraymap.py" />
+    <Compile Include="examples\pymeshviewer\opengl\__init__.py" />
+    <Compile Include="examples\pymeshviewer\pmdbuilder.py" />
+    <Compile Include="examples\pymeshviewer\pmxbuilder.py" />
+    <Compile Include="examples\pymeshviewer\pymeshviewer.py" />
+    <Compile Include="examples\pymeshviewer\togl.py" />
+    <Compile Include="examples\pymeshviewer\xbuilder.py" />
+    <Compile Include="pymeshio\common.py" />
+    <Compile Include="pymeshio\converter.py" />
+    <Compile Include="pymeshio\englishmap.py" />
+    <Compile Include="pymeshio\main.py" />
+    <Compile Include="pymeshio\mqo\reader.py" />
+    <Compile Include="pymeshio\mqo\__init__.py" />
+    <Compile Include="pymeshio\obj\reader.py" />
+    <Compile Include="pymeshio\obj\__init__.py" />
+    <Compile Include="pymeshio\pmd\reader.py" />
+    <Compile Include="pymeshio\pmd\writer.py" />
+    <Compile Include="pymeshio\pmd\__init__.py" />
+    <Compile Include="pymeshio\pmm\reader.py" />
+    <Compile Include="pymeshio\pmm\__init__.py" />
+    <Compile Include="pymeshio\pmx\reader.py" />
+    <Compile Include="pymeshio\pmx\writer.py" />
+    <Compile Include="pymeshio\pmx\__init__.py" />
+    <Compile Include="pymeshio\vmd\reader.py" />
+    <Compile Include="pymeshio\vmd\writer.py" />
+    <Compile Include="pymeshio\vmd\__init__.py" />
+    <Compile Include="pymeshio\vpd.py" />
+    <Compile Include="pymeshio\x\reader.py" />
+    <Compile Include="pymeshio\x\writer.py" />
+    <Compile Include="pymeshio\x\__init__.py" />
+    <Compile Include="pymeshio\__init__.py" />
+    <Compile Include="setup.py" />
+    <Compile Include="test\convert_test.py" />
+    <Compile Include="test\export_pmd_test.py" />
+    <Compile Include="test\export_pmx_test.py" />
+    <Compile Include="test\mqo_test.py" />
+    <Compile Include="test\obj_test.py" />
+    <Compile Include="test\pmd_test.py" />
+    <Compile Include="test\pmm_test.py" />
+    <Compile Include="test\pmx_test.py" />
+    <Compile Include="test\x_test.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="pymeshio.egg-info\dependency_links.txt" />
+    <Content Include="pymeshio.egg-info\entry_points.txt" />
+    <Content Include="pymeshio.egg-info\SOURCES.txt" />
+    <Content Include="pymeshio.egg-info\top_level.txt" />
+    <Content Include="README.rst" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="blender26-meshio" />
+    <Folder Include="blender26-meshio\exporter" />
+    <Folder Include="blender26-meshio\pymeshio" />
+    <Folder Include="blender26-meshio\pymeshio\mqo" />
+    <Folder Include="blender26-meshio\pymeshio\obj" />
+    <Folder Include="blender26-meshio\pymeshio\pmd" />
+    <Folder Include="blender26-meshio\pymeshio\pmm" />
+    <Folder Include="blender26-meshio\pymeshio\pmx" />
+    <Folder Include="blender26-meshio\pymeshio\vmd" />
+    <Folder Include="blender26-meshio\pymeshio\x" />
+    <Folder Include="build\" />
+    <Folder Include="build\lib\" />
+    <Folder Include="build\lib\blender26-meshio" />
+    <Folder Include="build\lib\blender26-meshio\exporter" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\mqo" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\obj" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\pmd" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\pmm" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\pmx" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\vmd" />
+    <Folder Include="build\lib\blender26-meshio\pymeshio\x" />
+    <Folder Include="build\lib\pymeshio" />
+    <Folder Include="build\lib\pymeshio\mqo" />
+    <Folder Include="build\lib\pymeshio\obj" />
+    <Folder Include="build\lib\pymeshio\pmd" />
+    <Folder Include="build\lib\pymeshio\pmm" />
+    <Folder Include="build\lib\pymeshio\pmx" />
+    <Folder Include="build\lib\pymeshio\vmd" />
+    <Folder Include="build\lib\pymeshio\x" />
+    <Folder Include="examples\" />
+    <Folder Include="examples\pymeshviewer" />
+    <Folder Include="examples\pymeshviewer\opengl" />
+    <Folder Include="pymeshio" />
+    <Folder Include="pymeshio.egg-info" />
+    <Folder Include="pymeshio\mqo" />
+    <Folder Include="pymeshio\obj" />
+    <Folder Include="pymeshio\pmd" />
+    <Folder Include="pymeshio\pmm" />
+    <Folder Include="pymeshio\pmx" />
+    <Folder Include="pymeshio\vmd" />
+    <Folder Include="pymeshio\x" />
+    <Folder Include="test" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.3" />
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>

@@ -16,6 +16,6 @@ class TestX(unittest.TestCase):
         model=pymeshio.x.reader.read_from_file(FILE)
         #print(model)
         self.assertEqual(pymeshio.x.Model, model.__class__)
-        self.assertEqual(20, len(model.vertices))
+        self.assertEqual(24, len(model.vertices))
         self.assertEqual(1, len(model.materials))
 

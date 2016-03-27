@@ -139,7 +139,7 @@ def pmd_to_pmx(src):
             return False
         if isinstance(b, pmd.Bone_Tweak):
             return False
-        return len(b.children)>0
+        return True
     def is_rotatable(b):
         if isinstance(b, pmd.Bone_Rotate):
             return True
@@ -193,23 +193,23 @@ def pmd_to_pmx(src):
         pass
     def get_bone_flag(b):
         return (
-                (1 if is_connected(b) else 0)+
-                (2 if is_rotatable(b) else 0)+
-                (4 if is_movable(b) else 0)+
-                (8 if is_visible(b) else 0)+
+                (0x0001 if is_connected(b) else 0)+
+                (0x0002 if is_rotatable(b) else 0)+
+                (0x0004 if is_movable(b) else 0)+
+                (0x0008 if is_visible(b) else 0)+
 
-                (16 if is_manupilatable(b) else 0)+
-                (32 if has_ik(b) else 0)+
+                (0x0010 if is_manupilatable(b) else 0)+
+                (0x0020 if has_ik(b) else 0)+
                 0+
                 0+
 
-                (256 if is_external_rotation(b) else 0)+
+                (0x0100 if is_external_rotation(b) else 0)+
                 0+
-                (1024 if is_fixed_axis(b) else 0)+
-                (2048 if is_local_axis(b) else 0)+
+                (0x0400 if is_fixed_axis(b) else 0)+
+                (0x0800 if is_local_axis(b) else 0)+
 
-                (4096 if after_physics(b) else 0)+
-                (8192 if external_parent(b) else 0)
+                (0x1000 if after_physics(b) else 0)+
+                (0x2000 if external_parent(b) else 0)
                 )
     def get_tail_position(b):
         return common.Vector3()

@@ -381,7 +381,8 @@ class ParseException(Exception):
     """
     Exception in reader
     """
-    pass
+    def __init__(self, message):
+        self.message=message
 
 
 def readall(path):
@@ -554,7 +555,8 @@ class BinaryWriter(object):
 
 
 class DifferenceException(Exception):
-    pass
+    def __init__(self, message):
+        self.message=message
 
 
 class Diff(object):
@@ -562,9 +564,8 @@ class Diff(object):
         l=getattr(self, key)
         r=getattr(rhs, key)
         if l!=r:
-            print(l)
-            print(r)
-            raise DifferenceException(key)
+            raise DifferenceException("{lhs}.{key}:{lvalue} != {rhs}.{key}:{rvalue}".format(
+                key=key, lhs=self, rhs=rhs, lvalue=l, rvalue=r))
 
     def _diff_array(self, rhs, key):
         la=getattr(self, key)
@@ -576,16 +577,13 @@ class Diff(object):
                 try:
                     l.diff(r)
                 except DifferenceException as e:
-                    print(i)
-                    print(l)
-                    print(r)
-                    raise DifferenceException("{0}: {1}".format(key, e.message))
+                    raise DifferenceException(
+                            "{lhs}.{key}[{i}] with {rhs}.{key}[{i}]: {message}".format(
+                                lhs=self, rhs=rhs, key=key, i=i, message=e.message))
             else:
                 if l!=r:
-                    print(i)
-                    print(l)
-                    print(r)
-                    raise DifferenceException("{0}".format(key))
+                    raise DifferenceException("{lhs}.{key}[{i}] != {rhs}.{key}[{i}]".format(
+                        lhs=self, rhs=rhs, key=key, i=i))
 
     def __ne__(self, rhs):
         return not self.__eq__(rhs)

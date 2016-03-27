@@ -7,3 +7,6 @@ __pycache__/*
 blender26-meshio/pymeshio
 PKG-INFO
 setup.cfg
+.eggs
+*.egg
+*.suo
