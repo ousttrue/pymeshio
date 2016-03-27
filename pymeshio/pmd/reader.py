@@ -199,7 +199,7 @@ def read_from_file(path):
     return pmd
 
 
-def read(ios):
+def read(ios: io.IOBase):
     """
     read from ios, then return the pymeshio.pmd.Model.
 
