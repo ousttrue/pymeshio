@@ -1,16 +1,15 @@
 # coding: utf-8
 
 bl_info={
-        'category': 'Import-Export',
-        'name': 'meshio. (.pmd)(.pmx)(.mqo)',
-        'author': 'ousttrue',
-        'version': (2, 7, 12),
-        'blender': (2, 6, 0),
-        'location': 'File > Import-Export',
-        'description': 'Import-Export PMD/PMX/MQO meshes',
-        'wiki_url': 'https://github.com/ousttrue/pymeshio',
-        'support': 'COMMUNITY',
-        }
+    'category': 'Import-Export',
+    'name': 'meshio. (.pmd)(.pmx)(.mqo)',
+    'author': 'ousttrue',
+    'version': (2, 7, 12),
+    'blender': (2, 6, 0),
+    'location': 'File > Import-Export',
+    'description': 'Import-Export PMD/PMX/MQO meshes',
+    'wiki_url': 'https://github.com/ousttrue/pymeshio',
+}
 
 
 if 'bpy' in locals():
