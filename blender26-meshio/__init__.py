@@ -8,7 +8,6 @@ bl_info={
         'blender': (2, 6, 0),
         'location': 'File > Import-Export',
         'description': 'Import-Export PMD/PMX/MQO meshes',
-        #'warning': 'pmx importer/exporter is under development', 
         'wiki_url': 'https://github.com/ousttrue/pymeshio',
         'support': 'COMMUNITY',
         }
