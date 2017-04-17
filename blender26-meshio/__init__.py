@@ -5,7 +5,7 @@ bl_info={
     "name": "meshio(pmd/pmx/mqo)",
     "author": "ousttrue",
     "version": (3, 0, 0),
-    "blender": (2, 7, 7),
+    "blender": (2, 77, 0),
     "location": "File > Import-Export",
     "description": "Import-Export PMD/PMX/MQO meshes",
     "warning": "",
