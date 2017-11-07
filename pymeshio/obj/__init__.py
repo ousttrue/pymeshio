@@ -1,6 +1,25 @@
 # coding: utf-8
 
 
+class FaceVertex:
+    __slots__=[
+            'v', 'vt', 'vn',
+            ]
+    def __init__(self, **kw):
+        self.v=None
+        self.vt=None
+        self.vn=None
+        for k, v in kw.items():
+            if k=="v":
+                self.v=v
+            elif k=="vt":
+                self.vt=v
+            elif k=="vn":
+                self.vn=v
+            else:
+                raise RuntimeError("unknown type: "+k)
+
+
 class Face(object):
     __slots__=[
             "vertex_references"
@@ -60,30 +79,22 @@ class Model(object):
         self.normals=[]
         self.materials=[]
         self.mtl=None
-        self.order=[]
 
     def __str__(self):
-        return ('<obj %s: %s %d vertices, %d materials %s>' % (
+        return ('<obj %s: %d vertices, %d materials %s>' % (
             self.comment.decode("cp932"),
-            self.order,
             len(self.vertices),
             len(self.materials),
             (self.mtl)
             ))
 
     def add_v(self, v):
-        if len(self.vertices)==0:
-            self.order.append("v")
         self.vertices.append(v)
 
     def add_vt(self, vt):
-        if len(self.uv)==0:
-            self.order.append("vt")
-        self.uv.append(v)
+        self.uv.append(vt)
 
     def add_vn(self, vn):
-        if len(self.normals)==0:
-            self.order.append("vn")
         self.normals.append(vn)
 
     def get_or_create_material(self, name):

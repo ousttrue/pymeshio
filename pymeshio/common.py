@@ -49,6 +49,10 @@ class Vector2(object):
         else:
             assert(False)
 
+    def __iter__(self):
+        yield self.x
+        yield self.y
+
     def to_tuple(self):
         return (self.x, self.y)
 
@@ -93,6 +97,11 @@ class Vector3(object):
             return self.z
         else:
             assert(False)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.z
 
     def to_tuple(self):
         return (self.x, self.y, self.z)
@@ -603,7 +612,7 @@ class TextReader(object):
     def getline(self):
         line=self.ios.readline()
         self.lines+=1
-        if line==b"":
+        if line=="":
             self.eof=True
             return None
         return line.strip()

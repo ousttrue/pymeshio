@@ -20,47 +20,55 @@ class Reader(common.TextReader):
     def read(self):
         model=obj.Model()
         material=model.get_or_create_material(b"default")
+
+        order=[]        
+
         while True:
             line=self.getline()
             if line==None:
                 break
 
             line=line.strip()
-            if line==b"":
+            if line=="":
                 continue
 
-            if line[0]==ord("#"):
+            if line[:1]=="#":
                 if model.comment=="":
                     model.comment=line[1:].strip()
                 continue
 
             token=line.split()
-            if token[0]==b"v":
+            if token[0]=="v":
+                if len(model.vertices)==0: order.append("v")
                 model.add_v(common.Vector3(
                     float(token[1]),
                     float(token[2]),
                     float(token[3])
                     ))
-            elif token[0]==b"vt":
+            elif token[0]=="vt":
+                if len(model.uv)==0: order.append("vt")
                 model.add_vt(common.Vector2(
                     float(token[1]),
                     float(token[2]),
                     ))
-            elif token[0]==b"vn":
+            elif token[0]=="vn":
+                if len(model.normals)==0: order.append("vn")
                 model.add_vn(common.Vector3(
                     float(token[1]),
                     float(token[2]),
                     float(token[3])
                     ))
-            elif token[0]==b"g":
+            elif token[0]=="o":
                 pass
-            elif token[0]==b"f":
-                material.faces.append(self.parseFace(*token[1:]))
-            elif token[0]==b"mtllib":
+            elif token[0]=="g":
+                pass
+            elif token[0]=="f":
+                material.faces.append(self.parseFace(order, *token[1:]))
+            elif token[0]=="mtllib":
                 model.mtl=token[1]
-            elif token[0]==b"usemtl":
+            elif token[0]=="usemtl":
                 material=model.get_or_create_material(token[1])
-            elif token[0]==b"s":
+            elif token[0]=="s":
                 material.s=token[1]
             else:
                 print(b"unknown key: "+line)
@@ -70,12 +78,22 @@ class Reader(common.TextReader):
 
         return model
     
-    def parseFace(self, *faces):
+    def parseFace(self, order, *faces):
         face=obj.Face()
+
         for f in faces:
-            vertex_reference=[(len(t)>0 and int(t) or None) for t in f.split(b"/")]
-            #print(vertex_reference)
-            face.vertex_references.append(vertex_reference)
+            splited=f.split("/")
+            index_map={}
+
+            index_map['v']=int(splited[0])-1
+            if len(splited)==3:           
+                if splited[1]:
+                    index_map['vt']=int(splited[1])-1
+                if splited[2]:
+                    index_map['vn']=int(splited[2])-1
+
+            face.vertex_references.append(obj.FaceVertex(**index_map))
+
         return face
 
 
