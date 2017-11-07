@@ -10,6 +10,7 @@ import re
 import codecs
 import os
 import shutil
+import nose
 from zipfile import ZipFile
 from setuptools import setup, find_packages, Command
 

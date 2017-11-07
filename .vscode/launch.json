@@ -12,7 +12,9 @@
             "pythonPath": "${config:python.pythonPath}",
             "program": "${workspaceRoot}/setup.py",
             "args": [
-                "blender"
+                "nosetests"
+                //, "--tests"
+                //, "test.obj_test"
             ],
             "cwd": "${workspaceRoot}",
             "env": {},

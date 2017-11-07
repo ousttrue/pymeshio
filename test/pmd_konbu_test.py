@@ -5,7 +5,7 @@ import unittest
 import pymeshio.common
 import pymeshio.pmd
 import pymeshio.pmd.reader_konbu
-from fixture import *
+from .fixture import *
 
 PMD_FILE=PYMESHIO_TEST_RESOURCES+('/初音ミクVer2.pmd')
 

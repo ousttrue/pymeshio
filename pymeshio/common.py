@@ -612,11 +612,10 @@ class TextReader(object):
     def getline(self):
         line=self.ios.readline()
         self.lines+=1
-        if line=="":
+        if not line:
             self.eof=True
             return None
         return line.strip()
 
     def printError(self, method, msg):
         print("%s:%s:%d" % (method, msg, self.lines))
-

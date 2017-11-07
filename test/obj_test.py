@@ -8,18 +8,18 @@ import pymeshio.obj.reader
 #import pymeshio.obj.writer
 
 
-OBJ_FILE=pymeshio.common.unicode('resources/cube.obj')
+OBJ_FILE = pymeshio.common.unicode('resources/cube.obj')
 
 
 class TestObj(unittest.TestCase):
-    
+
     def setUp(self):
         pass
 
     def test_read(self):
-        model=pymeshio.obj.reader.read_from_file(OBJ_FILE)
-        self.assertEqual(pymeshio.obj.Model,  model.__class__)
-        self.assertEqual(8,  len(model.vertices))
+        model = pymeshio.obj.reader.read_from_file(OBJ_FILE)
+        self.assertEqual(pymeshio.obj.Model, model.__class__)
+        self.assertEqual(8, len(model.vertices))
 
     def test_write(self):
         pass
@@ -35,4 +35,3 @@ class TestObj(unittest.TestCase):
         model.diff(model2)
         self.assertEqual(model, model2)
         """
-
