@@ -1,20 +1,49 @@
 #!/usr/bin/env python
 # coding: utf-8
+from logging import getLogger
+logger = getLogger(__name__)
+from logging import basicConfig, DEBUG
+basicConfig(level=DEBUG)
 
-from setuptools import setup, find_packages
 import sys
-import os
 import re
-import shutil
 import codecs
+import os
+import shutil
+from zipfile import ZipFile
+from setuptools import setup, find_packages, Command
 
 
-# copy pymeshio dir for blender26 plugin
-PYMESHIO_DIR_IN_BLENDER26='blender26-meshio/pymeshio'
-if os.path.exists(PYMESHIO_DIR_IN_BLENDER26):
-    shutil.rmtree(PYMESHIO_DIR_IN_BLENDER26)    
-print("copy pymeshio to %s" % PYMESHIO_DIR_IN_BLENDER26)
-shutil.copytree('pymeshio', PYMESHIO_DIR_IN_BLENDER26)
+class BlenderAddOn(Command):
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        # cleanup
+        dst = 'pymeshio_addon'
+        if os.path.exists(dst):
+            logger.debug('clear %s', dst)
+            shutil.rmtree(dst)
+
+        logger.debug('copy blender addon')
+        shutil.copytree('blender26-meshio', dst,
+                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        shutil.copytree('pymeshio', dst + '/pymeshio',
+                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+
+        # archive
+        with ZipFile(dst + '.zip', 'w') as myzip:
+            for root, dirs, files in os.walk(dst):
+                for file in files:
+                    path = os.path.join(root, file)
+                    logger.debug('archive: %s', path)
+                    myzip.write(path)
 
 
 version = ''
@@ -26,30 +55,28 @@ if not version:
 
 
 setup(
-        name='pymeshio',
-        version=version,
-        description='3d model io library for mqo, pmd, pmx, vmd and vpd',
-        long_description=codecs.open('README.rst', 'r', 'utf-8').read(),
-        classifiers=[
-            'Programming Language :: Python :: 3',
-            'License :: OSI Approved :: zlib/libpng License',
-            'Topic :: Multimedia :: Graphics :: 3D Modeling',
-            ],
-        keywords=['mqo', 'pmd', 'pmx', 'vmd', 'vpd', 'mmd', 'blender'],
-        author='ousttrue',
-        author_email='ousttrue@gmail.com',
-        url='https://pypi.python.org/pypi/pymeshio/',
-        license='zlib',
-        packages=find_packages(),
-        test_suite='nose.collector',
-        tests_require=['Nose'],
-        zip_safe = (sys.version>="3.4"),   # <2.5 needs unzipped for -m to work
-        entry_points = {
-            'console_scripts': [
-                'pmd2pmx = pymeshio.main:pmd_to_pmx',
-                'pmd_diff = pymeshio.main:pmd_diff',
-                'pmd_validator = pymeshio.main:pmd_validator',
-                ]
-            }
-        )
-
+    name='pymeshio',
+    version=version,
+    description='3d model io library for mqo, pmd, pmx, vmd and vpd',
+    long_description=codecs.open('README.rst', 'r', 'utf-8').read(),
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: zlib/libpng License',
+        'Topic :: Multimedia :: Graphics :: 3D Modeling',
+    ],
+    keywords=['mqo', 'pmd', 'pmx', 'vmd', 'vpd', 'mmd', 'blender'],
+    author='ousttrue',
+    author_email='ousttrue@gmail.com',
+    url='https://pypi.python.org/pypi/pymeshio/',
+    license='zlib',
+    packages=find_packages(),
+    test_suite='nose.collector',
+    tests_require=['Nose'],
+    zip_safe=(sys.version >= "3.4"),   # <2.5 needs unzipped for -m to work
+    entry_points={
+        'console_scripts': [
+            'pmd2pmx = pymeshio.main:pmd_to_pmx',
+            'pmd_diff = pymeshio.main:pmd_diff',
+            'pmd_validator = pymeshio.main:pmd_validator',
+        ]},
+    cmdclass={'blender': BlenderAddOn})

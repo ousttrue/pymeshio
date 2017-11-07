@@ -10,3 +10,6 @@ setup.cfg
 .eggs
 *.egg
 *.suo
+.mypy_cache/
+pymeshio_addon*
+resources/
