@@ -89,6 +89,10 @@ Usage as python module
 
 New
 ---
+3.0.1(2017-12-31)
+~~~~~~~~~~~~~~~~~
+* fix write vertex with unknown deform type
+
 3.0.0(2016)
 ~~~~~~~~~~~
 * fix tests

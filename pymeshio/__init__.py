@@ -6,5 +6,5 @@ pymeshio
 
 3d mesh io library.
 """
-__version__='3.0.0'
+__version__='3.0.1'
 
