@@ -29,26 +29,15 @@ Features
 
 Install as blender-2.6x addon
 -------------------------------
-Copy
-~~~~
-unzip archive, then exist blender26-meshio directory.
-copy `blender26-meshio` directory to ${blender directory}/2.6x/scripts/addons.
 
-Directory layout
-~~~~~~~~~~~~~~~~
-::
+download archive form below url.
 
-    ${blender directory}/2.6x/scripts/addons/
-      +- blender26-meshio
-           +- exporter
-           +- pymeshio
+* https://github.com/ousttrue/pymeshio/releases
 
-Blender user preference
-~~~~~~~~~~~~~~~~~~~~~~~
 launch blender, then menu (File)-(User Preferences).
 select (Add-Ons) tab.
 
-find "meshio. (.pmd)(.mqo)" and check.
+[install Add-on from file...] button
 
 
 Install as python module
@@ -91,6 +80,7 @@ New
 ---
 3.0.1(2017-12-31)
 ~~~~~~~~~~~~~~~~~
+* blender addon archive. https://github.com/ousttrue/pymeshio/releases
 * fix write vertex with unknown deform type
 
 3.0.0(2016)

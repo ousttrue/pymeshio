@@ -11,7 +11,10 @@ import codecs
 import os
 import shutil
 from zipfile import ZipFile
-from setuptools import setup, find_packages, Command
+
+from distutils.core import setup, Command
+from pkgutil import walk_packages
+
 
 try:
     import nose
@@ -74,14 +77,16 @@ setup(
     author_email='ousttrue@gmail.com',
     url='https://pypi.python.org/pypi/pymeshio/',
     license='zlib',
-    packages=find_packages(),
-    test_suite='nose.collector',
-    tests_require=['Nose'],
-    zip_safe=(sys.version >= "3.4"),   # <2.5 needs unzipped for -m to work
-    entry_points={
-        'console_scripts': [
-            'pmd2pmx = pymeshio.main:pmd_to_pmx',
-            'pmd_diff = pymeshio.main:pmd_diff',
-            'pmd_validator = pymeshio.main:pmd_validator',
-        ]},
-    cmdclass={'blender': BlenderAddOn})
+    packages=[
+        'pymeshio',
+        'pymeshio/mqo',
+        'pymeshio/obj',
+        'pymeshio/pmd',
+        'pymeshio/pmm',
+        'pymeshio/pmx',
+        'pymeshio/vmd',
+        'pymeshio/x',
+    ],
+    cmdclass={'blender': BlenderAddOn}
+    )
+

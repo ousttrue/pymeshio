@@ -1,4 +1,4 @@
-include blender26-meshio/*.py
-include examples/*.py
+#include blender26-meshio/*.py
+#include examples/*.py
 include README.*
-include ChageLog
+#include ChageLog
