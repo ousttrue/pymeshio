@@ -71,7 +71,7 @@ class Writer(common.BinaryWriter):
             self.write_float(deform.weight3)
         else:
             raise common.WriteException(
-                    "unknown deform type: {0}".format(deform.type))
+                    "unknown deform type: {0}".format(type(deform)))
 
     def write_indices(self, indices):
         self.write_int(len(indices), 4)
