@@ -10,11 +10,9 @@
             "request": "launch",
             "stopOnEntry": false,
             "pythonPath": "${config:python.pythonPath}",
-            "program": "${workspaceRoot}/setup.py",
+            //"program": "${workspaceRoot}/setup.py",
+            "program": "${file}",
             "args": [
-                "nosetests"
-                //, "--tests"
-                //, "test.obj_test"
             ],
             "cwd": "${workspaceRoot}",
             "env": {},
