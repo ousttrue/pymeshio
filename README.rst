@@ -78,6 +78,10 @@ Usage as python module
 
 New
 ---
+3.1.0(2018-01-14)
+~~~~~~~~~~~~~~~~~
+* add gltf support
+
 3.0.1(2017-12-31)
 ~~~~~~~~~~~~~~~~~
 * blender addon archive. https://github.com/ousttrue/pymeshio/releases
