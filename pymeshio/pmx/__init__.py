@@ -27,7 +27,8 @@ import io
 import os
 import struct
 from .. import common
-
+from .reader import *
+from .writer import *
 
 
 class Ik(common.Diff):
