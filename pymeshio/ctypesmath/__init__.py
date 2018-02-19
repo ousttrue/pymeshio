@@ -45,159 +45,56 @@ import ctypes
 from typing import NamedTuple
 
 
-class Float3(ctypes.Structure):
+class Vec2(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("x", ctypes.c_float),
+        ("y", ctypes.c_float),
+    ]
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        else:
+            raise IndexError()
+
+    def __eq__(self, rhs):
+        for l, r in zip(self, rhs):
+            if math.fabs(l - r) > 1e-4:
+                return False
+        return True
+
+    @staticmethod
+    def zero()->'Vec2':
+        return Vec2(0, 0)
+
+
+class Vec3(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
         ("x", ctypes.c_float),
         ("y", ctypes.c_float),
         ("z", ctypes.c_float),
     ]
+
     def __getitem__(self, key):
-        if key==0:
+        if key == 0:
             return self.x
-        elif key==1:
+        elif key == 1:
             return self.y
-        elif key==2:
+        elif key == 2:
             return self.z
         else:
             raise IndexError()
+
     def __eq__(self, rhs):
         for l, r in zip(self, rhs):
             if math.fabs(l - r) > 1e-4:
                 return False
         return True
 
-
-class Float4(ctypes.Structure):
-    _pack_ = 1
-    _fields_ = [
-        ("x", ctypes.c_float),
-        ("y", ctypes.c_float),
-        ("z", ctypes.c_float),
-        ("w", ctypes.c_float),
-    ]
-    def __getitem__(self, key):
-        if key==0:
-            return self.x
-        elif key==1:
-            return self.y
-        elif key==2:
-            return self.z
-        elif key==3:
-            return self.w
-        else:
-            raise IndexError()
-    def __eq__(self, rhs):
-        for l, r in zip(self, rhs):
-            if math.fabs(l - r) > 1e-4:
-                return False
-        return True
-
-
-class Float9(ctypes.Structure):
-    _pack_ = 1
-    _fields_ = [
-        ("m00", ctypes.c_float),
-        ("m01", ctypes.c_float),
-        ("m02", ctypes.c_float),
-        ("m10", ctypes.c_float),
-        ("m11", ctypes.c_float),
-        ("m12", ctypes.c_float),
-        ("m20", ctypes.c_float),
-        ("m21", ctypes.c_float),
-        ("m22", ctypes.c_float),
-    ]
-    def __getitem__(self, key):
-        if key==0:
-            return self.m00
-        elif key==1:
-            return self.m01
-        elif key==2:
-            return self.m02
-        elif key==3:
-            return self.m10
-        elif key==4:
-            return self.m11
-        elif key==5:
-            return self.m12
-        elif key==6:
-            return self.m20
-        elif key==7:
-            return self.m21
-        elif key==8:
-            return self.m22
-        else:
-            raise IndexError()
-    def __eq__(self, rhs):
-        for l, r in zip(self, rhs):
-            if math.fabs(l - r) > 1e-4:
-                return False
-        return True
-
-
-class Float16(ctypes.Structure):
-    _pack_ = 1
-    _fields_ = [
-        ("m00", ctypes.c_float),
-        ("m01", ctypes.c_float),
-        ("m02", ctypes.c_float),
-        ("m03", ctypes.c_float),
-        ("m10", ctypes.c_float),
-        ("m11", ctypes.c_float),
-        ("m12", ctypes.c_float),
-        ("m13", ctypes.c_float),
-        ("m20", ctypes.c_float),
-        ("m21", ctypes.c_float),
-        ("m22", ctypes.c_float),
-        ("m23", ctypes.c_float),
-        ("m30", ctypes.c_float),
-        ("m31", ctypes.c_float),
-        ("m32", ctypes.c_float),
-        ("m33", ctypes.c_float),
-    ]
-    def __getitem__(self, key):
-        if key==0:
-            return self.m00
-        elif key==1:
-            return self.m01
-        elif key==2:
-            return self.m02
-        elif key==3:
-            return self.m03
-        elif key==4:
-            return self.m10
-        elif key==5:
-            return self.m11
-        elif key==6:
-            return self.m12
-        elif key==7:
-            return self.m13
-        elif key==8:
-            return self.m20
-        elif key==9:
-            return self.m21
-        elif key==10:
-            return self.m22
-        elif key==11:
-            return self.m23
-        elif key==12:
-            return self.m30
-        elif key==13:
-            return self.m31
-        elif key==14:
-            return self.m32
-        elif key==15:
-            return self.m33
-        else:
-            raise IndexError()
-    def __eq__(self, rhs):
-        for l, r in zip(self, rhs):
-            if math.fabs(l - r) > 1e-4:
-                return False
-        return True
-
-
-class Vec3(Float3):
     @staticmethod
     def zero()->'Vec3':
         return Vec3(0, 0, 0)
@@ -233,7 +130,33 @@ class Vec3(Float3):
     def normalized(self): return self * (1 / self.norm)
 
 
-class Vec4(Float4):
+class Vec4(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("x", ctypes.c_float),
+        ("y", ctypes.c_float),
+        ("z", ctypes.c_float),
+        ("w", ctypes.c_float),
+    ]
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        elif key == 2:
+            return self.z
+        elif key == 3:
+            return self.w
+        else:
+            raise IndexError()
+
+    def __eq__(self, rhs):
+        for l, r in zip(self, rhs):
+            if math.fabs(l - r) > 1e-4:
+                return False
+        return True
+
     @staticmethod
     def zero()->'Vec4':
         return Vec4(0, 0, 0, 0)
@@ -263,7 +186,33 @@ class Vec4(Float4):
                 self.w * rhs.w)
 
 
-class Quaternion(Float4):
+class Quaternion(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("x", ctypes.c_float),
+        ("y", ctypes.c_float),
+        ("z", ctypes.c_float),
+        ("w", ctypes.c_float),
+    ]
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        elif key == 2:
+            return self.z
+        elif key == 3:
+            return self.w
+        else:
+            raise IndexError()
+
+    def __eq__(self, rhs):
+        for l, r in zip(self, rhs):
+            if math.fabs(l - r) > 1e-4:
+                return False
+        return True
+
     @staticmethod
     def identity()->'Quaternion':
         return Quaternion(0, 0, 0, 1)
@@ -308,7 +257,48 @@ class Quaternion(Float4):
         return Quaternion.from_mat3(self.to_mat3() * rhs.to_mat3())
 
 
-class Mat3(Float9):
+class Mat3(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("m00", ctypes.c_float),
+        ("m01", ctypes.c_float),
+        ("m02", ctypes.c_float),
+        ("m10", ctypes.c_float),
+        ("m11", ctypes.c_float),
+        ("m12", ctypes.c_float),
+        ("m20", ctypes.c_float),
+        ("m21", ctypes.c_float),
+        ("m22", ctypes.c_float),
+    ]
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.m00
+        elif key == 1:
+            return self.m01
+        elif key == 2:
+            return self.m02
+        elif key == 3:
+            return self.m10
+        elif key == 4:
+            return self.m11
+        elif key == 5:
+            return self.m12
+        elif key == 6:
+            return self.m20
+        elif key == 7:
+            return self.m21
+        elif key == 8:
+            return self.m22
+        else:
+            raise IndexError()
+
+    def __eq__(self, rhs):
+        for l, r in zip(self, rhs):
+            if math.fabs(l - r) > 1e-4:
+                return False
+        return True
+
     @staticmethod
     def identity()->'Mat3':
         return Mat3(1, 0, 0,
@@ -365,7 +355,69 @@ class Mat3(Float9):
         return Vec3(v.dot(self.row(0)), v.dot(self.row(1)), v.dot(self.row(2)))
 
 
-class Mat4(Float16):
+class Mat4(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("m00", ctypes.c_float),
+        ("m01", ctypes.c_float),
+        ("m02", ctypes.c_float),
+        ("m03", ctypes.c_float),
+        ("m10", ctypes.c_float),
+        ("m11", ctypes.c_float),
+        ("m12", ctypes.c_float),
+        ("m13", ctypes.c_float),
+        ("m20", ctypes.c_float),
+        ("m21", ctypes.c_float),
+        ("m22", ctypes.c_float),
+        ("m23", ctypes.c_float),
+        ("m30", ctypes.c_float),
+        ("m31", ctypes.c_float),
+        ("m32", ctypes.c_float),
+        ("m33", ctypes.c_float),
+    ]
+
+    def __getitem__(self, key):
+        if key == 0:
+            return self.m00
+        elif key == 1:
+            return self.m01
+        elif key == 2:
+            return self.m02
+        elif key == 3:
+            return self.m03
+        elif key == 4:
+            return self.m10
+        elif key == 5:
+            return self.m11
+        elif key == 6:
+            return self.m12
+        elif key == 7:
+            return self.m13
+        elif key == 8:
+            return self.m20
+        elif key == 9:
+            return self.m21
+        elif key == 10:
+            return self.m22
+        elif key == 11:
+            return self.m23
+        elif key == 12:
+            return self.m30
+        elif key == 13:
+            return self.m31
+        elif key == 14:
+            return self.m32
+        elif key == 15:
+            return self.m33
+        else:
+            raise IndexError()
+
+    def __eq__(self, rhs):
+        for l, r in zip(self, rhs):
+            if math.fabs(l - r) > 1e-4:
+                return False
+        return True
+
     def row(self, n)->Vec4:
         i = n * 4
         return Vec4(self[i], self[i + 1], self[i + 2], self[i + 3])
@@ -490,7 +542,8 @@ class Vec4TestCase(unittest.TestCase):
 class QuaternionTestCase(unittest.TestCase):
     def test_quaternion4(self):
         self.assertEqual(Quaternion(0, 0, 0, 1), Quaternion.identity())
-        self.assertEqual(Quaternion(0, 0, 0, 1), Quaternion.identity() * Quaternion.identity())
+        self.assertEqual(Quaternion(0, 0, 0, 1),
+                         Quaternion.identity() * Quaternion.identity())
         self.assertEqual(Mat3.identity(), Quaternion.identity().to_mat3())
 
 
@@ -518,7 +571,8 @@ class Mat4TestCase(unittest.TestCase):
 class TransformTestCase(unittest.TestCase):
 
     def test_transform(self):
-        a = Transform(Vec3(1, 2, 3), Quaternion.from_mat3(Mat3.rotation_y_axis_by_degree(90)))
+        a = Transform(Vec3(1, 2, 3), Quaternion.from_mat3(
+            Mat3.rotation_y_axis_by_degree(90)))
         b = a * a
         self.assertEqual(Vec3(4, 4, 4), b.pos)
 
