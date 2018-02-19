@@ -139,7 +139,11 @@ def pmd_to_pmx(src):
             return False
         if isinstance(b, pmd.Bone_Tweak):
             return False
-        return True
+        if b.tail_index == 0:
+            return False
+        if b.tail_index == -1:
+            return False
+        return len(b.children)>0
     def is_rotatable(b):
         if isinstance(b, pmd.Bone_Rotate):
             return True
@@ -280,6 +284,7 @@ def pmd_to_pmx(src):
             converted.fixed_axis=(b.tail-b.pos).normalize()
 
         converted.index=b.index
+        print(converted)
         bones.append(converted)
         for child in b.children:
             convert_bone(bones, child, layer)
