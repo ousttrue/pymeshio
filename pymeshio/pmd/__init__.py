@@ -24,6 +24,7 @@ import warnings
 from .. import common
 from .reader import *
 from .writer import *
+from .ctypespmd import *
 
 class Vertex(common.Diff):
     """
