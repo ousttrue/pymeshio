@@ -24,21 +24,9 @@ Features
 * read       MikuMikuDance vmd format
 * read       MikuMikuDance vpd format
 * convert    MikuMikuDance pmd format to MikuMikuDance pmx format
+
+blender part is separate to https://github.com/ousttrue/blpymeshio
 * blender-2.6 import/export plugin
-
-
-Install as blender-2.6x addon
--------------------------------
-
-download archive form below url.
-
-* https://github.com/ousttrue/pymeshio/releases
-
-launch blender, then menu (File)-(User Preferences).
-select (Add-Ons) tab.
-
-[install Add-on from file...] button
-
 
 Install as python module
 ------------------------
@@ -78,6 +66,10 @@ Usage as python module
 
 New
 ---
+3.1.0(2018-04-16)
+~~~~~~~~~~~~~~~~~
+* separate blender part to https://github.com/ousttrue/blpymeshio
+
 3.0.1(2017-12-31)
 ~~~~~~~~~~~~~~~~~
 * blender addon archive. https://github.com/ousttrue/pymeshio/releases
@@ -279,4 +271,3 @@ Upload to pypi
 
    $ python setup.py check -r
    $ python setup.py sdist --formats=zip upload
-
