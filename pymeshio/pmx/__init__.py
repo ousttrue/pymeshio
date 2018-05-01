@@ -29,7 +29,6 @@ import struct
 from .. import common
 
 
-
 class Ik(common.Diff):
     """ik info
     """

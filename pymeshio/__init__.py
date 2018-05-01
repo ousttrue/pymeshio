@@ -14,13 +14,7 @@ version = __version__
 
 
 from . import pmd
+from .pmd.reader import read_from_file as pmd_from_file
 from . import pmx
+from .pmx.reader import read_from_file as pmx_from_file
 from .converter import pmd_to_pmx
-
-
-def pmd_from_file(path):
-    return pmd.reader.read_from_file(path)
-
-
-def pmx_from_file(path):
-    return pmx.reader.read_from_file(path)
