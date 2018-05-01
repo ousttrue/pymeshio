@@ -222,6 +222,8 @@ def pmd_to_pmx(src):
             return -1
         if isinstance(b, pmd.Bone_Tweak):
             return -1
+        if b.tail_index == 0:
+            return -1
         return b.tail_index
     def get_ik_link(bone_index):
         b=src.bones[bone_index]

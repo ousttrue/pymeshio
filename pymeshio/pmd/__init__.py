@@ -22,6 +22,7 @@ import sys
 import struct
 import warnings
 from .. import common
+from . import reader
 
 
 class Vertex(common.Diff):
