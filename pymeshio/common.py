@@ -112,6 +112,9 @@ class Vector3(object):
     def __sub__(self, rhs):
         return Vector3(self.x-rhs.x, self.y-rhs.y, self.z-rhs.z)
 
+    def __mul__(self, rhs):
+        return Vector3(self.x*rhs, self.y*rhs, self.z*rhs)
+
     def getSqNorm(self):
         return self.x*self.x + self.y*self.y + self.z*self.z
 
