@@ -26,6 +26,7 @@ Features
 * convert    MikuMikuDance pmd format to MikuMikuDance pmx format
 
 blender part is separate to https://github.com/ousttrue/blpymeshio
+
 * blender-2.6 import/export plugin
 
 Install as python module
