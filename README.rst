@@ -70,7 +70,7 @@ New
 
 3.1.1(WIP)
 ~~~~~~~~~~
-* [fix vmd reader](#39)
+* fix vmd reader. https://github.com/ousttrue/pymeshio/pull/39
 
 3.1.0(2018-04-16)
 ~~~~~~~~~~~~~~~~~
