@@ -67,6 +67,11 @@ Usage as python module
 
 New
 ---
+
+3.1.1(WIP)
+~~~~~~~~~~
+* [fix vmd reader](#39)
+
 3.1.0(2018-04-16)
 ~~~~~~~~~~~~~~~~~
 * separate blender part to https://github.com/ousttrue/blpymeshio
