@@ -80,9 +80,9 @@ def read(ios):
 
     signature=reader.unpack("30s", 30)
     version=None
-    if signature[:25] == "Vocaloid Motion Data 0002":
+    if signature[:25].decode() == "Vocaloid Motion Data 0002":
         version=2
-    elif signature[:25] == "Vocaloid Motion Data file":
+    elif signature[:25].decode() == "Vocaloid Motion Data file":
         version=1
     else:
         print("invalid signature", signature)
